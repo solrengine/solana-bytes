@@ -89,16 +89,16 @@ export default class extends Controller {
     let html = ""
 
     if (regionName) {
-      html += `<div style="color:#fff;font-weight:600;margin-bottom:4px">${regionName}</div>`
+      html += `<div style="color:#a78bfa;font-weight:600;margin-bottom:4px;font-size:11px">${regionName}</div>`
       if (regionDecoded) {
-        html += `<div style="color:#d1d5db;word-break:break-all;margin-bottom:4px">${regionDecoded}</div>`
+        html += `<div style="color:#86efac;word-break:break-all;margin-bottom:4px">${regionDecoded}</div>`
       }
-      html += `<div style="color:#6b7280;font-size:10px">Bytes ${regionStart}\u2013${regionStart + regionLength - 1} (${regionLength} bytes)</div>`
+      html += `<div style="color:#4b5563;font-size:10px">[${regionStart}:${regionStart + regionLength - 1}] ${regionLength} bytes</div>`
     }
 
     const char = decimal >= 32 && decimal <= 126 ? String.fromCharCode(decimal) : "\u00B7"
-    html += `<div style="color:#6b7280;font-size:10px;margin-top:4px;border-top:1px solid #374151;padding-top:4px">`
-    html += `Offset 0x${offset.toString(16).padStart(4, "0")} \u00B7 0x${hex} \u00B7 ${decimal} \u00B7 '${char}'`
+    html += `<div style="color:#4b5563;font-size:10px;margin-top:4px;border-top:1px solid #1f1f3a;padding-top:4px">`
+    html += `0x${offset.toString(16).padStart(4, "0")} \u2502 0x${hex} \u2502 ${decimal} \u2502 ${char}`
     html += `</div>`
 
     tip.innerHTML = html

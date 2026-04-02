@@ -9,11 +9,9 @@ export default class extends Controller {
   }
 
   onBeforeFetch(event) {
-    // Determine if this is a "back to home" navigation
     const url = event.detail?.url?.toString() || ""
     this.isNavigatingHome = url.endsWith("/") || url === window.location.origin
 
-    // Hide current content, show spinner
     if (this.hasHeroTarget) {
       this.heroTarget.style.display = "none"
     }
@@ -31,7 +29,6 @@ export default class extends Controller {
         this.heroTarget.style.display = "none"
       }
     } else {
-      // Navigated back to home — restore hero
       this.frameTarget.style.display = ""
       if (this.hasHeroTarget) {
         this.heroTarget.style.display = ""

@@ -1,13 +1,15 @@
 <%= turbo_frame_tag "account_result" do %>
-  <div class="flex flex-col items-center justify-center min-h-[40vh]">
-    <div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-8 text-center max-w-md">
-      <p class="text-gray-300 mb-6"><%= flash[:alert] %></p>
+  <div class="max-w-6xl mx-auto mt-4 font-mono">
+    <div class="py-16 text-center">
+      <p class="text-red-400 text-sm mb-2"><span class="text-red-600">ERR</span> <%= flash[:alert] %></p>
       <% if @address.present? %>
-        <p class="font-mono text-xs text-gray-500 mb-6 break-all"><%= @address %></p>
+        <p class="text-xs text-gray-600 mb-8 break-all"><%= @address %></p>
       <% end %>
-      <%= link_to "Try another address", root_path,
-            class: "inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all",
-            data: { turbo_frame: "account_result", turbo_action: "advance" } %>
+      <%= link_to root_path,
+            class: "text-xs text-gray-500 hover:text-purple-400 transition-colors",
+            data: { turbo_frame: "account_result", turbo_action: "advance" } do %>
+        <span class="text-purple-500">$</span> cd ..
+      <% end %>
     </div>
   </div>
 <% end %>

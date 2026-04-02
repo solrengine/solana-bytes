@@ -87,14 +87,15 @@ class AccountPresenter
     end
   end
 
+  # Opaque backgrounds (pre-blended with ~#0a0a14 dark base) so rain canvas doesn't bleed through
   REGION_COLORS = {
-    "blue"   => { text: "#93c5fd", bg: "rgba(59,130,246,0.25)",  legend_bg: "rgba(59,130,246,0.3)",  legend_border: "rgba(59,130,246,0.5)" },
-    "green"  => { text: "#86efac", bg: "rgba(34,197,94,0.25)",   legend_bg: "rgba(34,197,94,0.3)",   legend_border: "rgba(34,197,94,0.5)" },
-    "orange" => { text: "#fdba74", bg: "rgba(249,115,22,0.25)",  legend_bg: "rgba(249,115,22,0.3)",  legend_border: "rgba(249,115,22,0.5)" },
-    "purple" => { text: "#c4b5fd", bg: "rgba(139,92,246,0.25)",  legend_bg: "rgba(139,92,246,0.3)",  legend_border: "rgba(139,92,246,0.5)" },
-    "yellow" => { text: "#fde047", bg: "rgba(234,179,8,0.25)",   legend_bg: "rgba(234,179,8,0.3)",   legend_border: "rgba(234,179,8,0.5)" },
-    "cyan"   => { text: "#67e8f9", bg: "rgba(6,182,212,0.25)",   legend_bg: "rgba(6,182,212,0.3)",   legend_border: "rgba(6,182,212,0.5)" },
-    "gray"   => { text: "#d1d5db", bg: "rgba(107,114,128,0.15)", legend_bg: "rgba(107,114,128,0.3)", legend_border: "rgba(107,114,128,0.5)" }
+    "blue"   => { text: "#93c5fd", bg: "#0f1a2e",  legend_bg: "rgba(59,130,246,0.3)",  legend_border: "rgba(59,130,246,0.5)" },
+    "green"  => { text: "#86efac", bg: "#0c1a12",   legend_bg: "rgba(34,197,94,0.3)",   legend_border: "rgba(34,197,94,0.5)" },
+    "orange" => { text: "#fdba74", bg: "#1a1208",  legend_bg: "rgba(249,115,22,0.3)",  legend_border: "rgba(249,115,22,0.5)" },
+    "purple" => { text: "#c4b5fd", bg: "#14102a",  legend_bg: "rgba(139,92,246,0.3)",  legend_border: "rgba(139,92,246,0.5)" },
+    "yellow" => { text: "#fde047", bg: "#1a1806",   legend_bg: "rgba(234,179,8,0.3)",   legend_border: "rgba(234,179,8,0.5)" },
+    "cyan"   => { text: "#67e8f9", bg: "#0a1a1e",   legend_bg: "rgba(6,182,212,0.3)",   legend_border: "rgba(6,182,212,0.5)" },
+    "gray"   => { text: "#d1d5db", bg: "#111318", legend_bg: "rgba(107,114,128,0.3)", legend_border: "rgba(107,114,128,0.5)" }
   }.freeze
 
   class HexRow

@@ -1,56 +1,52 @@
-<div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-6" data-controller="hex-viewer">
-  <div class="flex items-center justify-between mb-4">
-    <h2 class="text-lg font-semibold text-gray-300">Hex View</h2>
-    <% if account.truncated %>
-      <span class="text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
-        Showing first <%= number_with_delimiter(account.raw_bytes.length) %> of <%= number_with_delimiter(account.truncated) %> bytes
-      </span>
-    <% end %>
-  </div>
-
-  <%# Dynamic Legend from actual regions %>
+<div data-controller="hex-viewer">
+  <%# Legend %>
   <% if account.regions.length > 1 || account.regions.first&.name != "Data" %>
-    <div class="flex flex-wrap gap-3 mb-4 text-xs">
-      <span class="text-gray-500">Fields:</span>
+    <div class="flex flex-wrap gap-x-5 gap-y-1.5 mb-5 text-sm">
       <% seen = Set.new %>
       <% account.regions.each do |region| %>
         <% next if seen.include?(region.id) %>
         <% seen.add(region.id) %>
-        <span class="flex items-center gap-1">
-          <span class="w-3 h-3 rounded inline-block" style="background:<%= region.legend_bg %>;border:1px solid <%= region.legend_border %>"></span>
+        <span class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-sm inline-block" style="background:<%= region.legend_bg %>;border:1px solid <%= region.legend_border %>"></span>
           <span class="text-gray-400"><%= region.name %></span>
         </span>
       <% end %>
     </div>
   <% end %>
 
-  <%# Tooltip — moved to <body> by Stimulus controller %>
+  <% if account.truncated %>
+    <div class="text-xs text-yellow-500 mb-3">
+      showing <%= number_with_delimiter(account.raw_bytes.length) %> of <%= number_with_delimiter(account.truncated) %> bytes
+    </div>
+  <% end %>
+
+  <%# Tooltip %>
   <div
     data-hex-viewer-target="tooltip"
-    style="display:none;position:fixed;z-index:50;background:#111827;border:1px solid #4b5563;border-radius:8px;padding:8px 12px;font-size:12px;font-family:monospace;box-shadow:0 10px 25px rgba(0,0,0,0.5);pointer-events:none;max-width:350px"
+    style="display:none;position:fixed;z-index:50;background:#0a0a0f;border:1px solid #2d1b69;border-radius:4px;padding:8px 12px;font-size:13px;font-family:'JetBrains Mono',ui-monospace,monospace;box-shadow:0 8px 32px rgba(0,0,0,0.8);pointer-events:none;max-width:400px"
   >
   </div>
 
-  <%# Hex Grid %>
+  <%# Hex Grid — large and prominent %>
   <div class="overflow-x-auto">
-    <table class="font-mono text-xs leading-relaxed w-full">
+    <table class="w-full" style="font-family:'JetBrains Mono',ui-monospace,monospace;font-size:14px;line-height:2.0">
       <thead>
-        <tr class="text-gray-600">
-          <th class="text-left pr-4 pb-2 font-normal">Offset</th>
+        <tr>
+          <th class="text-left pr-4 pb-3 font-normal text-gray-600 text-sm"></th>
           <% 16.times do |i| %>
-            <th class="px-0.5 pb-2 font-normal w-6 text-center"><%= format("%x", i).upcase %></th>
+            <th class="px-1 pb-3 font-normal text-center text-gray-600 text-sm"><%= format("%X", i) %></th>
           <% end %>
-          <th class="pl-4 pb-2 font-normal text-left">ASCII</th>
+          <th class="pl-6 pb-3 font-normal text-left text-gray-600 text-sm"></th>
         </tr>
       </thead>
       <tbody>
         <% account.hex_rows.each do |row| %>
           <tr>
-            <td class="text-gray-600 pr-4 select-none"><%= row.offset_hex %>:</td>
+            <td class="text-gray-600 pr-4 select-none text-sm"><%= row.offset_hex %></td>
             <% row.cells.each do |cell| %>
               <td
-                class="px-0.5 text-center cursor-default rounded"
-                style="color:<%= cell.text_color %>;background:<%= cell.bg_color %>"
+                class="px-1 text-center cursor-default"
+                style="color:<%= cell.text_color %>;background:<%= cell.bg_color %>;border-radius:2px"
                 data-hex-viewer-target="cell"
                 data-region="<%= cell.region_id %>"
                 data-offset="<%= cell.offset %>"
@@ -67,9 +63,9 @@
               ><%= cell.hex %></td>
             <% end %>
             <% row.padding_cells.times do %>
-              <td class="px-0.5"></td>
+              <td class="px-1"></td>
             <% end %>
-            <td class="pl-4 text-gray-500 select-none whitespace-pre"><%= row.ascii %></td>
+            <td class="pl-6 text-gray-500 select-none whitespace-pre text-sm"><%= row.ascii %></td>
           </tr>
         <% end %>
       </tbody>

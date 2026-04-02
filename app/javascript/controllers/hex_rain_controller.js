@@ -66,19 +66,19 @@ export default class extends Controller {
         if (charY < -FONT_SIZE || charY > canvas.height + FONT_SIZE) continue
 
         if (i === 0) {
-          // Leading character — bright white with glow
-          ctx.shadowBlur = 15
-          ctx.shadowColor = "#a78bfa"
-          ctx.fillStyle = "#ffffff"
-        } else if (i < 3) {
-          // Near-head — bright purple
+          // Leading character — subtle glow
           ctx.shadowBlur = 8
-          ctx.shadowColor = "#7c3aed"
-          ctx.fillStyle = "#c4b5fd"
+          ctx.shadowColor = "rgba(139, 92, 246, 0.4)"
+          ctx.fillStyle = "rgba(167, 139, 250, 0.6)"
+        } else if (i < 3) {
+          // Near-head
+          ctx.shadowBlur = 0
+          ctx.shadowColor = "transparent"
+          ctx.fillStyle = "rgba(139, 92, 246, 0.3)"
         } else {
-          // Trail — fading green/purple
+          // Trail — very subtle
           const fade = Math.max(0, 1 - i / tailLength)
-          const alpha = fade * 0.6
+          const alpha = fade * 0.2
           ctx.shadowBlur = 0
           ctx.shadowColor = "transparent"
           ctx.fillStyle = `rgba(139, 92, 246, ${alpha})`
