@@ -15,6 +15,7 @@
 
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
+    <meta name="turbo-prefetch" content="false">
 
     <%= yield :head %>
 
@@ -27,14 +28,22 @@
   </head>
 
   <body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 text-gray-100">
-    <nav class="border-b border-gray-800/50 backdrop-blur">
+    <% if content_for?(:hex_rain) %>
+      <div data-controller="hex-rain" class="fixed inset-0" style="z-index:0">
+        <canvas data-hex-rain-target="canvas" class="w-full h-full"></canvas>
+        <%# Radial fade so content stays readable %>
+        <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, transparent 20%, rgba(3,7,18,0.7) 60%, rgba(3,7,18,1) 100%)"></div>
+      </div>
+    <% end %>
+
+    <nav class="relative border-b border-gray-800/50 backdrop-blur" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <%= link_to root_path, class: "flex items-center gap-2 text-white font-bold text-lg hover:text-purple-400 transition-colors" do %>
+        <%= link_to root_path, class: "flex items-center gap-2 text-white font-bold text-lg hover:text-purple-400 transition-colors", data: { turbo_frame: "account_result", turbo_action: "advance" } do %>
           <span class="text-2xl">0x</span>
           <span>Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-4">
-          <%= form_with url: network_path, method: :patch, data: { turbo: false }, class: "flex items-center" do |f| %>
+          <%= form_with url: network_path, method: :patch, class: "flex items-center", data: { controller: "auto-submit", turbo_frame: "account_result" } do |f| %>
             <%= f.select :network,
                   options_for_select(
                     [["Mainnet", "mainnet-beta"], ["Devnet", "devnet"], ["Testnet", "testnet"]],
@@ -42,13 +51,13 @@
                   ),
                   {},
                   class: "bg-gray-800 border border-gray-700/50 rounded-lg px-2 py-1 text-xs text-gray-400 font-mono focus:outline-none focus:border-purple-500/50 cursor-pointer",
-                  onchange: "this.form.submit()" %>
+                  data: { action: "change->auto-submit#submit" } %>
           <% end %>
         </div>
       </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="relative max-w-6xl mx-auto px-4 py-8" style="z-index:10">
       <% if flash[:alert] %>
         <div class="mb-6 p-4 bg-red-900/50 border border-red-700/50 rounded-xl text-red-200">
           <%= flash[:alert] %>
@@ -58,7 +67,7 @@
       <%= yield %>
     </main>
 
-    <footer class="border-t border-gray-800/50 mt-16">
+    <footer class="relative border-t border-gray-800/50 mt-16" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
         Built with <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300">SolRengine</a> — Rails 8 framework for Solana
       </div>

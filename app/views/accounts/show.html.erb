@@ -1,52 +1,56 @@
-<div class="space-y-6">
-  <%# Back link %>
-  <div>
-    <%= link_to "← New lookup", root_path, class: "text-sm text-gray-400 hover:text-purple-400 transition-colors" %>
-  </div>
+<%= content_for :hex_rain, true %>
 
-  <%# Summary Panel %>
-  <div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-6">
-    <h2 class="text-lg font-semibold text-gray-300 mb-4">Account Summary</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div>
-        <span class="text-xs text-gray-500 uppercase tracking-wider">Public Key</span>
-        <p class="font-mono text-sm text-gray-200 break-all mt-1"><%= @account.address %></p>
-      </div>
-      <div>
-        <span class="text-xs text-gray-500 uppercase tracking-wider">Balance</span>
-        <p class="text-sm text-gray-200 mt-1"><%= number_with_precision(@account.balance_sol, precision: 9, strip_insignificant_zeros: true) %> SOL</p>
-      </div>
-      <div>
-        <span class="text-xs text-gray-500 uppercase tracking-wider">Owner</span>
-        <p class="font-mono text-sm text-gray-200 mt-1" title="<%= @account.owner %>"><%= @account.owner_label %></p>
-      </div>
-      <div>
-        <span class="text-xs text-gray-500 uppercase tracking-wider">Executable</span>
-        <p class="text-sm mt-1">
-          <% if @account.executable %>
-            <span class="text-orange-400">Yes</span>
-          <% else %>
-            <span class="text-gray-400">No</span>
-          <% end %>
-        </p>
-      </div>
-      <div>
-        <span class="text-xs text-gray-500 uppercase tracking-wider">Rent Epoch</span>
-        <p class="font-mono text-sm text-gray-200 mt-1"><%= @account.rent_epoch %></p>
-      </div>
-      <div>
-        <span class="text-xs text-gray-500 uppercase tracking-wider">Data Length</span>
-        <p class="text-sm text-gray-200 mt-1"><%= number_with_delimiter(@account.data_length) %> bytes</p>
+<%= turbo_frame_tag "account_result", data: { turbo_action: "advance" } do %>
+  <div class="max-w-6xl mx-auto space-y-6 mt-4">
+    <%# Back link %>
+    <div>
+      <%= link_to "← New lookup", root_path, class: "text-sm text-gray-400 hover:text-purple-400 transition-colors", data: { turbo_frame: "account_result", turbo_action: "advance" } %>
+    </div>
+
+    <%# Summary Panel %>
+    <div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-6">
+      <h2 class="text-lg font-semibold text-gray-300 mb-4">Account Summary</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <span class="text-xs text-gray-500 uppercase tracking-wider">Public Key</span>
+          <p class="font-mono text-sm text-gray-200 break-all mt-1"><%= @account.address %></p>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 uppercase tracking-wider">Balance</span>
+          <p class="text-sm text-gray-200 mt-1"><%= number_with_precision(@account.balance_sol, precision: 9, strip_insignificant_zeros: true) %> SOL</p>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 uppercase tracking-wider">Owner</span>
+          <p class="font-mono text-sm text-gray-200 mt-1" title="<%= @account.owner %>"><%= @account.owner_label %></p>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 uppercase tracking-wider">Executable</span>
+          <p class="text-sm mt-1">
+            <% if @account.executable %>
+              <span class="text-orange-400">Yes</span>
+            <% else %>
+              <span class="text-gray-400">No</span>
+            <% end %>
+          </p>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 uppercase tracking-wider">Rent Epoch</span>
+          <p class="font-mono text-sm text-gray-200 mt-1"><%= @account.rent_epoch %></p>
+        </div>
+        <div>
+          <span class="text-xs text-gray-500 uppercase tracking-wider">Data Length</span>
+          <p class="text-sm text-gray-200 mt-1"><%= number_with_delimiter(@account.data_length) %> bytes</p>
+        </div>
       </div>
     </div>
-  </div>
 
-  <%# Hex View %>
-  <% if @account.raw_bytes.any? %>
-    <%= render "accounts/hex_view", account: @account %>
-  <% else %>
-    <div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-6 text-center text-gray-500">
-      This account has no data bytes.
-    </div>
-  <% end %>
-</div>
+    <%# Hex View %>
+    <% if @account.raw_bytes.any? %>
+      <%= render "accounts/hex_view", account: @account %>
+    <% else %>
+      <div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-6 text-center text-gray-500">
+        This account has no data bytes.
+      </div>
+    <% end %>
+  </div>
+<% end %>

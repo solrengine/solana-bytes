@@ -5,4 +5,16 @@ const application = Application.start()
 import HexViewerController from "./hex_viewer_controller"
 application.register("hex-viewer", HexViewerController)
 
+import HexRainController from "./hex_rain_controller"
+application.register("hex-rain", HexRainController)
+
+import LoadingController from "./loading_controller"
+application.register("loading", LoadingController)
+
+import AddressFormController from "./address_form_controller"
+application.register("address-form", AddressFormController)
+
+import AutoSubmitController from "./auto_submit_controller"
+application.register("auto-submit", AutoSubmitController)
+
 export { application }
