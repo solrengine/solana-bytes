@@ -1,8 +1,8 @@
 class AccountsController < ApplicationController
   EXAMPLE_ADDRESSES = [
-    { address: "11111111111111111111111111111111", label: "System Program" },
-    { address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", label: "Token Program" },
-    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" }
+    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
+    { address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", label: "Token Program (ELF)" },
+    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" }
   ].freeze
 
   MAX_DATA_DISPLAY = 10_240 # 10KB

@@ -157,10 +157,12 @@ class AccountPresenter
         decode_elf(bytes)
       when "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
            "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        if bytes.length == 82
+        if bytes.length >= 165
+          decode_spl_token(bytes)
+        elsif bytes.length >= 82
           decode_spl_mint(bytes)
         else
-          decode_spl_token(bytes)
+          []
         end
       else
         # Try ELF detection for any executable data
@@ -327,6 +329,11 @@ class AccountPresenter
         regions << Region.new(id: "freeze_authority", name: "Freeze Authority (empty)", start: 50, length: 32, color: "gray", decoded_value: "None")
       end
 
+      # Token-2022 extensions (after base 82 bytes)
+      if bytes.length > 82
+        regions.concat(decode_token_extensions(bytes, 82))
+      end
+
       regions
     end
 
@@ -385,7 +392,180 @@ class AccountPresenter
         regions << Region.new(id: "close_authority_empty", name: "Close Authority (empty)", start: 133, length: 32, color: "gray", decoded_value: "None")
       end
 
+      # Token-2022 extensions (after base 165 bytes)
+      if bytes.length > 165
+        regions.concat(decode_token_extensions(bytes, 165))
+      end
+
       regions
+    end
+
+    EXTENSION_TYPES = {
+      0 => "Uninitialized",
+      1 => "TransferFeeConfig",
+      2 => "TransferFeeAmount",
+      3 => "MintCloseAuthority",
+      4 => "ConfidentialTransferMint",
+      5 => "ConfidentialTransferAccount",
+      6 => "DefaultAccountState",
+      7 => "ImmutableOwner",
+      8 => "MemoTransfer",
+      9 => "NonTransferable",
+      10 => "InterestBearingConfig",
+      11 => "CpiGuard",
+      12 => "PermanentDelegate",
+      13 => "NonTransferableAccount",
+      14 => "TransferHook",
+      15 => "TransferHookAccount",
+      16 => "ConfidentialTransferFee",
+      17 => "ConfidentialTransferFeeAmount",
+      18 => "MetadataPointer",
+      19 => "TokenMetadata",
+      20 => "GroupPointer",
+      21 => "GroupMemberPointer",
+      22 => "TokenGroup",
+      23 => "TokenGroupMember"
+    }.freeze
+
+    EXTENSION_COLORS = %w[blue green purple cyan orange yellow].freeze
+
+    def decode_token_extensions(bytes, base_size)
+      regions = []
+      pos = base_size
+
+      # Account type byte (1 = Mint, 2 = Account)
+      if pos < bytes.length
+        account_type = bytes[pos]
+        type_label = case account_type
+        when 1 then "Mint"
+        when 2 then "Account"
+        else "Unknown (#{account_type})"
+        end
+        regions << Region.new(id: "ext_account_type", name: "Account Type (Token-2022)", start: pos, length: 1, color: "yellow", decoded_value: type_label)
+        pos += 1
+      end
+
+      # Parse TLV extensions
+      ext_index = 0
+      while pos + 4 <= bytes.length
+        ext_type_raw = read_u16(bytes, pos)
+        ext_length = read_u16(bytes, pos + 2)
+        ext_name = EXTENSION_TYPES[ext_type_raw] || "Extension #{ext_type_raw}"
+        color = EXTENSION_COLORS[ext_index % EXTENSION_COLORS.length]
+
+        # Extension header (type + length)
+        regions << Region.new(
+          id: "ext_#{ext_index}_header",
+          name: "#{ext_name} (header)",
+          start: pos,
+          length: 4,
+          color: "orange",
+          decoded_value: "Type: #{ext_type_raw}, Length: #{ext_length}"
+        )
+        pos += 4
+
+        break if ext_length == 0 || pos + ext_length > bytes.length
+
+        # Extension data — decode known extensions
+        ext_decoded = decode_extension_data(ext_type_raw, bytes, pos, ext_length)
+
+        if ext_decoded.any?
+          ext_decoded.each_with_index do |region, i|
+            region_with_offset = Region.new(
+              id: "ext_#{ext_index}_#{i}",
+              name: region[:name],
+              start: pos + region[:offset],
+              length: region[:length],
+              color: color,
+              decoded_value: region[:value]
+            )
+            regions << region_with_offset
+          end
+        else
+          regions << Region.new(
+            id: "ext_#{ext_index}_data",
+            name: ext_name,
+            start: pos,
+            length: ext_length,
+            color: color,
+            decoded_value: "#{ext_length} bytes"
+          )
+        end
+
+        pos += ext_length
+        ext_index += 1
+      end
+
+      regions
+    end
+
+    def decode_extension_data(ext_type, bytes, offset, length)
+      case ext_type
+      when 3 # MintCloseAuthority
+        if length >= 32
+          [{ name: "Close Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }]
+        else
+          []
+        end
+      when 6 # DefaultAccountState
+        if length >= 1
+          state = case bytes[offset]
+          when 0 then "Uninitialized"
+          when 1 then "Initialized"
+          when 2 then "Frozen"
+          else "Unknown (#{bytes[offset]})"
+          end
+          [{ name: "Default State", offset: 0, length: 1, value: state }]
+        else
+          []
+        end
+      when 12 # PermanentDelegate
+        if length >= 32
+          [{ name: "Delegate", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }]
+        else
+          []
+        end
+      when 14 # TransferHook
+        fields = []
+        if length >= 32
+          fields << { name: "Hook Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }
+        end
+        if length >= 64
+          fields << { name: "Hook Program ID", offset: 32, length: 32, value: encode_base58(bytes[offset + 32, 32]) }
+        end
+        fields
+      when 18 # MetadataPointer
+        fields = []
+        if length >= 32
+          fields << { name: "Pointer Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }
+        end
+        if length >= 64
+          fields << { name: "Metadata Address", offset: 32, length: 32, value: encode_base58(bytes[offset + 32, 32]) }
+        end
+        fields
+      when 19 # TokenMetadata
+        fields = []
+        if length >= 32
+          fields << { name: "Update Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }
+        end
+        if length >= 64
+          fields << { name: "Mint", offset: 32, length: 32, value: encode_base58(bytes[offset + 32, 32]) }
+        end
+        # After the two pubkeys, there are borsh-encoded strings: name, symbol, uri
+        str_offset = 64
+        %w[Name Symbol URI].each do |label|
+          break if str_offset + 4 > length
+          str_len = read_u32(bytes, offset + str_offset)
+          str_offset += 4
+          break if str_offset + str_len > length
+          str_val = bytes[offset + str_offset, str_len].pack("C*").force_encoding("UTF-8")
+          fields << { name: label, offset: str_offset - 4, length: 4 + str_len, value: str_val }
+          str_offset += str_len
+        end
+        fields
+      else
+        []
+      end
     end
 
     def read_u32(bytes, offset)
