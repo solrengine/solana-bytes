@@ -157,7 +157,11 @@ class AccountPresenter
         decode_elf(bytes)
       when "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
            "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
-        decode_spl_token(bytes)
+        if bytes.length == 82
+          decode_spl_mint(bytes)
+        else
+          decode_spl_token(bytes)
+        end
       else
         # Try ELF detection for any executable data
         if bytes.length >= 4 && bytes[0..3] == [ 0x7f, 0x45, 0x4c, 0x46 ]
@@ -281,6 +285,49 @@ class AccountPresenter
 
     def read_u16(bytes, offset)
       bytes[offset, 2].pack("C*").unpack1("v")
+    end
+
+    def decode_spl_mint(bytes)
+      # SPL Mint layout: 82 bytes
+      # 0-3:   mint_authority_option (u32)
+      # 4-35:  mint_authority (pubkey)
+      # 36-43: supply (u64)
+      # 44:    decimals (u8)
+      # 45:    is_initialized (bool)
+      # 46-49: freeze_authority_option (u32)
+      # 50-81: freeze_authority (pubkey)
+
+      mint_auth_option = read_u32(bytes, 0)
+      regions = [
+        Region.new(id: "mint_auth_option", name: "Mint Authority Option", start: 0, length: 4, color: "orange", decoded_value: mint_auth_option == 1 ? "Some" : "None")
+      ]
+
+      if mint_auth_option == 1
+        mint_auth = encode_base58(bytes[4, 32])
+        regions << Region.new(id: "mint_authority", name: "Mint Authority", start: 4, length: 32, color: "green", decoded_value: mint_auth)
+      else
+        regions << Region.new(id: "mint_authority", name: "Mint Authority (empty)", start: 4, length: 32, color: "gray", decoded_value: "None")
+      end
+
+      supply = read_u64(bytes, 36)
+      decimals = bytes[44]
+      is_initialized = bytes[45]
+
+      regions << Region.new(id: "supply", name: "Supply", start: 36, length: 8, color: "purple", decoded_value: supply.to_s)
+      regions << Region.new(id: "decimals", name: "Decimals", start: 44, length: 1, color: "blue", decoded_value: decimals.to_s)
+      regions << Region.new(id: "is_initialized", name: "Is Initialized", start: 45, length: 1, color: "yellow", decoded_value: is_initialized == 1 ? "Yes" : "No")
+
+      freeze_auth_option = read_u32(bytes, 46)
+      regions << Region.new(id: "freeze_auth_option", name: "Freeze Authority Option", start: 46, length: 4, color: "orange", decoded_value: freeze_auth_option == 1 ? "Some" : "None")
+
+      if freeze_auth_option == 1
+        freeze_auth = encode_base58(bytes[50, 32])
+        regions << Region.new(id: "freeze_authority", name: "Freeze Authority", start: 50, length: 32, color: "cyan", decoded_value: freeze_auth)
+      else
+        regions << Region.new(id: "freeze_authority", name: "Freeze Authority (empty)", start: 50, length: 32, color: "gray", decoded_value: "None")
+      end
+
+      regions
     end
 
     def decode_spl_token(bytes)
