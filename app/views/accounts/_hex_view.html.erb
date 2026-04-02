@@ -1,0 +1,78 @@
+<div class="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-2xl p-6" data-controller="hex-viewer">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-lg font-semibold text-gray-300">Hex View</h2>
+    <% if account.truncated %>
+      <span class="text-xs text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full">
+        Showing first <%= number_with_delimiter(account.raw_bytes.length) %> of <%= number_with_delimiter(account.truncated) %> bytes
+      </span>
+    <% end %>
+  </div>
+
+  <%# Dynamic Legend from actual regions %>
+  <% if account.regions.length > 1 || account.regions.first&.name != "Data" %>
+    <div class="flex flex-wrap gap-3 mb-4 text-xs">
+      <span class="text-gray-500">Fields:</span>
+      <% seen = Set.new %>
+      <% account.regions.each do |region| %>
+        <% next if seen.include?(region.id) %>
+        <% seen.add(region.id) %>
+        <span class="flex items-center gap-1">
+          <span class="w-3 h-3 rounded inline-block" style="background:<%= region.legend_bg %>;border:1px solid <%= region.legend_border %>"></span>
+          <span class="text-gray-400"><%= region.name %></span>
+        </span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Tooltip — moved to <body> by Stimulus controller %>
+  <div
+    data-hex-viewer-target="tooltip"
+    style="display:none;position:fixed;z-index:50;background:#111827;border:1px solid #4b5563;border-radius:8px;padding:8px 12px;font-size:12px;font-family:monospace;box-shadow:0 10px 25px rgba(0,0,0,0.5);pointer-events:none;max-width:350px"
+  >
+  </div>
+
+  <%# Hex Grid %>
+  <div class="overflow-x-auto">
+    <table class="font-mono text-xs leading-relaxed w-full">
+      <thead>
+        <tr class="text-gray-600">
+          <th class="text-left pr-4 pb-2 font-normal">Offset</th>
+          <% 16.times do |i| %>
+            <th class="px-0.5 pb-2 font-normal w-6 text-center"><%= format("%x", i).upcase %></th>
+          <% end %>
+          <th class="pl-4 pb-2 font-normal text-left">ASCII</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% account.hex_rows.each do |row| %>
+          <tr>
+            <td class="text-gray-600 pr-4 select-none"><%= row.offset_hex %>:</td>
+            <% row.cells.each do |cell| %>
+              <td
+                class="px-0.5 text-center cursor-default rounded"
+                style="color:<%= cell.text_color %>;background:<%= cell.bg_color %>"
+                data-hex-viewer-target="cell"
+                data-region="<%= cell.region_id %>"
+                data-offset="<%= cell.offset %>"
+                data-value="<%= cell.hex %>"
+                data-decimal="<%= cell.byte %>"
+                data-base-color="<%= cell.text_color %>"
+                data-base-bg="<%= cell.bg_color %>"
+                <% if cell.region %>
+                  data-region-name="<%= cell.region.name %>"
+                  data-region-decoded="<%= cell.region.decoded_value %>"
+                  data-region-start="<%= cell.region.start %>"
+                  data-region-length="<%= cell.region.length %>"
+                <% end %>
+              ><%= cell.hex %></td>
+            <% end %>
+            <% row.padding_cells.times do %>
+              <td class="px-0.5"></td>
+            <% end %>
+            <td class="pl-4 text-gray-500 select-none whitespace-pre"><%= row.ascii %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

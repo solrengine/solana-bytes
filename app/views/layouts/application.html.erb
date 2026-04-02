@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Solana Bytes — Interactive Account Hex Visualizer" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Visualize Solana account data as interactive, color-coded hex dumps. Built with Rails 8 and SolRengine.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Solana Bytes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <%# Open Graph %>
+    <meta property="og:title" content="Solana Bytes — Interactive Account Hex Visualizer">
+    <meta property="og:description" content="Paste any Solana address and see its account data as an interactive, color-coded hex dump with field annotations.">
+    <meta property="og:type" content="website">
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 text-gray-100">
+    <nav class="border-b border-gray-800/50 backdrop-blur">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <%= link_to root_path, class: "flex items-center gap-2 text-white font-bold text-lg hover:text-purple-400 transition-colors" do %>
+          <span class="text-2xl">0x</span>
+          <span>Solana Bytes</span>
+        <% end %>
+        <div class="flex items-center gap-4">
+          <%= form_with url: network_path, method: :patch, data: { turbo: false }, class: "flex items-center" do |f| %>
+            <%= f.select :network,
+                  options_for_select(
+                    [["Mainnet", "mainnet-beta"], ["Devnet", "devnet"], ["Testnet", "testnet"]],
+                    session[:solana_network] || "mainnet-beta"
+                  ),
+                  {},
+                  class: "bg-gray-800 border border-gray-700/50 rounded-lg px-2 py-1 text-xs text-gray-400 font-mono focus:outline-none focus:border-purple-500/50 cursor-pointer",
+                  onchange: "this.form.submit()" %>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <% if flash[:alert] %>
+        <div class="mb-6 p-4 bg-red-900/50 border border-red-700/50 rounded-xl text-red-200">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <footer class="border-t border-gray-800/50 mt-16">
+      <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
+        Built with <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300">SolRengine</a> — Rails 8 framework for Solana
+      </div>
+    </footer>
+  </body>
+</html>
