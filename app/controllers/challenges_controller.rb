@@ -1,12 +1,18 @@
 class ChallengesController < ApplicationController
   layout "game", only: :show
 
-  # Small accounts only — keeps the hex grid compact for gameplay
+  # Compact accounts only — keeps the hex grid manageable for gameplay
   CHALLENGE_ACCOUNTS = [
-    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },          # 82 bytes
-    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },          # 82 bytes
-    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" },       # 82 bytes
-    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint" }           # 82 bytes
+    # SPL Mints (82 bytes, 7-8 fields) — easier
+    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
+    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },
+    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" },
+    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint" },
+    # Token Accounts (165 bytes, 11 fields) — harder
+    { address: "CfWX7o2TswwbxusJ4hCaPobu2jLCb1hfXuXJQjVq3jQF", label: "Phantom wSOL" },
+    { address: "ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU", label: "Jupiter USDC" },
+    { address: "9bZucpaB5cSFHD5DSTsvZftUqqP1KgC8SGQkVDu42BBe", label: "Binance USDC" },
+    { address: "8hGBwecvELGSWQkfA64biQtzQKLoa8GoMKvWevCWwJbo", label: "Binance USDT" },
   ].freeze
 
   MAX_DATA_DISPLAY = 512
