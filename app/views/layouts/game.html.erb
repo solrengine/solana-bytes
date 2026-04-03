@@ -25,6 +25,11 @@
   </head>
 
   <body class="min-h-screen bg-gray-950 text-gray-100">
+    <div data-controller="hex-rain" class="fixed inset-0" style="z-index:0">
+      <canvas data-hex-rain-target="canvas" class="w-full h-full"></canvas>
+      <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, rgba(3,7,18,0.3) 0%, rgba(3,7,18,0.7) 50%, rgba(3,7,18,0.95) 100%)"></div>
+    </div>
+
     <nav class="relative pixel-nav" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <%= link_to "/", class: "flex items-center gap-2 text-white hover:text-purple-400" do %>
