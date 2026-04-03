@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount Solrengine::Auth::Engine, at: "/auth"
+
   get "up" => "rails/health#show", as: :rails_health_check
 
   resources :accounts, only: [ :show ], param: :address
@@ -6,8 +8,12 @@ Rails.application.routes.draw do
   patch "network", to: "networks#update", as: :network
 
   # Byte Challenge game
-  get "challenge", to: "challenges#show", as: :challenge
   get "challenges", to: "challenges#index", as: :challenges
+  get "challenge", to: "challenges#show", as: :challenge
+  post "challenge/result", to: "challenges#save_result", as: :save_challenge_result
+
+  # Leaderboard
+  get "leaderboard", to: "leaderboard#index", as: :leaderboard
 
   root "pages#home"
 end

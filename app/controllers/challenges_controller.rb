@@ -1,16 +1,24 @@
 class ChallengesController < ApplicationController
   CHALLENGE_ACCOUNTS = [
-    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint", difficulty: "easy" },
-    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint", difficulty: "easy" },
-    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)", difficulty: "hard" }
+    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
+    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },
+    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" },
+    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" },
+    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint" }
   ].freeze
 
   MAX_DATA_DISPLAY = 10_240
+  MAX_WRONG_ATTEMPTS = 3
+
+  def index
+    @user_stats = current_user_stats
+  end
 
   def show
     account_info = CHALLENGE_ACCOUNTS.sample
     @address = account_info[:address]
-    @difficulty = account_info[:difficulty]
+    @streak = (params[:streak] || 0).to_i
+    @max_wrong = MAX_WRONG_ATTEMPTS
 
     result = fetch_account(@address)
 
@@ -28,7 +36,6 @@ class ChallengesController < ApplicationController
 
     @account = AccountPresenter.new(@address, account_value, max_data: MAX_DATA_DISPLAY)
 
-    # Pick a random region as the target (exclude generic "Data")
     meaningful_regions = @account.regions.select { |r| r.name != "Data" && r.decoded_value.present? }
     @target_region = meaningful_regions.sample
 
@@ -38,14 +45,42 @@ class ChallengesController < ApplicationController
     end
   end
 
-  def index
-    # Landing page for the game
+  def save_result
+    unless logged_in?
+      return render json: { error: "Login required" }, status: :unauthorized
+    end
+
+    result = current_user.challenge_results.create!(
+      account_address: params[:account_address],
+      target_field: params[:target_field],
+      time_seconds: params[:time_seconds].to_f,
+      attempts: params[:attempts].to_i,
+      stars: params[:stars].to_i,
+      streak: params[:streak].to_i
+    )
+
+    render json: {
+      id: result.id,
+      streak: result.streak,
+      best_streak: current_user.best_streak
+    }
+  rescue => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   private
 
+  def current_user_stats
+    return nil unless logged_in?
+
+    {
+      best_streak: current_user.best_streak,
+      total_challenges: current_user.total_challenges,
+      total_stars: current_user.challenge_results.sum(:stars)
+    }
+  end
+
   def fetch_account(address)
-    # Challenge accounts are always on mainnet
     rpc_url = rpc_url_for("mainnet-beta")
 
     3.times do |attempt|

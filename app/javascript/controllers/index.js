@@ -20,4 +20,7 @@ application.register("auto-submit", AutoSubmitController)
 import ChallengeController from "./challenge_controller"
 application.register("challenge", ChallengeController)
 
+import { WalletController } from "@solrengine/wallet-utils/controllers"
+application.register("wallet", WalletController)
+
 export { application }
