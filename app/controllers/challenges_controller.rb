@@ -1,39 +1,45 @@
-class AccountsController < ApplicationController
-  EXAMPLE_ADDRESSES = [
-    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
-    { address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", label: "Token Program (ELF)" },
-    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" }
+class ChallengesController < ApplicationController
+  CHALLENGE_ACCOUNTS = [
+    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint", difficulty: "easy" },
+    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint", difficulty: "easy" },
+    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)", difficulty: "hard" }
   ].freeze
 
-  MAX_DATA_DISPLAY = 10_240 # 10KB
-
-  def lookup
-    redirect_to account_path(address: params[:address].to_s.strip)
-  end
+  MAX_DATA_DISPLAY = 10_240
 
   def show
-    @address = params[:address]
-
-    unless valid_base58?(@address)
-      flash.now[:alert] = "Invalid Solana address"
-      return render :error, status: :unprocessable_entity
-    end
+    account_info = CHALLENGE_ACCOUNTS.sample
+    @address = account_info[:address]
+    @difficulty = account_info[:difficulty]
 
     result = fetch_account(@address)
 
     if result.nil?
-      flash.now[:alert] = "Could not reach Solana network. Try again."
-      return render :error, status: :service_unavailable
+      flash[:alert] = "Could not reach Solana network. Try again."
+      return redirect_to challenges_path
     end
 
     account_value = result.dig("result", "value")
 
     if account_value.nil?
-      flash.now[:alert] = "Account not found — it may not exist or has been closed."
-      return render :error, status: :not_found
+      flash[:alert] = "Account not found."
+      return redirect_to challenges_path
     end
 
     @account = AccountPresenter.new(@address, account_value, max_data: MAX_DATA_DISPLAY)
+
+    # Pick a random region as the target (exclude generic "Data")
+    meaningful_regions = @account.regions.select { |r| r.name != "Data" && r.decoded_value.present? }
+    @target_region = meaningful_regions.sample
+
+    unless @target_region
+      flash[:alert] = "Could not generate a challenge. Try again."
+      return redirect_to challenges_path
+    end
+  end
+
+  def index
+    # Landing page for the game
   end
 
   private
@@ -63,11 +69,5 @@ class AccountsController < ApplicationController
     else
       ENV.fetch("SOLANA_RPC_MAINNET_URL", "https://api.mainnet-beta.solana.com")
     end
-  end
-
-  def valid_base58?(address)
-    return false if address.blank?
-    return false unless address.length.between?(32, 44)
-    address.match?(/\A[1-9A-HJ-NP-Za-km-z]+\z/)
   end
 end

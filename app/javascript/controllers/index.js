@@ -17,4 +17,7 @@ application.register("address-form", AddressFormController)
 import AutoSubmitController from "./auto_submit_controller"
 application.register("auto-submit", AutoSubmitController)
 
+import ChallengeController from "./challenge_controller"
+application.register("challenge", ChallengeController)
+
 export { application }

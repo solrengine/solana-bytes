@@ -5,5 +5,9 @@ Rails.application.routes.draw do
   post "lookup", to: "accounts#lookup", as: :lookup
   patch "network", to: "networks#update", as: :network
 
+  # Byte Challenge game
+  get "challenge", to: "challenges#show", as: :challenge
+  get "challenges", to: "challenges#index", as: :challenges
+
   root "pages#home"
 end

@@ -43,6 +43,7 @@
           <span>Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-4">
+          <%= link_to "🎯 Challenge", challenges_path, class: "text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium" %>
           <%= form_with url: network_path, method: :patch, class: "flex items-center", data: { controller: "auto-submit", turbo_frame: "account_result" } do |f| %>
             <%= f.select :network,
                   options_for_select(
