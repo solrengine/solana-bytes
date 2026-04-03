@@ -1,15 +1,15 @@
 class ChallengesController < ApplicationController
   layout "game", only: :show
 
+  # Small accounts only — keeps the hex grid compact for gameplay
   CHALLENGE_ACCOUNTS = [
-    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
-    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },
-    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" },
-    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" },
-    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint" }
+    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },          # 82 bytes
+    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },          # 82 bytes
+    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" },       # 82 bytes
+    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint" }           # 82 bytes
   ].freeze
 
-  MAX_DATA_DISPLAY = 10_240
+  MAX_DATA_DISPLAY = 512
   MAX_WRONG_ATTEMPTS = 3
 
   def index
