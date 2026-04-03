@@ -15,14 +15,14 @@ class ChallengesController < ApplicationController
     result = fetch_account(@address)
 
     if result.nil?
-      flash[:alert] = "Could not reach Solana network. Try again."
+      flash[:alert] = "Could not reach Solana mainnet. Check your connection and try again."
       return redirect_to challenges_path
     end
 
     account_value = result.dig("result", "value")
 
     if account_value.nil?
-      flash[:alert] = "Account not found."
+      flash[:alert] = "Account #{@address[0..7]}... not found on mainnet."
       return redirect_to challenges_path
     end
 
@@ -45,8 +45,8 @@ class ChallengesController < ApplicationController
   private
 
   def fetch_account(address)
-    network = session[:solana_network] || ENV.fetch("SOLANA_NETWORK", "mainnet-beta")
-    rpc_url = rpc_url_for(network)
+    # Challenge accounts are always on mainnet
+    rpc_url = rpc_url_for("mainnet-beta")
 
     3.times do |attempt|
       client = Solrengine::Rpc::Client.new(rpc_url: rpc_url)
