@@ -1,1 +1,18 @@
 @import "tailwindcss";
+
+/* Override SolRengine wallet list button styles (rendered dynamically by JS) */
+[data-wallet-target="walletList"] button {
+  border-color: rgba(55, 65, 81, 0.5) !important;
+  background: rgba(17, 19, 24, 0.6) !important;
+}
+
+[data-wallet-target="walletList"] button:hover {
+  border-color: rgba(107, 114, 128, 0.5) !important;
+  background: rgba(31, 33, 41, 0.6) !important;
+}
+
+/* Selected wallet - purple highlight */
+[data-wallet-target="walletList"] button[class*="border-purple"] {
+  border-color: rgba(139, 92, 246, 0.5) !important;
+  background: rgba(88, 28, 135, 0.15) !important;
+}
