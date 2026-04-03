@@ -3,7 +3,7 @@
 <div class="max-w-3xl mx-auto">
   <div class="flex items-center justify-between mb-8">
     <h1 class="text-3xl font-bold text-white">🏆 Leaderboard</h1>
-    <%= link_to "Play", challenges_path, class: "text-purple-400 hover:text-purple-300 text-sm transition-colors" %>
+    <%= link_to "Play", "/challenges", class: "text-purple-400 hover:text-purple-300 text-sm transition-colors" %>
   </div>
 
   <%# Top Streaks %>
@@ -54,7 +54,7 @@
     <% else %>
       <div class="p-10 text-center">
         <p class="text-gray-400">No challenges completed yet</p>
-        <p class="text-gray-500 text-xs mt-1"><%= link_to "Be the first!", challenges_path, class: "text-purple-400 hover:text-purple-300" %></p>
+        <p class="text-gray-500 text-xs mt-1"><%= link_to "Be the first!", "/challenges", class: "text-purple-400 hover:text-purple-300" %></p>
       </div>
     <% end %>
   </div>

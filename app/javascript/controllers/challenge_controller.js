@@ -71,10 +71,6 @@ export default class extends Controller {
     this.statusTarget.className = "mb-4 p-4 rounded-xl text-center bg-green-900/30 border border-green-700/50"
     this.statusTarget.classList.remove("hidden")
 
-    if (this.loggedInValue) {
-      this.saveResult(elapsed, stars, newStreak)
-    }
-
     if (this.hasNextBtnTarget) {
       this.nextBtnTarget.innerHTML = `
         <a href="${this.nextUrlValue}?streak=${newStreak}" class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200">

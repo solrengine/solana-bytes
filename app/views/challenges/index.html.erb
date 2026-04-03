@@ -1,28 +1,115 @@
 <% content_for(:title, "Byte Challenge — Solana Bytes") %>
 <% content_for(:hex_rain) { "" } %>
 
-<div class="flex flex-col items-center justify-center min-h-[60vh]">
-  <div class="text-center max-w-lg">
+<div class="flex flex-col items-center justify-center min-h-[70vh]">
+  <div class="text-center max-w-2xl">
     <div class="text-6xl mb-6">🎯</div>
     <h1 class="text-4xl font-bold text-white mb-4">Byte Challenge</h1>
     <p class="text-gray-400 text-lg mb-2">
       Can you find the right bytes in a Solana account?
     </p>
     <p class="text-gray-500 mb-10">
-      We'll show you an account's hex dump and ask you to click on a specific field.
-      The faster you find it, the higher your score.
+      We'll show you a hex dump and ask you to click on a specific field.
+      Build streaks, earn stars, climb the leaderboard.
     </p>
 
-    <%= link_to challenge_path, class: "inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 text-lg" do %>
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      Start Challenge
+    <%# Play buttons %>
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+      <% if logged_in? %>
+        <%= link_to "/challenge", class: "inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 text-lg" do %>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Play Challenge
+        <% end %>
+      <% else %>
+        <%= link_to "/challenge", class: "inline-flex items-center gap-2 bg-gray-800 hover:bg-gray-700 border border-gray-600/50 text-gray-200 font-semibold py-4 px-8 rounded-xl transition-all duration-200 text-lg" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Practice
+        <% end %>
+        <%= link_to "/auth/login", class: "inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-4 px-8 rounded-xl transition-all duration-200 text-lg" do %>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Connect & Play
+        <% end %>
+      <% end %>
+    </div>
+
+    <% if logged_in? %>
+      <p class="text-gray-500 text-sm mb-10">
+        Playing as <span class="text-purple-400 font-mono"><%= current_user.short_address %></span> — results saved to leaderboard
+      </p>
+    <% else %>
+      <p class="text-gray-500 text-sm mb-10">
+        Connect your wallet to save scores and appear on the leaderboard
+      </p>
     <% end %>
 
-    <div class="mt-8 text-gray-600 text-sm">
-      <p>Test your knowledge of Solana account data structures</p>
+    <%# User stats (logged in) %>
+    <% if @user_stats %>
+      <div class="flex items-center justify-center gap-8 mb-10">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-yellow-400 font-mono">🔥 <%= @user_stats[:best_streak] %></div>
+          <div class="text-gray-500 text-xs mt-1">Best Streak</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-white font-mono"><%= @user_stats[:total_challenges] %></div>
+          <div class="text-gray-500 text-xs mt-1">Games</div>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-yellow-400 font-mono"><%= @user_stats[:total_stars] %> ⭐</div>
+          <div class="text-gray-500 text-xs mt-1">Stars</div>
+        </div>
+      </div>
+    <% end %>
+
+    <%# Mini leaderboard %>
+    <div class="bg-gray-800/40 border border-gray-700/50 rounded-2xl overflow-hidden text-left max-w-md mx-auto">
+      <div class="px-5 py-3 border-b border-gray-700/50 flex items-center justify-between">
+        <h2 class="text-sm font-semibold text-white">🏆 Top Streaks</h2>
+        <%= link_to "View all", "/leaderboard", class: "text-purple-400 hover:text-purple-300 text-xs transition-colors" %>
+      </div>
+
+      <% if @top_streaks.any? %>
+        <div class="divide-y divide-gray-700/30">
+          <% @top_streaks.each_with_index do |result, index| %>
+            <div class="px-5 py-3 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <span class="w-6 text-center <%= index < 3 ? 'text-yellow-400 font-bold' : 'text-gray-500' %>">
+                  <%= index == 0 ? '🥇' : index == 1 ? '🥈' : index == 2 ? '🥉' : (index + 1).to_s %>
+                </span>
+                <span class="text-gray-300 font-mono text-xs"><%= result.user.short_address %></span>
+              </div>
+              <span class="text-yellow-400 font-bold text-sm">🔥 <%= result.streak %></span>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-5 py-8 text-center">
+          <p class="text-gray-500 text-sm">No scores yet — be the first!</p>
+        </div>
+      <% end %>
+    </div>
+
+    <%# How to play %>
+    <div class="mt-10 grid grid-cols-3 gap-4 text-center max-w-md mx-auto">
+      <div>
+        <div class="text-2xl mb-1">🔍</div>
+        <div class="text-gray-400 text-xs">Find the field<br>in the hex dump</div>
+      </div>
+      <div>
+        <div class="text-2xl mb-1">🔥</div>
+        <div class="text-gray-400 text-xs">Build streaks<br>3 wrong = game over</div>
+      </div>
+      <div>
+        <div class="text-2xl mb-1">⭐</div>
+        <div class="text-gray-400 text-xs">Earn stars<br>0 mistakes = 3 stars</div>
+      </div>
     </div>
   </div>
 </div>

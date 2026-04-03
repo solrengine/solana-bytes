@@ -12,6 +12,7 @@ class ChallengesController < ApplicationController
 
   def index
     @user_stats = current_user_stats
+    @top_streaks = ChallengeResult.includes(:user).leaderboard.limit(5)
   end
 
   def show
