@@ -3,12 +3,12 @@
 
 <div class="flex flex-col items-center justify-center min-h-[70vh]">
   <div class="text-center max-w-2xl">
-    <div class="mb-6"><%= pixel_icon(:target, size: 48) %></div>
-    <h1 class="text-white mb-4" style="font-size:16px">Byte Challenge</h1>
-    <p class="text-gray-400 mb-2" style="font-size:8px;line-height:2">
+    <div class="mb-6"><%= pixel_icon(:target, size: 56) %></div>
+    <h1 class="text-white mb-4" style="font-size:20px">Byte Challenge</h1>
+    <p class="text-gray-400 mb-2" style="font-size:12px;line-height:2">
       Can you find the right bytes in a Solana account?
     </p>
-    <p class="text-gray-500 mb-10" style="font-size:7px;line-height:2">
+    <p class="text-gray-500 mb-10" style="font-size:10px;line-height:2">
       Click on the hex dump to find a specific field.
       Build streaks, earn stars, climb the leaderboard.
     </p>
@@ -16,25 +16,25 @@
     <%# Play buttons %>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
       <% if logged_in? %>
-        <%= link_to "/challenge", class: "pixel-btn", style: "font-size:9px" do %>
-          <%= pixel_icon(:play, size: 14) %> Play Challenge
+        <%= link_to "/challenge", class: "pixel-btn", style: "font-size:12px" do %>
+          <%= pixel_icon(:play, size: 18) %> Play Challenge
         <% end %>
       <% else %>
-        <%= link_to "/challenge", class: "pixel-btn pixel-btn-secondary", style: "font-size:9px" do %>
-          <%= pixel_icon(:play, size: 14) %> Practice
+        <%= link_to "/challenge", class: "pixel-btn pixel-btn-secondary", style: "font-size:12px" do %>
+          <%= pixel_icon(:play, size: 18) %> Practice
         <% end %>
-        <%= link_to "/auth/login", class: "pixel-btn", style: "font-size:9px" do %>
-          <%= pixel_icon(:lock, size: 14) %> Connect & Play
+        <%= link_to "/auth/login", class: "pixel-btn", style: "font-size:12px" do %>
+          <%= pixel_icon(:lock, size: 18) %> Connect & Play
         <% end %>
       <% end %>
     </div>
 
     <% if logged_in? %>
-      <p class="text-gray-500 mb-10" style="font-size:7px">
+      <p class="text-gray-500 mb-10" style="font-size:10px">
         Playing as <span class="text-purple-400"><%= current_user.short_address %></span> — results saved
       </p>
     <% else %>
-      <p class="text-gray-500 mb-10" style="font-size:7px">
+      <p class="text-gray-500 mb-10" style="font-size:10px">
         Connect wallet to save scores
       </p>
     <% end %>
@@ -43,16 +43,16 @@
     <% if @user_stats %>
       <div class="flex items-center justify-center gap-8 mb-10">
         <div class="text-center">
-          <div class="text-yellow-400" style="font-size:12px"><%= pixel_icon(:fire, size: 16) %> <%= @user_stats[:best_streak] %></div>
-          <div class="text-gray-500 mt-1" style="font-size:7px">Best Streak</div>
+          <div class="text-yellow-400" style="font-size:16px"><%= pixel_icon(:fire, size: 20) %> <%= @user_stats[:best_streak] %></div>
+          <div class="text-gray-500 mt-1" style="font-size:10px">Best Streak</div>
         </div>
         <div class="text-center">
-          <div class="text-white" style="font-size:12px"><%= @user_stats[:total_challenges] %></div>
-          <div class="text-gray-500 mt-1" style="font-size:7px">Games</div>
+          <div class="text-white" style="font-size:16px"><%= @user_stats[:total_challenges] %></div>
+          <div class="text-gray-500 mt-1" style="font-size:10px">Games</div>
         </div>
         <div class="text-center">
-          <div class="text-yellow-400" style="font-size:12px"><%= @user_stats[:total_stars] %> <%= pixel_icon(:star, size: 14) %></div>
-          <div class="text-gray-500 mt-1" style="font-size:7px">Stars</div>
+          <div class="text-yellow-400" style="font-size:16px"><%= @user_stats[:total_stars] %> <%= pixel_icon(:star, size: 18) %></div>
+          <div class="text-gray-500 mt-1" style="font-size:10px">Stars</div>
         </div>
       </div>
     <% end %>
@@ -60,8 +60,8 @@
     <%# Mini leaderboard %>
     <div class="pixel-card text-left max-w-md mx-auto" style="padding:0">
       <div class="px-5 py-3 border-b-2 border-gray-700 flex items-center justify-between">
-        <h2 class="text-white flex items-center gap-2" style="font-size:8px"><%= pixel_icon(:trophy, size: 12) %> Top Streaks</h2>
-        <%= link_to "View all", "/leaderboard", class: "text-purple-400 hover:text-purple-300", style: "font-size:7px" %>
+        <h2 class="text-white flex items-center gap-2" style="font-size:14px"><%= pixel_icon(:trophy, size: 16) %> Top Streaks</h2>
+        <%= link_to "View all", "/leaderboard", class: "text-purple-400 hover:text-purple-300", style: "font-size:10px" %>
       </div>
 
       <% if @top_streaks.any? %>
@@ -71,24 +71,24 @@
               <div class="flex items-center gap-3">
                 <span class="w-6 text-center">
                   <% if index == 0 %>
-                    <%= pixel_icon(:medal_gold, size: 14) %>
+                    <%= pixel_icon(:medal_gold, size: 18) %>
                   <% elsif index == 1 %>
-                    <%= pixel_icon(:medal_silver, size: 14) %>
+                    <%= pixel_icon(:medal_silver, size: 18) %>
                   <% elsif index == 2 %>
-                    <%= pixel_icon(:medal_bronze, size: 14) %>
+                    <%= pixel_icon(:medal_bronze, size: 18) %>
                   <% else %>
-                    <span class="text-gray-500" style="font-size:8px"><%= index + 1 %></span>
+                    <span class="text-gray-500" style="font-size:12px"><%= index + 1 %></span>
                   <% end %>
                 </span>
-                <span class="text-gray-300" style="font-size:7px"><%= result.user.short_address %></span>
+                <span class="text-gray-300" style="font-size:10px"><%= result.user.short_address %></span>
               </div>
-              <span class="text-yellow-400" style="font-size:8px"><%= pixel_icon(:fire, size: 12) %> <%= result.streak %></span>
+              <span class="text-yellow-400" style="font-size:12px"><%= pixel_icon(:fire, size: 16) %> <%= result.streak %></span>
             </div>
           <% end %>
         </div>
       <% else %>
         <div class="px-5 py-8 text-center">
-          <p class="text-gray-500" style="font-size:7px">No scores yet — be the first!</p>
+          <p class="text-gray-500" style="font-size:10px">No scores yet — be the first!</p>
         </div>
       <% end %>
     </div>
@@ -96,16 +96,16 @@
     <%# How to play %>
     <div class="mt-10 grid grid-cols-3 gap-4 text-center max-w-md mx-auto">
       <div>
-        <div class="mb-2"><%= pixel_icon(:magnifier, size: 20) %></div>
-        <div class="text-gray-400" style="font-size:7px;line-height:2">Find the field<br>in the hex dump</div>
+        <div class="mb-2"><%= pixel_icon(:magnifier, size: 24) %></div>
+        <div class="text-gray-400" style="font-size:10px;line-height:2">Find the field<br>in the hex dump</div>
       </div>
       <div>
-        <div class="mb-2"><%= pixel_icon(:fire, size: 20) %></div>
-        <div class="text-gray-400" style="font-size:7px;line-height:2">Build streaks<br>3 wrong = game over</div>
+        <div class="mb-2"><%= pixel_icon(:fire, size: 24) %></div>
+        <div class="text-gray-400" style="font-size:10px;line-height:2">Build streaks<br>3 wrong = game over</div>
       </div>
       <div>
-        <div class="mb-2"><%= pixel_icon(:star, size: 20) %></div>
-        <div class="text-gray-400" style="font-size:7px;line-height:2">Earn stars<br>0 mistakes = 3 stars</div>
+        <div class="mb-2"><%= pixel_icon(:star, size: 24) %></div>
+        <div class="text-gray-400" style="font-size:10px;line-height:2">Earn stars<br>0 mistakes = 3 stars</div>
       </div>
     </div>
   </div>

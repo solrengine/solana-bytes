@@ -6,7 +6,7 @@
       <h1 class="mb-4" style="font-size:20px">
         <span class="text-purple-400">0x</span> Solana Bytes
       </h1>
-      <p class="text-gray-400 max-w-xl mx-auto" style="font-size:8px;line-height:2">
+      <p class="text-gray-400 max-w-xl mx-auto" style="font-size:12px;line-height:2">
         Paste any Solana account address to visualize its data as an interactive, color-coded hex dump.
       </p>
     </div>
@@ -17,7 +17,7 @@
           <%= f.text_field :address,
                 placeholder: "Enter address...",
                 class: "flex-1 pixel-input",
-                style: "font-size:8px;padding:14px 16px",
+                style: "font-size:12px;padding:14px 16px",
                 autocomplete: "off",
                 autofocus: true,
                 data: { address_form_target: "input", action: "input->address-form#validate" } %>
@@ -26,22 +26,22 @@
             disabled="disabled"
             data-address-form-target="submit"
             class="pixel-btn"
-            style="font-size:9px;opacity:0.4;cursor:not-allowed"
+            style="font-size:12px;opacity:0.4;cursor:not-allowed"
           >
             Visualize
           </button>
         </div>
-        <p data-address-form-target="error" class="text-red-400 mt-2" style="display:none;font-size:7px"></p>
+        <p data-address-form-target="error" class="text-red-400 mt-2" style="display:none;font-size:10px"></p>
       <% end %>
 
       <div class="mt-8">
-        <p class="text-gray-500 mb-3" style="font-size:7px">Try an example:</p>
+        <p class="text-gray-500 mb-3" style="font-size:10px">Try an example:</p>
         <div class="flex flex-wrap gap-2">
           <% AccountsController::EXAMPLE_ADDRESSES.each do |example| %>
             <%= link_to account_path(address: example[:address]),
                   data: { turbo_frame: "account_result" },
                   class: "bg-gray-900 border-2 border-gray-700 px-3 py-2 text-gray-400 hover:text-purple-400 hover:border-purple-500",
-                  style: "font-size:7px" do %>
+                  style: "font-size:10px" do %>
               <span class="text-gray-500"><%= example[:label] %></span>
               <span class="ml-1"><%= example[:address][0..7] %>...</span>
             <% end %>
@@ -55,7 +55,7 @@
   <div data-loading-target="spinner" class="items-center justify-center min-h-[40vh]" style="display:none">
     <div class="text-center">
       <div class="text-purple-400 mb-4" style="font-size:16px">...</div>
-      <p class="text-gray-400" style="font-size:8px">Fetching account data...</p>
+      <p class="text-gray-400" style="font-size:12px">Fetching account data...</p>
     </div>
   </div>
 

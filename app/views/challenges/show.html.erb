@@ -16,34 +16,34 @@
     <div class="flex items-center justify-between">
       <div>
         <div class="flex items-center gap-3 mb-2">
-          <%= pixel_icon(:target, size: 20) %>
-          <span class="text-white" style="font-size:10px">Find the bytes for:</span>
+          <%= pixel_icon(:target, size: 24) %>
+          <span class="text-white" style="font-size:14px">Find the bytes for:</span>
         </div>
         <div class="pixel-card inline-block px-5 py-3" style="border-color:#7c3aed">
-          <span class="text-purple-300" style="font-size:9px" data-challenge-target="fieldName"><%= @target_region.name %></span>
+          <span class="text-purple-300" style="font-size:14px" data-challenge-target="fieldName"><%= @target_region.name %></span>
         </div>
       </div>
       <div class="flex items-center gap-6">
         <% if @streak > 0 %>
           <div class="text-right">
-            <div class="text-gray-500" style="font-size:7px">Streak</div>
-            <div class="text-yellow-400 mt-1" style="font-size:12px"><%= pixel_icon(:fire, size: 16) %> <%= @streak %></div>
+            <div class="text-gray-500" style="font-size:10px">Streak</div>
+            <div class="text-yellow-400 mt-1" style="font-size:16px"><%= pixel_icon(:fire, size: 20) %> <%= @streak %></div>
           </div>
         <% end %>
         <div class="text-right">
-          <div class="text-gray-500" style="font-size:7px">Time</div>
-          <div class="text-white mt-1" style="font-size:12px" data-challenge-target="timer">0.0s</div>
+          <div class="text-gray-500" style="font-size:10px">Time</div>
+          <div class="text-white mt-1" style="font-size:16px" data-challenge-target="timer">0.0s</div>
         </div>
         <div class="text-right">
-          <div class="text-gray-500" style="font-size:7px">Lives</div>
-          <div class="mt-1" data-challenge-target="lives"><%= pixel_icon(:heart, size: 14, css_class: "text-red-500") %><%= pixel_icon(:heart, size: 14, css_class: "text-red-500") %><%= pixel_icon(:heart, size: 14, css_class: "text-red-500") %></div>
+          <div class="text-gray-500" style="font-size:10px">Lives</div>
+          <div class="mt-1" data-challenge-target="lives"><%= pixel_icon(:heart, size: 18, css_class: "text-red-500") %><%= pixel_icon(:heart, size: 18, css_class: "text-red-500") %><%= pixel_icon(:heart, size: 18, css_class: "text-red-500") %></div>
         </div>
       </div>
     </div>
   </div>
 
   <%# Metadata bar %>
-  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4 text-gray-400" style="font-size:7px">
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4 text-gray-400" style="font-size:10px">
     <span>Account: <span class="text-gray-300"><%= @address[0..7] %>...<%= @address[-4..] %></span></span>
     <span>Size: <span class="text-gray-300"><%= number_with_delimiter(@account.raw_bytes.length) %> bytes</span></span>
     <%= link_to "Skip >>", "/challenge", class: "text-gray-500 hover:text-white ml-auto" %>
@@ -52,7 +52,7 @@
   <%# Hex grid %>
   <div data-controller="hex-viewer">
     <% if @account.truncated %>
-      <div class="text-yellow-500 mb-3" style="font-size:7px">
+      <div class="text-yellow-500 mb-3" style="font-size:10px">
         showing <%= number_with_delimiter(@account.raw_bytes.length) %> of <%= number_with_delimiter(@account.truncated) %> bytes
       </div>
     <% end %>
@@ -67,20 +67,20 @@
 
     <%# Hex Grid — all cells same gray color (challenge mode) %>
     <div class="overflow-x-auto">
-      <table class="w-full" style="font-size:9px;line-height:2.4">
+      <table class="w-full" style="font-size:11px;line-height:2.4">
         <thead>
           <tr>
-            <th class="text-left pr-4 pb-3 font-normal text-gray-600" style="font-size:8px"></th>
+            <th class="text-left pr-4 pb-3 font-normal text-gray-600" style="font-size:10px"></th>
             <% 16.times do |i| %>
-              <th class="px-1 pb-3 font-normal text-center text-gray-600" style="font-size:8px"><%= format("%X", i) %></th>
+              <th class="px-1 pb-3 font-normal text-center text-gray-600" style="font-size:10px"><%= format("%X", i) %></th>
             <% end %>
-            <th class="pl-6 pb-3 font-normal text-left text-gray-600" style="font-size:8px"></th>
+            <th class="pl-6 pb-3 font-normal text-left text-gray-600" style="font-size:10px"></th>
           </tr>
         </thead>
         <tbody>
           <% @account.hex_rows.each do |row| %>
             <tr>
-              <td class="text-gray-600 pr-4 select-none" style="font-size:8px"><%= row.offset_hex %></td>
+              <td class="text-gray-600 pr-4 select-none" style="font-size:10px"><%= row.offset_hex %></td>
               <% row.cells.each do |cell| %>
                 <td
                   class="px-1 text-center cursor-pointer hover:bg-gray-700/50"
@@ -104,7 +104,7 @@
               <% row.padding_cells.times do %>
                 <td class="px-1"></td>
               <% end %>
-              <td class="pl-6 text-gray-500 select-none whitespace-pre" style="font-size:8px"><%= row.ascii %></td>
+              <td class="pl-6 text-gray-500 select-none whitespace-pre" style="font-size:10px"><%= row.ascii %></td>
             </tr>
           <% end %>
         </tbody>

@@ -2,20 +2,20 @@
 
 <div class="max-w-3xl mx-auto">
   <div class="flex items-center justify-between mb-8">
-    <h1 class="text-white flex items-center gap-3" style="font-size:14px"><%= pixel_icon(:trophy, size: 20) %> Leaderboard</h1>
-    <%= link_to "Play", "/challenges", class: "text-purple-400 hover:text-purple-300", style: "font-size:8px" %>
+    <h1 class="text-white flex items-center gap-3" style="font-size:20px"><%= pixel_icon(:trophy, size: 24) %> Leaderboard</h1>
+    <%= link_to "Play", "/challenges", class: "text-purple-400 hover:text-purple-300", style: "font-size:12px" %>
   </div>
 
   <%# Top Streaks %>
   <div class="pixel-card overflow-hidden mb-8" style="padding:0">
     <div class="px-5 py-3 border-b-2 border-gray-700">
-      <h2 class="text-white" style="font-size:9px">Top Streaks</h2>
+      <h2 class="text-white" style="font-size:14px">Top Streaks</h2>
     </div>
 
     <% if @top_streaks.any? %>
-      <table class="w-full" style="font-size:8px">
+      <table class="w-full" style="font-size:12px">
         <thead>
-          <tr class="text-gray-500" style="font-size:7px">
+          <tr class="text-gray-500" style="font-size:10px">
             <th class="text-left px-5 py-3">#</th>
             <th class="text-left px-5 py-3">Player</th>
             <th class="text-right px-5 py-3">Streak</th>
@@ -29,29 +29,29 @@
             <tr class="border-t border-gray-800">
               <td class="px-5 py-3">
                 <% if index == 0 %>
-                  <%= pixel_icon(:medal_gold, size: 14) %>
+                  <%= pixel_icon(:medal_gold, size: 18) %>
                 <% elsif index == 1 %>
-                  <%= pixel_icon(:medal_silver, size: 14) %>
+                  <%= pixel_icon(:medal_silver, size: 18) %>
                 <% elsif index == 2 %>
-                  <%= pixel_icon(:medal_bronze, size: 14) %>
+                  <%= pixel_icon(:medal_bronze, size: 18) %>
                 <% else %>
                   <span class="text-gray-500"><%= index + 1 %></span>
                 <% end %>
               </td>
               <td class="px-5 py-3">
-                <span class="text-gray-300" style="font-size:7px"><%= result.user.short_address %></span>
+                <span class="text-gray-300" style="font-size:10px"><%= result.user.short_address %></span>
               </td>
               <td class="px-5 py-3 text-right">
-                <span class="text-yellow-400"><%= pixel_icon(:fire, size: 12) %> <%= result.streak %></span>
+                <span class="text-yellow-400"><%= pixel_icon(:fire, size: 16) %> <%= result.streak %></span>
               </td>
               <td class="px-5 py-3 text-right">
-                <span class="text-gray-400"><%= result.stars.times.map { pixel_icon(:star, size: 10) }.join.html_safe %></span>
+                <span class="text-gray-400"><%= result.stars.times.map { pixel_icon(:star, size: 14) }.join.html_safe %></span>
               </td>
               <td class="px-5 py-3 text-right">
-                <span class="text-gray-400" style="font-size:7px"><%= "%.1f" % result.time_seconds %>s</span>
+                <span class="text-gray-400" style="font-size:10px"><%= "%.1f" % result.time_seconds %>s</span>
               </td>
               <td class="px-5 py-3 text-right">
-                <span class="text-gray-500" style="font-size:7px"><%= result.created_at.strftime("%b %d") %></span>
+                <span class="text-gray-500" style="font-size:10px"><%= result.created_at.strftime("%b %d") %></span>
               </td>
             </tr>
           <% end %>
@@ -59,8 +59,8 @@
       </table>
     <% else %>
       <div class="p-10 text-center">
-        <p class="text-gray-400" style="font-size:8px">No challenges completed yet</p>
-        <p class="text-gray-500 mt-2" style="font-size:7px"><%= link_to "Be the first!", "/challenges", class: "text-purple-400 hover:text-purple-300" %></p>
+        <p class="text-gray-400" style="font-size:12px">No challenges completed yet</p>
+        <p class="text-gray-500 mt-2" style="font-size:10px"><%= link_to "Be the first!", "/challenges", class: "text-purple-400 hover:text-purple-300" %></p>
       </div>
     <% end %>
   </div>
@@ -68,7 +68,7 @@
   <%# Recent Games %>
   <div class="pixel-card overflow-hidden" style="padding:0">
     <div class="px-5 py-3 border-b-2 border-gray-700">
-      <h2 class="text-white" style="font-size:9px">Recent Games</h2>
+      <h2 class="text-white" style="font-size:14px">Recent Games</h2>
     </div>
 
     <% if @recent_games.any? %>
@@ -76,19 +76,19 @@
         <% @recent_games.each do |result| %>
           <div class="px-5 py-3 flex items-center justify-between border-t border-gray-800">
             <div class="flex items-center gap-3">
-              <span class="text-gray-300" style="font-size:7px"><%= result.user.short_address %></span>
-              <span class="text-gray-500" style="font-size:7px">found <span class="text-purple-400"><%= result.target_field %></span></span>
+              <span class="text-gray-300" style="font-size:10px"><%= result.user.short_address %></span>
+              <span class="text-gray-500" style="font-size:10px">found <span class="text-purple-400"><%= result.target_field %></span></span>
             </div>
             <div class="flex items-center gap-4">
-              <span class="text-yellow-400" style="font-size:8px"><%= pixel_icon(:fire, size: 10) %> <%= result.streak %></span>
-              <span class="text-gray-500" style="font-size:7px"><%= time_ago_in_words(result.created_at) %> ago</span>
+              <span class="text-yellow-400" style="font-size:12px"><%= pixel_icon(:fire, size: 14) %> <%= result.streak %></span>
+              <span class="text-gray-500" style="font-size:10px"><%= time_ago_in_words(result.created_at) %> ago</span>
             </div>
           </div>
         <% end %>
       </div>
     <% else %>
       <div class="p-10 text-center">
-        <p class="text-gray-400" style="font-size:8px">No games yet</p>
+        <p class="text-gray-400" style="font-size:12px">No games yet</p>
       </div>
     <% end %>
   </div>

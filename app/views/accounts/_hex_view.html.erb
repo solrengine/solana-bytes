@@ -1,7 +1,7 @@
 <div data-controller="hex-viewer">
   <%# Legend %>
   <% if account.regions.length > 1 || account.regions.first&.name != "Data" %>
-    <div class="flex flex-wrap gap-x-5 gap-y-1.5 mb-5" style="font-size:8px">
+    <div class="flex flex-wrap gap-x-5 gap-y-1.5 mb-5" style="font-size:10px">
       <% seen = Set.new %>
       <% account.regions.each do |region| %>
         <% next if seen.include?(region.id) %>
@@ -15,7 +15,7 @@
   <% end %>
 
   <% if account.truncated %>
-    <div class="text-yellow-500 mb-3" style="font-size:7px">
+    <div class="text-yellow-500 mb-3" style="font-size:10px">
       showing <%= number_with_delimiter(account.raw_bytes.length) %> of <%= number_with_delimiter(account.truncated) %> bytes
     </div>
   <% end %>
@@ -30,20 +30,20 @@
 
   <%# Hex Grid %>
   <div class="overflow-x-auto">
-    <table class="w-full" style="font-size:9px;line-height:2.4">
+    <table class="w-full" style="font-size:11px;line-height:2.4">
       <thead>
         <tr>
-          <th class="text-left pr-4 pb-3 font-normal text-gray-600" style="font-size:8px"></th>
+          <th class="text-left pr-4 pb-3 font-normal text-gray-600" style="font-size:10px"></th>
           <% 16.times do |i| %>
-            <th class="px-1 pb-3 font-normal text-center text-gray-600" style="font-size:8px"><%= format("%X", i) %></th>
+            <th class="px-1 pb-3 font-normal text-center text-gray-600" style="font-size:10px"><%= format("%X", i) %></th>
           <% end %>
-          <th class="pl-6 pb-3 font-normal text-left text-gray-600" style="font-size:8px"></th>
+          <th class="pl-6 pb-3 font-normal text-left text-gray-600" style="font-size:10px"></th>
         </tr>
       </thead>
       <tbody>
         <% account.hex_rows.each do |row| %>
           <tr>
-            <td class="text-gray-600 pr-4 select-none" style="font-size:8px"><%= row.offset_hex %></td>
+            <td class="text-gray-600 pr-4 select-none" style="font-size:10px"><%= row.offset_hex %></td>
             <% row.cells.each do |cell| %>
               <td
                 class="px-1 text-center cursor-default"
@@ -66,7 +66,7 @@
             <% row.padding_cells.times do %>
               <td class="px-1"></td>
             <% end %>
-            <td class="pl-6 text-gray-500 select-none whitespace-pre" style="font-size:8px"><%= row.ascii %></td>
+            <td class="pl-6 text-gray-500 select-none whitespace-pre" style="font-size:10px"><%= row.ascii %></td>
           </tr>
         <% end %>
       </tbody>

@@ -42,19 +42,19 @@
     <nav class="relative pixel-nav" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
         <%= link_to "/", class: "flex items-center gap-2 text-white hover:text-purple-400", data: { turbo_frame: "account_result", turbo_action: "advance" } do %>
-          <span class="text-purple-400" style="font-size:14px">0x</span>
-          <span style="font-size:10px">Solana Bytes</span>
+          <span class="text-purple-400" style="font-size:18px">0x</span>
+          <span style="font-size:14px">Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-4">
-          <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:8px" do %>
-            <%= pixel_icon(:target, size: 12) %> Challenge
+          <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:12px" do %>
+            <%= pixel_icon(:target, size: 16) %> Challenge
           <% end %>
-          <%= link_to "/leaderboard", class: "hover:opacity-80", style: "font-size:8px" do %>
-            <%= pixel_icon(:trophy, size: 12) %>
+          <%= link_to "/leaderboard", class: "hover:opacity-80", style: "font-size:12px" do %>
+            <%= pixel_icon(:trophy, size: 16) %>
           <% end %>
           <% if logged_in? %>
-            <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1" style="font-size:7px"><%= current_user.short_address %></span>
-            <%= link_to "x", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white", style: "font-size:8px" %>
+            <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1" style="font-size:10px"><%= current_user.short_address %></span>
+            <%= link_to "x", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white", style: "font-size:12px" %>
           <% end %>
           <%= form_with url: "/network", method: :patch, class: "flex items-center", data: { controller: "auto-submit", turbo_frame: "account_result" } do |f| %>
             <%= f.select :network,
@@ -64,7 +64,7 @@
                   ),
                   {},
                   class: "pixel-input cursor-pointer",
-                  style: "font-size:7px;padding:4px 8px;border-width:2px",
+                  style: "font-size:10px;padding:4px 8px;border-width:2px",
                   data: { action: "change->auto-submit#submit" } %>
           <% end %>
         </div>
@@ -82,7 +82,7 @@
     </main>
 
     <footer class="relative border-t-3 border-gray-800 mt-16" style="z-index:10">
-      <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-600" style="font-size:7px">
+      <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-600" style="font-size:8px">
         Built with <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300">SolRengine</a>
       </div>
     </footer>

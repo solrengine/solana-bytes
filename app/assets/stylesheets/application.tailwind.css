@@ -8,12 +8,12 @@
 @layer base {
   html {
     font-family: 'Press Start 2P', monospace;
-    font-size: 10px;
+    font-size: 12px;
   }
 
   body {
-    font-size: 10px;
-    line-height: 1.8;
+    font-size: 12px;
+    line-height: 2;
   }
 }
 
@@ -130,7 +130,7 @@
   border: 2px solid #7c3aed;
   box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.5);
   padding: 8px 12px;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 /* ═══════════════════════════════════════════
