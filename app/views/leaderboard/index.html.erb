@@ -20,7 +20,6 @@
             <th class="text-left px-5 py-3">Player</th>
             <th class="text-right px-5 py-3">Streak</th>
             <th class="text-right px-5 py-3">Stars</th>
-            <th class="text-right px-5 py-3">Time</th>
             <th class="text-right px-5 py-3">Date</th>
           </tr>
         </thead>
@@ -46,9 +45,6 @@
               </td>
               <td class="px-5 py-3 text-right">
                 <span class="text-gray-400"><%= result.stars.times.map { pixel_icon(:star, size: 14) }.join.html_safe %></span>
-              </td>
-              <td class="px-5 py-3 text-right">
-                <span class="text-gray-400" style="font-size:10px"><%= "%.1f" % result.time_seconds %>s</span>
               </td>
               <td class="px-5 py-3 text-right">
                 <span class="text-gray-500" style="font-size:10px"><%= result.created_at.strftime("%b %d") %></span>

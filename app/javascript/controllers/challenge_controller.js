@@ -12,7 +12,7 @@ const ICONS = {
 }
 
 export default class extends Controller {
-  static targets = ["timer", "fieldName", "lives", "modal", "modalContent", "toast", "toastContent"]
+  static targets = ["fieldName", "lives", "modal", "modalContent", "toast", "toastContent"]
   static values = {
     targetRegion: String,
     targetName: String,
@@ -29,18 +29,6 @@ export default class extends Controller {
     this.solved = false
     this.wrongAttempts = 0
     this.totalAttempts = 0
-    this.startTime = performance.now()
-    this.timerInterval = setInterval(() => this.updateTimer(), 100)
-  }
-
-  disconnect() {
-    if (this.timerInterval) clearInterval(this.timerInterval)
-  }
-
-  updateTimer() {
-    if (this.solved) return
-    const elapsed = (performance.now() - this.startTime) / 1000
-    this.timerTarget.textContent = `${elapsed.toFixed(1)}s`
   }
 
   guess(event) {
@@ -60,23 +48,19 @@ export default class extends Controller {
 
   handleCorrect() {
     this.solved = true
-    clearInterval(this.timerInterval)
 
-    const elapsed = ((performance.now() - this.startTime) / 1000).toFixed(1)
     const newStreak = this.streakValue + 1
     const stars = this.wrongAttempts === 0 ? 3 : this.wrongAttempts === 1 ? 2 : 1
 
-    this.timerTarget.textContent = `${elapsed}s`
     this.revealRegion(this.targetRegionValue)
 
     const starIcons = ICONS.star.repeat(stars)
     this.showModal("correct", `
       <div class="mb-4">${ICONS.checkmark}</div>
       <div class="text-green-400 mb-2" style="font-size:16px">Correct!</div>
-      <div class="text-gray-300 mb-1" style="font-size:12px">
+      <div class="text-gray-300 mb-4" style="font-size:12px">
         <span class="text-purple-400">${this.targetNameValue}</span>
       </div>
-      <div class="text-gray-400 mb-4" style="font-size:10px">found in ${elapsed}s</div>
       <div class="mb-2">${starIcons}</div>
       <div class="text-yellow-400 mb-6" style="font-size:14px">${ICONS.fire} Streak: ${newStreak}</div>
       <a href="${this.nextUrlValue}?streak=${newStreak}" class="pixel-btn pixel-btn-green" style="font-size:12px">
@@ -120,15 +104,12 @@ export default class extends Controller {
 
   gameOverSequence() {
     this.solved = true
-    clearInterval(this.timerInterval)
-
-    const elapsed = ((performance.now() - this.startTime) / 1000).toFixed(1)
 
     this.revealRegion(this.targetRegionValue)
     this.livesTarget.innerHTML = ICONS.heartEmpty.repeat(3)
 
     if (this.loggedInValue && this.streakValue > 0) {
-      this.saveResult(elapsed, 0, this.streakValue)
+      this.saveResult(0, this.streakValue)
     }
 
     this.showModal("gameover", `
@@ -154,7 +135,7 @@ export default class extends Controller {
     this.modalTarget.classList.remove("hidden")
   }
 
-  async saveResult(timeSeconds, stars, streak) {
+  async saveResult(stars, streak) {
     try {
       const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
       await fetch(this.saveUrlValue, {
@@ -166,7 +147,7 @@ export default class extends Controller {
         body: JSON.stringify({
           account_address: this.accountAddressValue,
           target_field: this.targetNameValue,
-          time_seconds: parseFloat(timeSeconds),
+          time_seconds: 0,
           attempts: this.totalAttempts,
           stars: stars,
           streak: streak
