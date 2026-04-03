@@ -1,4 +1,6 @@
 class ChallengesController < ApplicationController
+  layout "game", only: :show
+
   CHALLENGE_ACCOUNTS = [
     { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
     { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },

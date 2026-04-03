@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["timer", "status", "fieldName", "nextBtn"]
+  static targets = ["timer", "fieldName", "lives", "modal", "modalContent", "toast", "toastContent"]
   static values = {
     targetRegion: String,
     targetName: String,
@@ -59,26 +59,20 @@ export default class extends Controller {
     this.revealRegion(this.targetRegionValue)
 
     const starEmojis = "⭐".repeat(stars)
-    this.statusTarget.innerHTML = `
-      <div class="text-green-400 text-lg mb-1">✅ Correct!</div>
-      <div class="text-gray-300">
-        <span class="text-purple-400 font-semibold">${this.targetNameValue}</span>
-        found in ${elapsed}s
+    this.showModal("correct", `
+      <div class="text-5xl mb-4">✅</div>
+      <div class="text-green-400 text-2xl font-bold mb-2">Correct!</div>
+      <div class="text-gray-300 mb-1">
+        <span class="text-purple-400 font-semibold font-mono">${this.targetNameValue}</span>
       </div>
-      <div class="text-2xl mt-2">${starEmojis}</div>
-      <div class="text-yellow-400 font-bold text-lg mt-1">🔥 Streak: ${newStreak}</div>
-    `
-    this.statusTarget.className = "mb-4 p-4 rounded-xl text-center bg-green-900/30 border border-green-700/50"
-    this.statusTarget.classList.remove("hidden")
-
-    if (this.hasNextBtnTarget) {
-      this.nextBtnTarget.innerHTML = `
-        <a href="${this.nextUrlValue}?streak=${newStreak}" class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200">
-          Next Challenge →
-        </a>
-      `
-      this.nextBtnTarget.classList.remove("hidden")
-    }
+      <div class="text-gray-400 text-sm mb-4">found in ${elapsed}s</div>
+      <div class="text-3xl mb-2">${starEmojis}</div>
+      <div class="text-yellow-400 font-bold text-xl mb-6">🔥 Streak: ${newStreak}</div>
+      <a href="${this.nextUrlValue}?streak=${newStreak}"
+         class="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 text-lg">
+        Next Challenge →
+      </a>
+    `)
   }
 
   handleWrong(cell) {
@@ -92,15 +86,26 @@ export default class extends Controller {
       cell.style.outline = "none"
     }, 300)
 
+    // Update lives display
+    const remaining = this.maxWrongValue - this.wrongAttempts
+    this.livesTarget.textContent = "❤️".repeat(remaining) + "🖤".repeat(this.wrongAttempts)
+
     if (this.wrongAttempts >= this.maxWrongValue) {
       this.gameOverSequence()
       return
     }
 
-    const remaining = this.maxWrongValue - this.wrongAttempts
-    this.statusTarget.innerHTML = `<div class="text-yellow-400">❌ Wrong! ${remaining} ${remaining === 1 ? 'attempt' : 'attempts'} remaining</div>`
-    this.statusTarget.className = "mb-4 p-4 rounded-xl text-center bg-yellow-900/20 border border-yellow-700/30"
-    this.statusTarget.classList.remove("hidden")
+    // Show wrong toast
+    this.toastContentTarget.innerHTML = `
+      <div class="text-3xl mb-2">❌</div>
+      <div class="text-red-400 font-bold text-lg">Wrong!</div>
+      <div class="text-gray-400 text-sm mt-1">${remaining} ${remaining === 1 ? 'life' : 'lives'} remaining</div>
+    `
+    this.toastTarget.classList.remove("hidden")
+    if (this.toastTimeout) clearTimeout(this.toastTimeout)
+    this.toastTimeout = setTimeout(() => {
+      this.toastTarget.classList.add("hidden")
+    }, 1000)
   }
 
   gameOverSequence() {
@@ -110,30 +115,40 @@ export default class extends Controller {
     const elapsed = ((performance.now() - this.startTime) / 1000).toFixed(1)
 
     this.revealRegion(this.targetRegionValue)
-
-    this.statusTarget.innerHTML = `
-      <div class="text-red-400 text-2xl mb-2">💀 Game Over!</div>
-      <div class="text-gray-300 mb-2">
-        The answer was <span class="text-purple-400 font-semibold">${this.targetNameValue}</span>
-      </div>
-      <div class="text-yellow-400 font-bold text-xl">Final Streak: ${this.streakValue}</div>
-      ${this.streakValue > 0 ? '<div class="text-gray-400 text-sm mt-2">🔥 Nice run!</div>' : ''}
-    `
-    this.statusTarget.className = "mb-4 p-6 rounded-xl text-center bg-red-900/20 border border-red-700/30"
-    this.statusTarget.classList.remove("hidden")
+    this.livesTarget.textContent = "🖤🖤🖤"
 
     if (this.loggedInValue && this.streakValue > 0) {
       this.saveResult(elapsed, 0, this.streakValue)
     }
 
-    if (this.hasNextBtnTarget) {
-      this.nextBtnTarget.innerHTML = `
-        <a href="${this.nextUrlValue}" class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200">
-          Play Again
-        </a>
-      `
-      this.nextBtnTarget.classList.remove("hidden")
-    }
+    this.showModal("gameover", `
+      <div class="text-5xl mb-4">💀</div>
+      <div class="text-red-400 text-2xl font-bold mb-2">Game Over!</div>
+      <div class="text-gray-300 mb-1">
+        The answer was <span class="text-purple-400 font-semibold font-mono">${this.targetNameValue}</span>
+      </div>
+      ${this.streakValue > 0
+        ? `<div class="text-yellow-400 font-bold text-xl mt-4 mb-6">🔥 Final Streak: ${this.streakValue}</div>`
+        : '<div class="mt-4 mb-6"></div>'
+      }
+      <a href="/challenges"
+         class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 text-lg">
+        ← Back to Challenges
+      </a>
+    `)
+  }
+
+  showModal(type, content) {
+    const borderColor = type === "correct"
+      ? "border-green-700/50"
+      : "border-red-700/50"
+    const bgColor = type === "correct"
+      ? "bg-gray-900 border border-green-700/50"
+      : "bg-gray-900 border border-red-700/50"
+
+    this.modalContentTarget.className = `relative max-w-sm w-full mx-4 rounded-2xl p-8 text-center ${bgColor}`
+    this.modalContentTarget.innerHTML = content
+    this.modalTarget.classList.remove("hidden")
   }
 
   async saveResult(timeSeconds, stars, streak) {

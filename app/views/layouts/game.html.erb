@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Solana Bytes — Interactive Account Hex Visualizer" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <meta name="turbo-prefetch" content="false">
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+  </head>
+
+  <body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 text-gray-100">
+    <nav class="relative border-b border-gray-800/50 backdrop-blur" style="z-index:10">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <%= link_to "/", class: "flex items-center gap-2 text-white font-bold text-lg hover:text-purple-400 transition-colors" do %>
+          <span class="text-2xl">0x</span>
+          <span>Solana Bytes</span>
+        <% end %>
+        <div class="flex items-center gap-4">
+          <%= link_to "🎯 Challenge", "/challenges", class: "text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium" %>
+          <%= link_to "🏆", "/leaderboard", class: "text-sm hover:opacity-80 transition-opacity" %>
+          <% if logged_in? %>
+            <span class="text-gray-400 text-xs font-mono bg-gray-800 px-2 py-1 rounded-lg"><%= current_user.short_address %></span>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <% if flash[:alert] %>
+        <div class="mb-6 p-4 bg-red-900/50 border border-red-700/50 rounded-xl text-red-200">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>
