@@ -13,7 +13,13 @@ export default class extends Controller {
     this.resize()
     this.boundResize = this.resize.bind(this)
     window.addEventListener("resize", this.boundResize)
-    this.animate()
+
+    // Wait for pixel font to load before animating
+    document.fonts.load(`${FONT_SIZE}px 'Press Start 2P'`).then(() => {
+      this.animate()
+    }).catch(() => {
+      this.animate() // fallback: animate with whatever font is available
+    })
   }
 
   disconnect() {
@@ -66,22 +72,13 @@ export default class extends Controller {
         if (charY < -FONT_SIZE || charY > canvas.height + FONT_SIZE) continue
 
         if (i === 0) {
-          // Leading character — subtle glow
-          ctx.shadowBlur = 8
-          ctx.shadowColor = "rgba(139, 92, 246, 0.4)"
-          ctx.fillStyle = "rgba(167, 139, 250, 0.6)"
+          // Leading character — bright, no glow (pixel style)
+          ctx.fillStyle = "rgba(167, 139, 250, 0.7)"
         } else if (i < 3) {
-          // Near-head
-          ctx.shadowBlur = 0
-          ctx.shadowColor = "transparent"
-          ctx.fillStyle = "rgba(139, 92, 246, 0.3)"
+          ctx.fillStyle = "rgba(139, 92, 246, 0.35)"
         } else {
-          // Trail — very subtle
           const fade = Math.max(0, 1 - i / tailLength)
-          const alpha = fade * 0.2
-          ctx.shadowBlur = 0
-          ctx.shadowColor = "transparent"
-          ctx.fillStyle = `rgba(139, 92, 246, ${alpha})`
+          ctx.fillStyle = `rgba(139, 92, 246, ${fade * 0.2})`
         }
 
         ctx.fillText(col.chars[i], col.x, charY)
@@ -104,7 +101,6 @@ export default class extends Controller {
       }
     }
 
-    ctx.shadowBlur = 0
     this.frameId = requestAnimationFrame(this.animate.bind(this))
   }
 }
