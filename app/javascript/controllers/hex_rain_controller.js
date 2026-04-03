@@ -1,25 +1,44 @@
 import { Controller } from "@hotwired/stimulus"
 
-const HEX_CHARS = "0123456789abcdef"
-const FONT_SIZE = 12
-const COLUMN_GAP = FONT_SIZE + 4
+// Pixel mosaic background — colorful grid of squares with subtle animation
+const CELL_SIZE = 24
+const GAP = 2
+
+// Color palette — purples, blues, cyans with some warm accents
+const COLORS = [
+  "#7c3aed", "#8b5cf6", "#a78bfa", "#6d28d9", // purples
+  "#4f46e5", "#6366f1", "#818cf8",             // indigos
+  "#2563eb", "#3b82f6",                         // blues
+  "#0891b2", "#06b6d4", "#22d3ee",             // cyans
+  "#059669", "#10b981",                         // greens
+  "#d946ef", "#c026d3",                         // magentas
+  "#f59e0b", "#f97316",                         // warm accents (rare)
+  "#ef4444",                                     // red accent (rare)
+]
+
+// Weights: purples/indigos more frequent, warm colors rare
+const WEIGHTED_COLORS = [
+  ...COLORS.slice(0, 7),  // purples + indigos (×3)
+  ...COLORS.slice(0, 7),
+  ...COLORS.slice(0, 7),
+  ...COLORS.slice(7, 9),  // blues (×2)
+  ...COLORS.slice(7, 9),
+  ...COLORS.slice(9, 12), // cyans (×1)
+  ...COLORS.slice(12, 14),// greens (×1)
+  ...COLORS.slice(14, 16),// magentas (×1)
+  ...COLORS.slice(16),    // warm (×1)
+]
 
 export default class extends Controller {
   static targets = ["canvas"]
 
   connect() {
     this.ctx = this.canvasTarget.getContext("2d")
-    this.columns = []
+    this.grid = []
     this.resize()
     this.boundResize = this.resize.bind(this)
     window.addEventListener("resize", this.boundResize)
-
-    // Wait for pixel font to load before animating
-    document.fonts.load(`${FONT_SIZE}px 'Press Start 2P'`).then(() => {
-      this.animate()
-    }).catch(() => {
-      this.animate() // fallback: animate with whatever font is available
-    })
+    this.animate()
   }
 
   disconnect() {
@@ -32,75 +51,80 @@ export default class extends Controller {
     canvas.width = window.innerWidth
     canvas.height = window.innerHeight
 
-    const columnCount = Math.floor(canvas.width / COLUMN_GAP)
+    const step = CELL_SIZE + GAP
+    this.cols = Math.ceil(canvas.width / step) + 1
+    this.rows = Math.ceil(canvas.height / step) + 1
 
-    // Preserve existing columns, add new ones if needed
-    while (this.columns.length < columnCount) {
-      this.columns.push({
-        x: this.columns.length * COLUMN_GAP,
-        y: Math.random() * -canvas.height * 2,
-        speed: 1 + Math.random() * 3,
-        chars: this.randomChars(30 + Math.floor(Math.random() * 20))
-      })
+    // Build grid with random colors and opacity
+    this.grid = []
+    for (let r = 0; r < this.rows; r++) {
+      const row = []
+      for (let c = 0; c < this.cols; c++) {
+        row.push({
+          color: this.randomColor(),
+          alpha: 0.08 + Math.random() * 0.18,
+          targetAlpha: 0.08 + Math.random() * 0.18,
+        })
+      }
+      this.grid.push(row)
     }
-    this.columns.length = columnCount
+
+    this.drawGrid()
   }
 
-  randomChars(count) {
-    return Array.from({ length: count }, () =>
-      HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)]
-    )
+  randomColor() {
+    return WEIGHTED_COLORS[Math.floor(Math.random() * WEIGHTED_COLORS.length)]
+  }
+
+  drawGrid() {
+    const ctx = this.ctx
+    const canvas = this.canvasTarget
+    const step = CELL_SIZE + GAP
+
+    // Clear to dark background
+    ctx.fillStyle = "#030712"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        const cell = this.grid[r][c]
+        ctx.globalAlpha = cell.alpha
+        ctx.fillStyle = cell.color
+        ctx.fillRect(c * step, r * step, CELL_SIZE, CELL_SIZE)
+      }
+    }
+    ctx.globalAlpha = 1.0
   }
 
   animate() {
-    const canvas = this.canvasTarget
+    // Randomly shimmer a few cells each frame
+    const changes = Math.floor(this.cols * this.rows * 0.003) + 1
+    const step = CELL_SIZE + GAP
     const ctx = this.ctx
 
-    // Fade trail — semi-transparent black overlay
-    ctx.fillStyle = "rgba(3, 7, 18, 0.15)"
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    for (let i = 0; i < changes; i++) {
+      const r = Math.floor(Math.random() * this.rows)
+      const c = Math.floor(Math.random() * this.cols)
+      const cell = this.grid[r][c]
 
-    ctx.font = `${FONT_SIZE}px 'Press Start 2P', monospace`
-
-    for (const col of this.columns) {
-      const tailLength = col.chars.length
-
-      for (let i = 0; i < tailLength; i++) {
-        const charY = col.y - i * FONT_SIZE
-
-        // Skip off-screen characters
-        if (charY < -FONT_SIZE || charY > canvas.height + FONT_SIZE) continue
-
-        if (i === 0) {
-          // Leading character — bright, no glow (pixel style)
-          ctx.fillStyle = "rgba(167, 139, 250, 0.7)"
-        } else if (i < 3) {
-          ctx.fillStyle = "rgba(139, 92, 246, 0.35)"
-        } else {
-          const fade = Math.max(0, 1 - i / tailLength)
-          ctx.fillStyle = `rgba(139, 92, 246, ${fade * 0.2})`
-        }
-
-        ctx.fillText(col.chars[i], col.x, charY)
+      // Randomly change color or pulse alpha
+      if (Math.random() < 0.3) {
+        cell.color = this.randomColor()
       }
+      cell.alpha = 0.06 + Math.random() * 0.22
 
-      // Move column down
-      col.y += col.speed
-
-      // Randomly mutate a character in the trail
-      if (Math.random() < 0.03) {
-        const idx = Math.floor(Math.random() * col.chars.length)
-        col.chars[idx] = HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)]
-      }
-
-      // Reset column when fully off screen
-      if (col.y - col.chars.length * FONT_SIZE > canvas.height) {
-        col.y = Math.random() * -500
-        col.speed = 1 + Math.random() * 3
-        col.chars = this.randomChars(30 + Math.floor(Math.random() * 20))
-      }
+      // Redraw just this cell
+      ctx.fillStyle = "#030712"
+      ctx.fillRect(c * step, r * step, CELL_SIZE, CELL_SIZE)
+      ctx.globalAlpha = cell.alpha
+      ctx.fillStyle = cell.color
+      ctx.fillRect(c * step, r * step, CELL_SIZE, CELL_SIZE)
+      ctx.globalAlpha = 1.0
     }
 
-    this.frameId = requestAnimationFrame(this.animate.bind(this))
+    // Slow frame rate — no need for 60fps on a background
+    this.frameId = setTimeout(() => {
+      requestAnimationFrame(this.animate.bind(this))
+    }, 150)
   }
 }

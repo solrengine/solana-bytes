@@ -34,8 +34,8 @@
   <body class="min-h-screen bg-gray-950 text-gray-100">
     <% if content_for?(:hex_rain) %>
       <div data-controller="hex-rain" class="fixed inset-0" style="z-index:0">
-        <canvas data-hex-rain-target="canvas" class="w-full h-full" style="image-rendering:pixelated"></canvas>
-        <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, rgba(3,7,18,0.5) 0%, rgba(3,7,18,0.85) 50%, rgba(3,7,18,1) 100%)"></div>
+        <canvas data-hex-rain-target="canvas" class="w-full h-full"></canvas>
+        <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, rgba(3,7,18,0.3) 0%, rgba(3,7,18,0.7) 50%, rgba(3,7,18,0.95) 100%)"></div>
       </div>
     <% end %>
 
