@@ -10,6 +10,10 @@
     <%= csp_meta_tag %>
     <meta name="turbo-prefetch" content="false">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
     <%= yield :head %>
 
     <link rel="icon" href="/icon.png" type="image/png">
@@ -20,18 +24,22 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 text-gray-100">
-    <nav class="relative border-b border-gray-800/50 backdrop-blur" style="z-index:10">
+  <body class="min-h-screen bg-gray-950 text-gray-100">
+    <nav class="relative pixel-nav" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <%= link_to "/", class: "flex items-center gap-2 text-white font-bold text-lg hover:text-purple-400 transition-colors" do %>
-          <span class="text-2xl">0x</span>
-          <span>Solana Bytes</span>
+        <%= link_to "/", class: "flex items-center gap-2 text-white hover:text-purple-400" do %>
+          <span class="text-purple-400" style="font-size:14px">0x</span>
+          <span style="font-size:10px">Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-4">
-          <%= link_to "🎯 Challenge", "/challenges", class: "text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium" %>
-          <%= link_to "🏆", "/leaderboard", class: "text-sm hover:opacity-80 transition-opacity" %>
+          <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:8px" do %>
+            <%= pixel_icon(:target, size: 12) %> Challenge
+          <% end %>
+          <%= link_to "/leaderboard", class: "hover:opacity-80", style: "font-size:8px" do %>
+            <%= pixel_icon(:trophy, size: 12) %>
+          <% end %>
           <% if logged_in? %>
-            <span class="text-gray-400 text-xs font-mono bg-gray-800 px-2 py-1 rounded-lg"><%= current_user.short_address %></span>
+            <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1" style="font-size:7px"><%= current_user.short_address %></span>
           <% end %>
         </div>
       </div>
@@ -39,7 +47,7 @@
 
     <main class="max-w-6xl mx-auto px-4 py-8">
       <% if flash[:alert] %>
-        <div class="mb-6 p-4 bg-red-900/50 border border-red-700/50 rounded-xl text-red-200">
+        <div class="mb-6 p-4 pixel-card text-red-400" style="border-color:#991b1b">
           <%= flash[:alert] %>
         </div>
       <% end %>

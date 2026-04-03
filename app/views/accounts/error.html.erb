@@ -1,12 +1,13 @@
 <%= turbo_frame_tag "account_result" do %>
-  <div class="max-w-6xl mx-auto mt-4 font-mono">
+  <div class="max-w-6xl mx-auto mt-4">
     <div class="py-16 text-center">
-      <p class="text-red-400 text-sm mb-2"><span class="text-red-600">ERR</span> <%= flash[:alert] %></p>
+      <p class="text-red-400 mb-2" style="font-size:9px"><span class="text-red-600">ERR</span> <%= flash[:alert] %></p>
       <% if @address.present? %>
-        <p class="text-xs text-gray-600 mb-8 break-all"><%= @address %></p>
+        <p class="text-gray-600 mb-8 break-all" style="font-size:7px"><%= @address %></p>
       <% end %>
       <%= link_to root_path,
-            class: "text-xs text-gray-500 hover:text-purple-400 transition-colors",
+            class: "text-gray-500 hover:text-purple-400",
+            style: "font-size:8px",
             data: { turbo_frame: "account_result", turbo_action: "advance" } do %>
         <span class="text-purple-500">$</span> cd ..
       <% end %>

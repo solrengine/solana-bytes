@@ -1,14 +1,13 @@
 <%= content_for :hex_rain, true %>
 
 <div data-controller="loading">
-  <div data-loading-target="hero" class="flex flex-col items-center justify-center min-h-[80vh] transition-opacity duration-300">
+  <div data-loading-target="hero" class="flex flex-col items-center justify-center min-h-[80vh]">
     <div class="text-center mb-10">
-      <h1 class="text-5xl font-bold mb-4">
+      <h1 class="mb-4" style="font-size:20px">
         <span class="text-purple-400">0x</span> Solana Bytes
       </h1>
-      <p class="text-gray-400 text-lg max-w-xl mx-auto">
+      <p class="text-gray-400 max-w-xl mx-auto" style="font-size:8px;line-height:2">
         Paste any Solana account address to visualize its data as an interactive, color-coded hex dump.
-        Hover over bytes to see what they mean.
       </p>
     </div>
 
@@ -16,8 +15,9 @@
       <%= form_with url: lookup_path, method: :post, data: { turbo_frame: "account_result", action: "submit->address-form#submit" } do |f| %>
         <div class="flex gap-3">
           <%= f.text_field :address,
-                placeholder: "Enter a Solana address...",
-                class: "flex-1 bg-gray-800/50 border border-gray-700/50 rounded-xl px-5 py-4 text-gray-100 font-mono text-sm placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 backdrop-blur",
+                placeholder: "Enter address...",
+                class: "flex-1 pixel-input",
+                style: "font-size:8px;padding:14px 16px",
                 autocomplete: "off",
                 autofocus: true,
                 data: { address_form_target: "input", action: "input->address-form#validate" } %>
@@ -25,22 +25,23 @@
             type="submit"
             disabled="disabled"
             data-address-form-target="submit"
-            class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold px-8 py-4 rounded-xl transition-all"
-            style="opacity:0.4;cursor:not-allowed"
+            class="pixel-btn"
+            style="font-size:9px;opacity:0.4;cursor:not-allowed"
           >
             Visualize
           </button>
         </div>
-        <p data-address-form-target="error" class="text-red-400 text-xs mt-2" style="display:none"></p>
+        <p data-address-form-target="error" class="text-red-400 mt-2" style="display:none;font-size:7px"></p>
       <% end %>
 
       <div class="mt-8">
-        <p class="text-gray-500 text-xs mb-3">Try an example:</p>
+        <p class="text-gray-500 mb-3" style="font-size:7px">Try an example:</p>
         <div class="flex flex-wrap gap-2">
           <% AccountsController::EXAMPLE_ADDRESSES.each do |example| %>
             <%= link_to account_path(address: example[:address]),
                   data: { turbo_frame: "account_result" },
-                  class: "text-xs font-mono bg-gray-800/30 border border-gray-700/30 rounded-lg px-3 py-2 text-gray-400 hover:text-purple-400 hover:border-purple-500/30 transition-colors" do %>
+                  class: "bg-gray-900 border-2 border-gray-700 px-3 py-2 text-gray-400 hover:text-purple-400 hover:border-purple-500",
+                  style: "font-size:7px" do %>
               <span class="text-gray-500"><%= example[:label] %></span>
               <span class="ml-1"><%= example[:address][0..7] %>...</span>
             <% end %>
@@ -53,8 +54,8 @@
   <%# Loading spinner %>
   <div data-loading-target="spinner" class="items-center justify-center min-h-[40vh]" style="display:none">
     <div class="text-center">
-      <div class="inline-block w-8 h-8 border-2 border-purple-500/30 border-t-purple-400 rounded-full animate-spin mb-4"></div>
-      <p class="text-gray-400 text-sm">Fetching account data...</p>
+      <div class="text-purple-400 mb-4" style="font-size:16px">...</div>
+      <p class="text-gray-400" style="font-size:8px">Fetching account data...</p>
     </div>
   </div>
 

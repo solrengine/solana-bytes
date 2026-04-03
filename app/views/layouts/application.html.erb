@@ -17,6 +17,10 @@
     <%= csp_meta_tag %>
     <meta name="turbo-prefetch" content="false">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
     <%= yield :head %>
 
     <link rel="icon" href="/icon.png" type="image/png">
@@ -27,27 +31,30 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950 text-gray-100">
+  <body class="min-h-screen bg-gray-950 text-gray-100">
     <% if content_for?(:hex_rain) %>
       <div data-controller="hex-rain" class="fixed inset-0" style="z-index:0">
-        <canvas data-hex-rain-target="canvas" class="w-full h-full"></canvas>
-        <%# Radial fade so content stays readable %>
+        <canvas data-hex-rain-target="canvas" class="w-full h-full" style="image-rendering:pixelated"></canvas>
         <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, rgba(3,7,18,0.5) 0%, rgba(3,7,18,0.85) 50%, rgba(3,7,18,1) 100%)"></div>
       </div>
     <% end %>
 
-    <nav class="relative border-b border-gray-800/50 backdrop-blur" style="z-index:10">
+    <nav class="relative pixel-nav" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-        <%= link_to "/", class: "flex items-center gap-2 text-white font-bold text-lg hover:text-purple-400 transition-colors", data: { turbo_frame: "account_result", turbo_action: "advance" } do %>
-          <span class="text-2xl">0x</span>
-          <span>Solana Bytes</span>
+        <%= link_to "/", class: "flex items-center gap-2 text-white hover:text-purple-400", data: { turbo_frame: "account_result", turbo_action: "advance" } do %>
+          <span class="text-purple-400" style="font-size:14px">0x</span>
+          <span style="font-size:10px">Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-4">
-          <%= link_to "🎯 Challenge", "/challenges", class: "text-sm text-purple-400 hover:text-purple-300 transition-colors font-medium" %>
-          <%= link_to "🏆", "/leaderboard", class: "text-sm hover:opacity-80 transition-opacity" %>
+          <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:8px" do %>
+            <%= pixel_icon(:target, size: 12) %> Challenge
+          <% end %>
+          <%= link_to "/leaderboard", class: "hover:opacity-80", style: "font-size:8px" do %>
+            <%= pixel_icon(:trophy, size: 12) %>
+          <% end %>
           <% if logged_in? %>
-            <span class="text-gray-400 text-xs font-mono bg-gray-800 px-2 py-1 rounded-lg"><%= current_user.short_address %></span>
-            <%= link_to "×", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white text-xs transition-colors" %>
+            <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1" style="font-size:7px"><%= current_user.short_address %></span>
+            <%= link_to "x", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white", style: "font-size:8px" %>
           <% end %>
           <%= form_with url: "/network", method: :patch, class: "flex items-center", data: { controller: "auto-submit", turbo_frame: "account_result" } do |f| %>
             <%= f.select :network,
@@ -56,7 +63,8 @@
                     session[:solana_network] || "mainnet-beta"
                   ),
                   {},
-                  class: "bg-gray-800 border border-gray-700/50 rounded-lg px-2 py-1 text-xs text-gray-400 font-mono focus:outline-none focus:border-purple-500/50 cursor-pointer",
+                  class: "pixel-input cursor-pointer",
+                  style: "font-size:7px;padding:4px 8px;border-width:2px",
                   data: { action: "change->auto-submit#submit" } %>
           <% end %>
         </div>
@@ -65,7 +73,7 @@
 
     <main class="relative max-w-6xl mx-auto px-4 py-8" style="z-index:10">
       <% if flash[:alert] %>
-        <div class="mb-6 p-4 bg-red-900/50 border border-red-700/50 rounded-xl text-red-200">
+        <div class="mb-6 p-4 pixel-card text-red-400" style="border-color:#991b1b">
           <%= flash[:alert] %>
         </div>
       <% end %>
@@ -73,9 +81,9 @@
       <%= yield %>
     </main>
 
-    <footer class="relative border-t border-gray-800/50 mt-16" style="z-index:10">
-      <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-500 text-sm">
-        Built with <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300">SolRengine</a> — Rails 8 framework for Solana
+    <footer class="relative border-t-3 border-gray-800 mt-16" style="z-index:10">
+      <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-600" style="font-size:7px">
+        Built with <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300">SolRengine</a>
       </div>
     </footer>
   </body>

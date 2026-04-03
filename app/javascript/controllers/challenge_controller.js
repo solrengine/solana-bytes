@@ -1,5 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
+// Pixel SVG sprite constants for JS-rendered icons
+const ICONS = {
+  heart: '<span class="pixel-icon text-red-500" style="width:14px;height:14px"><svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges"><rect x="2" y="2" width="2" height="2"/><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="12" y="0" width="2" height="2"/><rect x="14" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="14" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/></svg></span>',
+  heartEmpty: '<span class="pixel-icon text-gray-600" style="width:14px;height:14px"><svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" opacity="0.3"><rect x="2" y="2" width="2" height="2"/><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="12" y="0" width="2" height="2"/><rect x="14" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="14" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/></svg></span>',
+  checkmark: '<span class="pixel-icon" style="width:32px;height:32px"><svg viewBox="0 0 16 16" fill="#4ade80" shape-rendering="crispEdges"><rect x="12" y="2" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="4" y="10" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/></svg></span>',
+  cross: '<span class="pixel-icon" style="width:24px;height:24px"><svg viewBox="0 0 16 16" fill="#ef4444" shape-rendering="crispEdges"><rect x="2" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="6" y="6" width="4" height="4"/><rect x="4" y="10" width="2" height="2"/><rect x="10" y="10" width="2" height="2"/><rect x="2" y="12" width="2" height="2"/><rect x="12" y="12" width="2" height="2"/></svg></span>',
+  skull: '<span class="pixel-icon" style="width:32px;height:32px"><svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges"><rect x="4" y="0" width="8" height="2"/><rect x="2" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="4"/><rect x="14" y="4" width="2" height="4"/><rect x="2" y="4" width="2" height="4"/><rect x="12" y="4" width="2" height="4"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="4" y="6" width="2" height="2" fill="#0a0a14"/><rect x="10" y="6" width="2" height="2" fill="#0a0a14"/><rect x="6" y="8" width="4" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="12" y="8" width="2" height="2"/><rect x="4" y="10" width="8" height="2"/><rect x="4" y="12" width="2" height="2"/><rect x="6" y="12" width="2" height="2" fill="#0a0a14"/><rect x="8" y="12" width="2" height="2"/><rect x="10" y="12" width="2" height="2" fill="#0a0a14"/><rect x="4" y="14" width="8" height="2"/></svg></span>',
+  fire: '<span class="pixel-icon" style="width:14px;height:14px"><svg viewBox="0 0 16 16" shape-rendering="crispEdges"><rect x="6" y="0" width="2" height="2" fill="#fde047"/><rect x="8" y="0" width="2" height="2" fill="#f97316"/><rect x="4" y="2" width="2" height="2" fill="#fde047"/><rect x="6" y="2" width="2" height="2" fill="#fde047"/><rect x="8" y="2" width="2" height="2" fill="#f97316"/><rect x="10" y="2" width="2" height="2" fill="#ef4444"/><rect x="4" y="4" width="2" height="2" fill="#fde047"/><rect x="6" y="4" width="2" height="2" fill="#fde047"/><rect x="8" y="4" width="2" height="2" fill="#f97316"/><rect x="10" y="4" width="2" height="2" fill="#ef4444"/><rect x="12" y="4" width="2" height="2" fill="#ef4444"/><rect x="2" y="6" width="2" height="2" fill="#f97316"/><rect x="4" y="6" width="2" height="2" fill="#fde047"/><rect x="6" y="6" width="2" height="2" fill="#fde047"/><rect x="8" y="6" width="2" height="2" fill="#f97316"/><rect x="10" y="6" width="2" height="2" fill="#ef4444"/><rect x="12" y="6" width="2" height="2" fill="#ef4444"/><rect x="2" y="8" width="2" height="2" fill="#f97316"/><rect x="4" y="8" width="2" height="2" fill="#f97316"/><rect x="6" y="8" width="2" height="2" fill="#fde047"/><rect x="8" y="8" width="2" height="2" fill="#f97316"/><rect x="10" y="8" width="2" height="2" fill="#f97316"/><rect x="12" y="8" width="2" height="2" fill="#ef4444"/><rect x="2" y="10" width="2" height="2" fill="#ef4444"/><rect x="4" y="10" width="2" height="2" fill="#f97316"/><rect x="6" y="10" width="2" height="2" fill="#f97316"/><rect x="8" y="10" width="2" height="2" fill="#f97316"/><rect x="10" y="10" width="2" height="2" fill="#ef4444"/><rect x="4" y="12" width="2" height="2" fill="#ef4444"/><rect x="6" y="12" width="2" height="2" fill="#ef4444"/><rect x="8" y="12" width="2" height="2" fill="#ef4444"/><rect x="10" y="12" width="2" height="2" fill="#ef4444"/><rect x="6" y="14" width="4" height="2" fill="#991b1b"/></svg></span>',
+  star: '<span class="pixel-icon text-yellow-400" style="width:14px;height:14px"><svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges"><rect x="6" y="0" width="4" height="2"/><rect x="6" y="2" width="4" height="2"/><rect x="0" y="4" width="16" height="2"/><rect x="2" y="6" width="12" height="2"/><rect x="2" y="8" width="12" height="2"/><rect x="2" y="10" width="4" height="2"/><rect x="10" y="10" width="4" height="2"/><rect x="0" y="12" width="4" height="2"/><rect x="12" y="12" width="4" height="2"/></svg></span>'
+}
+
 export default class extends Controller {
   static targets = ["timer", "fieldName", "lives", "modal", "modalContent", "toast", "toastContent"]
   static values = {
@@ -58,19 +69,18 @@ export default class extends Controller {
     this.timerTarget.textContent = `${elapsed}s`
     this.revealRegion(this.targetRegionValue)
 
-    const starEmojis = "⭐".repeat(stars)
+    const starIcons = ICONS.star.repeat(stars)
     this.showModal("correct", `
-      <div class="text-5xl mb-4">✅</div>
-      <div class="text-green-400 text-2xl font-bold mb-2">Correct!</div>
-      <div class="text-gray-300 mb-1">
-        <span class="text-purple-400 font-semibold font-mono">${this.targetNameValue}</span>
+      <div class="mb-4">${ICONS.checkmark}</div>
+      <div class="text-green-400 mb-2" style="font-size:14px">Correct!</div>
+      <div class="text-gray-300 mb-1" style="font-size:8px">
+        <span class="text-purple-400">${this.targetNameValue}</span>
       </div>
-      <div class="text-gray-400 text-sm mb-4">found in ${elapsed}s</div>
-      <div class="text-3xl mb-2">${starEmojis}</div>
-      <div class="text-yellow-400 font-bold text-xl mb-6">🔥 Streak: ${newStreak}</div>
-      <a href="${this.nextUrlValue}?streak=${newStreak}"
-         class="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 text-lg">
-        Next Challenge →
+      <div class="text-gray-400 mb-4" style="font-size:7px">found in ${elapsed}s</div>
+      <div class="mb-2">${starIcons}</div>
+      <div class="text-yellow-400 mb-6" style="font-size:10px">${ICONS.fire} Streak: ${newStreak}</div>
+      <a href="${this.nextUrlValue}?streak=${newStreak}" class="pixel-btn pixel-btn-green" style="font-size:9px">
+        Next Challenge >>
       </a>
     `)
   }
@@ -80,7 +90,7 @@ export default class extends Controller {
 
     const originalBg = cell.style.background
     cell.style.background = "rgba(239, 68, 68, 0.3)"
-    cell.style.outline = "1px solid rgba(239, 68, 68, 0.5)"
+    cell.style.outline = "2px solid rgba(239, 68, 68, 0.5)"
     setTimeout(() => {
       cell.style.background = originalBg
       cell.style.outline = "none"
@@ -88,7 +98,7 @@ export default class extends Controller {
 
     // Update lives display
     const remaining = this.maxWrongValue - this.wrongAttempts
-    this.livesTarget.textContent = "❤️".repeat(remaining) + "🖤".repeat(this.wrongAttempts)
+    this.livesTarget.innerHTML = ICONS.heart.repeat(remaining) + ICONS.heartEmpty.repeat(this.wrongAttempts)
 
     if (this.wrongAttempts >= this.maxWrongValue) {
       this.gameOverSequence()
@@ -97,9 +107,9 @@ export default class extends Controller {
 
     // Show wrong toast
     this.toastContentTarget.innerHTML = `
-      <div class="text-3xl mb-2">❌</div>
-      <div class="text-red-400 font-bold text-lg">Wrong!</div>
-      <div class="text-gray-400 text-sm mt-1">${remaining} ${remaining === 1 ? 'life' : 'lives'} remaining</div>
+      <div class="mb-2">${ICONS.cross}</div>
+      <div class="text-red-400" style="font-size:10px">Wrong!</div>
+      <div class="text-gray-400 mt-1" style="font-size:7px">${remaining} ${remaining === 1 ? 'life' : 'lives'} left</div>
     `
     this.toastTarget.classList.remove("hidden")
     if (this.toastTimeout) clearTimeout(this.toastTimeout)
@@ -115,38 +125,31 @@ export default class extends Controller {
     const elapsed = ((performance.now() - this.startTime) / 1000).toFixed(1)
 
     this.revealRegion(this.targetRegionValue)
-    this.livesTarget.textContent = "🖤🖤🖤"
+    this.livesTarget.innerHTML = ICONS.heartEmpty.repeat(3)
 
     if (this.loggedInValue && this.streakValue > 0) {
       this.saveResult(elapsed, 0, this.streakValue)
     }
 
     this.showModal("gameover", `
-      <div class="text-5xl mb-4">💀</div>
-      <div class="text-red-400 text-2xl font-bold mb-2">Game Over!</div>
-      <div class="text-gray-300 mb-1">
-        The answer was <span class="text-purple-400 font-semibold font-mono">${this.targetNameValue}</span>
+      <div class="mb-4">${ICONS.skull}</div>
+      <div class="text-red-400 mb-2" style="font-size:14px">Game Over!</div>
+      <div class="text-gray-300 mb-1" style="font-size:8px">
+        The answer was <span class="text-purple-400">${this.targetNameValue}</span>
       </div>
       ${this.streakValue > 0
-        ? `<div class="text-yellow-400 font-bold text-xl mt-4 mb-6">🔥 Final Streak: ${this.streakValue}</div>`
+        ? `<div class="text-yellow-400 mt-4 mb-6" style="font-size:10px">${ICONS.fire} Final Streak: ${this.streakValue}</div>`
         : '<div class="mt-4 mb-6"></div>'
       }
-      <a href="/challenges"
-         class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-200 text-lg">
-        ← Back to Challenges
+      <a href="/challenges" class="pixel-btn" style="font-size:9px">
+        << Back to Challenges
       </a>
     `)
   }
 
   showModal(type, content) {
-    const borderColor = type === "correct"
-      ? "border-green-700/50"
-      : "border-red-700/50"
-    const bgColor = type === "correct"
-      ? "bg-gray-900 border border-green-700/50"
-      : "bg-gray-900 border border-red-700/50"
-
-    this.modalContentTarget.className = `relative max-w-sm w-full mx-4 rounded-2xl p-8 text-center ${bgColor}`
+    const borderColor = type === "correct" ? "#4ade80" : "#ef4444"
+    this.modalContentTarget.style.borderColor = borderColor
     this.modalContentTarget.innerHTML = content
     this.modalTarget.classList.remove("hidden")
   }
@@ -179,7 +182,7 @@ export default class extends Controller {
     cells.forEach(cell => {
       cell.style.color = cell.dataset.baseColor
       cell.style.background = cell.dataset.baseBg
-      cell.style.outline = "1px solid rgba(255,255,255,0.3)"
+      cell.style.outline = "2px solid rgba(255,255,255,0.3)"
     })
   }
 }

@@ -1,8 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
 const HEX_CHARS = "0123456789abcdef"
-const FONT_SIZE = 14
-const COLUMN_GAP = FONT_SIZE + 2
+const FONT_SIZE = 12
+const COLUMN_GAP = FONT_SIZE + 4
 
 export default class extends Controller {
   static targets = ["canvas"]
@@ -54,7 +54,7 @@ export default class extends Controller {
     ctx.fillStyle = "rgba(3, 7, 18, 0.15)"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    ctx.font = `${FONT_SIZE}px monospace`
+    ctx.font = `${FONT_SIZE}px 'Press Start 2P', monospace`
 
     for (const col of this.columns) {
       const tailLength = col.chars.length
