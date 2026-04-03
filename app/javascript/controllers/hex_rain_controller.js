@@ -43,7 +43,7 @@ export default class extends Controller {
 
   disconnect() {
     window.removeEventListener("resize", this.boundResize)
-    if (this.frameId) cancelAnimationFrame(this.frameId)
+    if (this.frameId) clearTimeout(this.frameId)
   }
 
   resize() {
