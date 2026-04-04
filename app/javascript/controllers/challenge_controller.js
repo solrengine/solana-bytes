@@ -41,6 +41,16 @@ const SFX = {
     setTimeout(() => this.play(350, 0.15), 150)
     setTimeout(() => this.play(300, 0.15), 300)
     setTimeout(() => this.play(200, 0.4), 450)
+  },
+
+  start() {
+    // Coin-insert / power-up jingle
+    this.play(262, 0.08)  // C4
+    setTimeout(() => this.play(330, 0.08), 60)   // E4
+    setTimeout(() => this.play(392, 0.08), 120)  // G4
+    setTimeout(() => this.play(523, 0.12), 180)  // C5
+    setTimeout(() => this.play(659, 0.08), 280)  // E5
+    setTimeout(() => this.play(784, 0.2), 340)   // G5
   }
 }
 
@@ -73,6 +83,7 @@ export default class extends Controller {
     this.solved = false
     this.wrongAttempts = 0
     this.totalAttempts = 0
+    SFX.start()
   }
 
   guess(event) {
