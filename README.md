@@ -1,107 +1,97 @@
 # Solana Bytes
 
-An interactive Solana account hex visualizer built with Ruby on Rails 8. Paste any account address and see its raw data as a color-coded hex dump with hover tooltips that explain what each byte range means.
+An 8-bit pixel art Solana account hex visualizer and educational game. Visualize any account's raw data as a color-coded hex dump, or play the Byte Challenge to test your knowledge of Solana data structures.
 
-Part of the [SolRengine](https://github.com/solrengine) project.
+Built with [SolRengine](https://github.com/solrengine) and Rails 8 for the **Colosseum Frontier Hackathon**.
 
-## Stack
+![Solana Bytes](public/og.png)
 
-- Ruby on Rails 8 (Hotwire, Turbo, Stimulus, Solid Queue/Cache/Cable)
-- [SolRengine](https://github.com/solrengine/solrengine) — Rails framework for Solana dapps
-- SQLite (cache + queue + cable)
-- Tailwind CSS 4 + esbuild
+## What It Does
+
+**Hex Visualizer** — Paste any Solana account address and see its raw bytes as an interactive hex dump. Every byte range is color-coded and decoded: hover to see field names, values, offsets. Supports SPL Mints, Token Accounts, Token-2022 with extensions, BPF programs (full ELF header), and more.
+
+**Byte Challenge** — An educational game where you're shown a hex dump and asked to find a specific field (e.g., "Mint Authority"). All cells start gray — you have to click the right bytes. Build streaks, earn stars, compete on the leaderboard. 8-bit sound effects included.
+
+**Wallet Auth** — Connect your Solana wallet via Sign-In with Solana (SIWS) to save game results and appear on the leaderboard. Guest play works too.
 
 ## Features
 
-- **Hex Visualization** — Account data rendered as an interactive hex dump with offset, hex, and ASCII columns
-- **Region Decoding** — Color-coded byte ranges with decoded values for known account types
-- **Hover Tooltips** — Hover any byte to see its field name, decoded value, offset, and binary representation
-- **Block Highlighting** — Hovering a byte highlights the entire field it belongs to (e.g., all 32 bytes of a public key)
-- **Network Selector** — Switch between mainnet, devnet, and testnet
-- **SPA Navigation** — Turbo Frame-based navigation with loading spinner, no full page reloads
-- **Matrix Rain** — Animated hex rain background on the landing page
-- **Client-side Validation** — Base58 address validation before submitting
-- **Touch Support** — Tap-to-toggle on mobile devices
+- Interactive hex dump with region decoding and hover tooltips
+- Byte Challenge game with streak mode, 3 lives, star ratings
+- 8-bit pixel art design (Press Start 2P font, SVG pixel icons, pixel mosaic background)
+- 8-bit sound effects (Web Audio API — correct, wrong, game over, start jingles)
+- Wallet authentication via SIWS (SolRengine Auth Engine)
+- Leaderboard with top streaks
+- Network selector (mainnet, devnet, testnet)
+- SPA navigation via Turbo Frames
 
 ## Supported Account Types
 
-| Account Type | Owner | Fields Decoded |
-|---|---|---|
-| **SPL Token Mint** | Token Program | Mint authority, supply, decimals, freeze authority |
-| **SPL Token Account** | Token Program | Mint, owner, amount, delegate, state, close authority |
-| **Token-2022** | Token-2022 Program | Base fields + TLV extensions (metadata, transfer hook, etc.) |
-| **BPF Upgradeable** | BPF Loader | Account type, programdata address |
-| **ELF Programs** | BPF Loader v2 | ELF header (class, endianness, machine, entry point, sections) |
-| **Unknown** | Any | Raw hex with per-byte tooltips |
+| Account Type | Fields Decoded |
+|---|---|
+| **SPL Token Mint** | Mint authority, supply, decimals, freeze authority |
+| **SPL Token Account** | Mint, owner, amount, delegate, state, close authority |
+| **Token-2022** | Base fields + TLV extensions (metadata, transfer hook, etc.) |
+| **BPF Upgradeable** | Account type, programdata address |
+| **ELF Programs** | ELF header (class, endianness, machine, entry point, sections) |
 
-### Token-2022 Extensions
+## Stack
 
-MintCloseAuthority, PermanentDelegate, TransferFeeConfig, TransferHook, MetadataPointer, TokenMetadata (name, symbol, URI), DefaultAccountState, ConfidentialTransferMint, and more.
+- Ruby on Rails 8 (Hotwire, Turbo, Stimulus)
+- [SolRengine](https://github.com/solrengine/solrengine) — Rails framework for Solana dapps
+- [solrengine-rpc](https://github.com/solrengine/solrengine-rpc) — Solana JSON-RPC client
+- [solrengine-auth](https://github.com/solrengine/solrengine-auth) — SIWS wallet authentication engine
+- Tailwind CSS 4 + esbuild
+- SQLite (via Solid Queue/Cache/Cable)
+- Press Start 2P (Google Fonts)
 
 ## Setup
 
 ```sh
 bin/setup
 cp .env.example .env
-```
-
-## Development
-
-```sh
 bin/dev
 ```
 
-Starts 3 processes: web server, JS bundler, and CSS compiler.
-
-Open `http://localhost:3000` and paste a Solana account address.
-
-### Try These Accounts
-
-| Address | What You'll See |
-|---|---|
-| `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` | USDC mint — authority, supply, 6 decimals |
-| `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` | Token Program — full ELF header with BPF machine type |
-| `2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo` | PYUSD — Token-2022 with metadata, transfer hook, permanent delegate |
+Open `http://localhost:3000`.
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `SOLANA_NETWORK` | `mainnet-beta` | Default network (`mainnet-beta`, `devnet`, `testnet`) |
-| `SOLANA_RPC_MAINNET_URL` | public RPC | Mainnet HTTP RPC endpoint |
-| `SOLANA_RPC_DEVNET_URL` | public RPC | Devnet HTTP RPC endpoint |
-| `SOLANA_RPC_TESTNET_URL` | public RPC | Testnet HTTP RPC endpoint |
+| `SOLANA_NETWORK` | `mainnet-beta` | Default network |
+| `SOLANA_RPC_MAINNET_URL` | public RPC | Mainnet RPC endpoint |
+| `SOLANA_RPC_DEVNET_URL` | public RPC | Devnet RPC endpoint |
+| `SOLANA_RPC_TESTNET_URL` | public RPC | Testnet RPC endpoint |
+| `APP_DOMAIN` | — | Domain for SIWS auth (production) |
 
-Copy `.env.example` to `.env` and fill in your RPC endpoints.
+## Try These Accounts
 
-## Architecture
-
-```
-app/
-├── controllers/
-│   ├── accounts_controller.rb          # Fetch account via RPC, validate address
-│   ├── networks_controller.rb          # Session-based network switching
-│   └── pages_controller.rb             # Landing page
-├── presenters/
-│   └── account_presenter.rb            # Hex rows, regions, known program labels
-│       ├── RegionDecoder                # Per-program byte range decoders
-│       ├── HexRow / HexCell             # Structured hex output
-│       └── Region                       # Named byte range with color + decoded value
-└── javascript/controllers/
-    ├── hex_viewer_controller.js         # Region hover/tap, tooltip positioning
-    ├── hex_rain_controller.js           # Matrix-style canvas animation
-    ├── loading_controller.js            # Turbo Frame SPA transitions + spinner
-    ├── address_form_controller.js       # Client-side base58 validation
-    └── auto_submit_controller.js        # Network dropdown auto-submit
-```
+| Address | What You'll See |
+|---|---|
+| `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v` | USDC Mint — authority, supply, 6 decimals |
+| `TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA` | Token Program — full ELF header |
+| `2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo` | PYUSD — Token-2022 with metadata + extensions |
 
 ## How It Works
 
-1. User pastes a Solana address on the landing page
-2. Client validates the address format (base58, 32-44 chars)
-3. Form submits via Turbo Frame — URL updates, spinner shows
-4. Server fetches account via `solrengine-rpc` (`getAccountInfo` with base64 encoding)
-5. `AccountPresenter` decodes the response: metadata (balance, owner, executable) + raw data bytes
-6. `RegionDecoder` identifies byte ranges based on the account owner program
-7. Server renders a color-coded hex grid with data attributes for each cell
-8. Stimulus `hex-viewer` controller handles hover/tap to highlight entire regions and show tooltips
+### Hex Visualizer
+
+1. User pastes a Solana address
+2. Server fetches account via `solrengine-rpc` (`getAccountInfo` base64)
+3. `AccountPresenter` decodes metadata + raw bytes into hex rows
+4. `RegionDecoder` identifies byte ranges by owner program
+5. Stimulus `hex-viewer` controller handles hover/tap highlighting and tooltips
+
+### Byte Challenge
+
+1. Random mainnet account loaded (SPL Mints + Token Accounts)
+2. Random field selected as target (e.g., "Supply", "Mint Authority")
+3. All cells rendered gray — player clicks to guess
+4. Hover shows "?????" as field name + decoded value (educational)
+5. 3 wrong clicks = game over. Correct = streak +1, next challenge
+6. Results saved to leaderboard if connected via wallet
+
+## License
+
+MIT
