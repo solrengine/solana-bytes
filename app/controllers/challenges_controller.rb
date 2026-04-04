@@ -55,6 +55,8 @@ class ChallengesController < ApplicationController
       flash[:alert] = "Could not generate a challenge. Try again."
       return redirect_to challenges_path
     end
+
+    ahoy.track "challenge_started", mode: logged_in? ? "ranked" : "practice"
   end
 
   def save_result

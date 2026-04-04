@@ -28,8 +28,9 @@
 
   <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
     <div class="pixel-card p-4 text-center">
-      <div class="text-yellow-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_games]) %></div>
-      <div class="text-gray-500 mt-1" style="font-size:9px">Games Played</div>
+      <div class="text-yellow-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_challenges]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Challenges Played</div>
+      <div class="text-gray-600 mt-1" style="font-size:8px"><%= @stats[:practice_plays] %> practice / <%= @stats[:ranked_plays] %> ranked</div>
     </div>
     <div class="pixel-card p-4 text-center">
       <div class="text-yellow-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_players]) %></div>

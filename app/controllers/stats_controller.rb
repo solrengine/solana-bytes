@@ -19,7 +19,12 @@ class StatsController < ApplicationController
                               .limit(10)
                               .count,
 
-        # Challenge stats
+        # Challenge stats (all plays including practice)
+        total_challenges: Ahoy::Event.where(name: "challenge_started").count,
+        practice_plays: Ahoy::Event.where(name: "challenge_started").where("json_extract(properties, '$.mode') = 'practice'").count,
+        ranked_plays: Ahoy::Event.where(name: "challenge_started").where("json_extract(properties, '$.mode') = 'ranked'").count,
+
+        # Saved results (ranked only)
         total_games: ChallengeResult.count,
         total_players: ChallengeResult.distinct.count(:user_id),
         total_stars: ChallengeResult.sum(:stars),
