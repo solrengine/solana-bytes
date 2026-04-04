@@ -23,4 +23,12 @@ application.register("challenge", ChallengeController)
 import { WalletController } from "@solrengine/wallet-utils/controllers"
 application.register("wallet", WalletController)
 
+// Show loading overlay when navigating to challenge pages
+document.addEventListener("turbo:before-visit", (event) => {
+  if (event.detail?.url?.includes("/challenge")) {
+    const overlay = document.getElementById("game-loading")
+    if (overlay) overlay.classList.remove("hidden")
+  }
+})
+
 export { application }

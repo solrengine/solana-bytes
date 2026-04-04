@@ -31,9 +31,9 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="min-h-screen bg-gray-950 text-gray-100" data-controller="game-loading">
-    <%# Loading overlay for challenge navigation %>
-    <div data-game-loading-target="overlay" class="hidden fixed inset-0 flex items-center justify-center bg-black/80" style="z-index:200">
+  <body class="min-h-screen bg-gray-950 text-gray-100">
+    <%# Loading overlay — shown during challenge navigation %>
+    <div id="game-loading" class="hidden fixed inset-0 flex items-center justify-center bg-black/80" style="z-index:200">
       <div class="text-center">
         <div class="text-purple-400 mb-4" style="font-size:14px">
           <span class="pixel-loading">Loading</span>
