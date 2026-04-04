@@ -24,7 +24,17 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
   </head>
 
-  <body class="min-h-screen bg-gray-950 text-gray-100">
+  <body class="min-h-screen bg-gray-950 text-gray-100" data-controller="game-loading">
+    <%# Loading overlay for challenge navigation %>
+    <div data-game-loading-target="overlay" class="hidden fixed inset-0 flex items-center justify-center bg-black/80" style="z-index:200">
+      <div class="text-center">
+        <div class="text-purple-400 mb-4" style="font-size:14px">
+          <span class="pixel-loading">Loading</span>
+        </div>
+        <div class="text-gray-500" style="font-size:10px">Fetching account from Solana...</div>
+      </div>
+    </div>
+
     <div data-controller="hex-rain" class="fixed inset-0" style="z-index:0">
       <canvas data-hex-rain-target="canvas" class="w-full h-full"></canvas>
       <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, rgba(3,7,18,0.3) 0%, rgba(3,7,18,0.7) 50%, rgba(3,7,18,0.95) 100%)"></div>

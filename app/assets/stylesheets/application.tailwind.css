@@ -133,6 +133,19 @@
   font-size: 10px;
 }
 
+/* Pixel loading animation */
+.pixel-loading::after {
+  content: "";
+  animation: pixel-dots 1.5s steps(4) infinite;
+}
+
+@keyframes pixel-dots {
+  0%   { content: ""; }
+  25%  { content: "."; }
+  50%  { content: ".."; }
+  75%  { content: "..."; }
+}
+
 /* ═══════════════════════════════════════════
    WALLET OVERRIDES (SolRengine engine)
    ═══════════════════════════════════════════ */
