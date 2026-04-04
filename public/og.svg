@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" shape-rendering="crispEdges">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+      text { font-family: 'Press Start 2P', monospace; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#030712"/>
+
+  <!-- Pixel mosaic background (subtle) -->
+  <!-- Row 1 -->
+  <rect x="0" y="0" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <rect x="26" y="0" width="24" height="24" fill="#4f46e5" opacity="0.08"/>
+  <rect x="78" y="0" width="24" height="24" fill="#8b5cf6" opacity="0.15"/>
+  <rect x="130" y="0" width="24" height="24" fill="#06b6d4" opacity="0.1"/>
+  <rect x="182" y="0" width="24" height="24" fill="#6366f1" opacity="0.12"/>
+  <rect x="260" y="0" width="24" height="24" fill="#a78bfa" opacity="0.08"/>
+  <rect x="338" y="0" width="24" height="24" fill="#7c3aed" opacity="0.1"/>
+  <rect x="416" y="0" width="24" height="24" fill="#2563eb" opacity="0.12"/>
+  <rect x="520" y="0" width="24" height="24" fill="#d946ef" opacity="0.08"/>
+  <rect x="598" y="0" width="24" height="24" fill="#6d28d9" opacity="0.15"/>
+  <rect x="676" y="0" width="24" height="24" fill="#818cf8" opacity="0.1"/>
+  <rect x="780" y="0" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <rect x="858" y="0" width="24" height="24" fill="#4f46e5" opacity="0.08"/>
+  <rect x="936" y="0" width="24" height="24" fill="#0891b2" opacity="0.1"/>
+  <rect x="1014" y="0" width="24" height="24" fill="#8b5cf6" opacity="0.15"/>
+  <rect x="1092" y="0" width="24" height="24" fill="#6366f1" opacity="0.08"/>
+  <rect x="1170" y="0" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <!-- Row 2 -->
+  <rect x="52" y="26" width="24" height="24" fill="#6d28d9" opacity="0.1"/>
+  <rect x="156" y="26" width="24" height="24" fill="#7c3aed" opacity="0.15"/>
+  <rect x="234" y="26" width="24" height="24" fill="#f97316" opacity="0.08"/>
+  <rect x="364" y="26" width="24" height="24" fill="#8b5cf6" opacity="0.12"/>
+  <rect x="468" y="26" width="24" height="24" fill="#4f46e5" opacity="0.1"/>
+  <rect x="572" y="26" width="24" height="24" fill="#22d3ee" opacity="0.08"/>
+  <rect x="702" y="26" width="24" height="24" fill="#6366f1" opacity="0.15"/>
+  <rect x="806" y="26" width="24" height="24" fill="#7c3aed" opacity="0.1"/>
+  <rect x="910" y="26" width="24" height="24" fill="#a78bfa" opacity="0.12"/>
+  <rect x="1040" y="26" width="24" height="24" fill="#059669" opacity="0.08"/>
+  <rect x="1144" y="26" width="24" height="24" fill="#8b5cf6" opacity="0.1"/>
+  <!-- Scattered pixels across the image -->
+  <rect x="26" y="52" width="24" height="24" fill="#818cf8" opacity="0.1"/>
+  <rect x="104" y="78" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <rect x="208" y="52" width="24" height="24" fill="#6366f1" opacity="0.08"/>
+  <rect x="312" y="78" width="24" height="24" fill="#d946ef" opacity="0.1"/>
+  <rect x="442" y="52" width="24" height="24" fill="#4f46e5" opacity="0.15"/>
+  <rect x="546" y="78" width="24" height="24" fill="#7c3aed" opacity="0.08"/>
+  <rect x="650" y="52" width="24" height="24" fill="#0891b2" opacity="0.12"/>
+  <rect x="754" y="78" width="24" height="24" fill="#8b5cf6" opacity="0.1"/>
+  <rect x="884" y="52" width="24" height="24" fill="#6d28d9" opacity="0.15"/>
+  <rect x="988" y="78" width="24" height="24" fill="#7c3aed" opacity="0.08"/>
+  <rect x="1066" y="52" width="24" height="24" fill="#a78bfa" opacity="0.12"/>
+  <!-- Bottom area pixels -->
+  <rect x="0" y="530" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <rect x="78" y="556" width="24" height="24" fill="#6366f1" opacity="0.08"/>
+  <rect x="156" y="530" width="24" height="24" fill="#4f46e5" opacity="0.1"/>
+  <rect x="260" y="556" width="24" height="24" fill="#8b5cf6" opacity="0.15"/>
+  <rect x="364" y="530" width="24" height="24" fill="#0891b2" opacity="0.08"/>
+  <rect x="468" y="556" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <rect x="572" y="530" width="24" height="24" fill="#d946ef" opacity="0.1"/>
+  <rect x="676" y="556" width="24" height="24" fill="#6d28d9" opacity="0.08"/>
+  <rect x="780" y="530" width="24" height="24" fill="#a78bfa" opacity="0.15"/>
+  <rect x="884" y="556" width="24" height="24" fill="#7c3aed" opacity="0.1"/>
+  <rect x="988" y="530" width="24" height="24" fill="#6366f1" opacity="0.12"/>
+  <rect x="1092" y="556" width="24" height="24" fill="#4f46e5" opacity="0.08"/>
+  <rect x="52" y="580" width="24" height="24" fill="#818cf8" opacity="0.1"/>
+  <rect x="182" y="604" width="24" height="24" fill="#7c3aed" opacity="0.12"/>
+  <rect x="416" y="580" width="24" height="24" fill="#8b5cf6" opacity="0.08"/>
+  <rect x="598" y="604" width="24" height="24" fill="#6366f1" opacity="0.1"/>
+  <rect x="832" y="580" width="24" height="24" fill="#7c3aed" opacity="0.15"/>
+  <rect x="1040" y="604" width="24" height="24" fill="#4f46e5" opacity="0.08"/>
+
+  <!-- Hex dump decoration (left side) -->
+  <text x="80" y="240" fill="#4b5563" font-size="14" opacity="0.4">0000</text>
+  <text x="140" y="240" fill="#93c5fd" font-size="14" opacity="0.3">01 00 00 00</text>
+  <text x="370" y="240" fill="#86efac" font-size="14" opacity="0.3">a4 b2 7f 3e</text>
+  <text x="80" y="264" fill="#4b5563" font-size="14" opacity="0.4">0010</text>
+  <text x="140" y="264" fill="#c4b5fd" font-size="14" opacity="0.3">ff 00 c8 5d 92 1a e3 7b</text>
+  <text x="80" y="288" fill="#4b5563" font-size="14" opacity="0.4">0020</text>
+  <text x="140" y="288" fill="#fdba74" font-size="14" opacity="0.3">06 00 00 00 00 00 00 00</text>
+
+  <!-- Hex dump decoration (right side) -->
+  <text x="750" y="370" fill="#4b5563" font-size="14" opacity="0.4">0030</text>
+  <text x="810" y="370" fill="#67e8f9" font-size="14" opacity="0.3">01 d4 a1 10</text>
+  <text x="1010" y="370" fill="#fde047" font-size="14" opacity="0.3">00 01</text>
+  <text x="750" y="394" fill="#4b5563" font-size="14" opacity="0.4">0040</text>
+  <text x="810" y="394" fill="#86efac" font-size="14" opacity="0.3">b7 3c 9e 22 5f 8a c1 04</text>
+  <text x="750" y="418" fill="#4b5563" font-size="14" opacity="0.4">0050</text>
+  <text x="810" y="418" fill="#93c5fd" font-size="14" opacity="0.3">00 00 00 00 00 00 00 00</text>
+
+  <!-- Main title -->
+  <text x="600" y="270" fill="#e5e7eb" font-size="42" text-anchor="middle">Solana Bytes</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="320" fill="#9ca3af" font-size="16" text-anchor="middle">Interactive Hex Visualizer</text>
+  <text x="600" y="350" fill="#9ca3af" font-size="16" text-anchor="middle">+ Byte Challenge Game</text>
+
+  <!-- Pixel border frame -->
+  <rect x="20" y="20" width="1160" height="590" fill="none" stroke="#7c3aed" stroke-width="4"/>
+  <rect x="24" y="24" width="1152" height="582" fill="none" stroke="#4c1d95" stroke-width="2"/>
+
+  <!-- Bottom tagline -->
+  <text x="600" y="560" fill="#6d28d9" font-size="12" text-anchor="middle">Built with SolRengine for the Colosseum Frontier Hackathon</text>
+
+  <!-- Corner decorations (pixel squares) -->
+  <rect x="30" y="30" width="8" height="8" fill="#a78bfa"/>
+  <rect x="42" y="30" width="8" height="8" fill="#7c3aed"/>
+  <rect x="30" y="42" width="8" height="8" fill="#7c3aed"/>
+
+  <rect x="1162" y="30" width="8" height="8" fill="#a78bfa"/>
+  <rect x="1150" y="30" width="8" height="8" fill="#7c3aed"/>
+  <rect x="1162" y="42" width="8" height="8" fill="#7c3aed"/>
+
+  <rect x="30" y="592" width="8" height="8" fill="#a78bfa"/>
+  <rect x="42" y="592" width="8" height="8" fill="#7c3aed"/>
+  <rect x="30" y="580" width="8" height="8" fill="#7c3aed"/>
+
+  <rect x="1162" y="592" width="8" height="8" fill="#a78bfa"/>
+  <rect x="1150" y="592" width="8" height="8" fill="#7c3aed"/>
+  <rect x="1162" y="580" width="8" height="8" fill="#7c3aed"/>
+</svg>
