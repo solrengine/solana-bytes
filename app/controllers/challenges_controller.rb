@@ -30,6 +30,7 @@ class ChallengesController < ApplicationController
     @address = account_info[:address]
     @account_label = account_info[:label]
     @streak = (params[:streak] || 0).to_i
+    @total_stars = (params[:total_stars] || 0).to_i
     @max_wrong = MAX_WRONG_ATTEMPTS
 
     result = fetch_account_cached(@address, network: "mainnet-beta", expires_in: 10.minutes)

@@ -72,6 +72,7 @@ export default class extends Controller {
     targetName: String,
     targetDecoded: String,
     streak: { type: Number, default: 0 },
+    totalStars: { type: Number, default: 0 },
     maxWrong: { type: Number, default: 3 },
     saveUrl: String,
     nextUrl: String,
@@ -119,7 +120,7 @@ export default class extends Controller {
       </div>
       <div class="mb-2">${starIcons}</div>
       <div class="text-yellow-400 mb-6" style="font-size:14px">${ICONS.fire} Streak: ${newStreak}</div>
-      <a href="${this.nextUrlValue}?streak=${newStreak}" class="pixel-btn pixel-btn-green" style="font-size:12px">
+      <a href="${this.nextUrlValue}?streak=${newStreak}&total_stars=${this.totalStarsValue + stars}" class="pixel-btn pixel-btn-green" style="font-size:12px">
         Next Challenge >>
       </a>
     `)
@@ -167,7 +168,7 @@ export default class extends Controller {
     this.livesTarget.innerHTML = ICONS.heartEmpty.repeat(3)
 
     if (this.loggedInValue && this.streakValue > 0) {
-      this.saveResult(0, this.streakValue)
+      this.saveResult(this.totalStarsValue, this.streakValue)
     }
 
     this.showModal("gameover", `
