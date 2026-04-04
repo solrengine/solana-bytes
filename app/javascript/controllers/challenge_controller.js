@@ -1,5 +1,49 @@
 import { Controller } from "@hotwired/stimulus"
 
+// 8-bit sound effects via Web Audio API
+const SFX = {
+  _ctx: null,
+  get ctx() {
+    if (!this._ctx) this._ctx = new (window.AudioContext || window.webkitAudioContext)()
+    return this._ctx
+  },
+
+  play(frequency, duration, type = "square") {
+    try {
+      const ctx = this.ctx
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.type = type
+      osc.frequency.value = frequency
+      gain.gain.value = 0.15
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration)
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.start(ctx.currentTime)
+      osc.stop(ctx.currentTime + duration)
+    } catch (e) { /* audio not available */ }
+  },
+
+  correct() {
+    this.play(523, 0.1)  // C5
+    setTimeout(() => this.play(659, 0.1), 80)   // E5
+    setTimeout(() => this.play(784, 0.15), 160)  // G5
+    setTimeout(() => this.play(1047, 0.25), 240) // C6
+  },
+
+  wrong() {
+    this.play(200, 0.15) // low buzz
+    setTimeout(() => this.play(150, 0.2), 100)
+  },
+
+  gameOver() {
+    this.play(400, 0.15)
+    setTimeout(() => this.play(350, 0.15), 150)
+    setTimeout(() => this.play(300, 0.15), 300)
+    setTimeout(() => this.play(200, 0.4), 450)
+  }
+}
+
 // Pixel SVG sprite constants for JS-rendered icons
 const ICONS = {
   heart: '<span class="pixel-icon text-red-500" style="width:18px;height:18px"><svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges"><rect x="2" y="2" width="2" height="2"/><rect x="4" y="0" width="2" height="2"/><rect x="6" y="0" width="2" height="2"/><rect x="8" y="2" width="2" height="2"/><rect x="10" y="0" width="2" height="2"/><rect x="12" y="0" width="2" height="2"/><rect x="14" y="2" width="2" height="2"/><rect x="0" y="4" width="2" height="2"/><rect x="2" y="4" width="2" height="2"/><rect x="4" y="2" width="2" height="2"/><rect x="6" y="2" width="2" height="2"/><rect x="8" y="4" width="2" height="2"/><rect x="10" y="2" width="2" height="2"/><rect x="12" y="2" width="2" height="2"/><rect x="14" y="4" width="2" height="2"/><rect x="0" y="6" width="2" height="2"/><rect x="2" y="6" width="2" height="2"/><rect x="4" y="4" width="2" height="2"/><rect x="6" y="4" width="2" height="2"/><rect x="8" y="6" width="2" height="2"/><rect x="10" y="4" width="2" height="2"/><rect x="12" y="4" width="2" height="2"/><rect x="14" y="6" width="2" height="2"/><rect x="2" y="8" width="2" height="2"/><rect x="4" y="6" width="2" height="2"/><rect x="6" y="6" width="2" height="2"/><rect x="8" y="8" width="2" height="2"/><rect x="10" y="6" width="2" height="2"/><rect x="12" y="6" width="2" height="2"/><rect x="4" y="8" width="2" height="2"/><rect x="6" y="8" width="2" height="2"/><rect x="8" y="10" width="2" height="2"/><rect x="10" y="8" width="2" height="2"/><rect x="6" y="10" width="2" height="2"/><rect x="8" y="12" width="2" height="2"/></svg></span>',
@@ -49,6 +93,7 @@ export default class extends Controller {
   handleCorrect() {
     this.solved = true
 
+    SFX.correct()
     const newStreak = this.streakValue + 1
     const stars = this.wrongAttempts === 0 ? 3 : this.wrongAttempts === 1 ? 2 : 1
 
@@ -71,6 +116,7 @@ export default class extends Controller {
 
   handleWrong(cell) {
     this.wrongAttempts++
+    SFX.wrong()
 
     const originalBg = cell.style.background
     cell.style.background = "rgba(239, 68, 68, 0.3)"
@@ -104,6 +150,7 @@ export default class extends Controller {
 
   gameOverSequence() {
     this.solved = true
+    SFX.gameOver()
 
     this.revealRegion(this.targetRegionValue)
     this.livesTarget.innerHTML = ICONS.heartEmpty.repeat(3)
