@@ -1,4 +1,6 @@
 class AccountsController < ApplicationController
+  include RpcFetchable
+
   EXAMPLE_ADDRESSES = [
     { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
     { address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", label: "Token Program (ELF)" },
@@ -19,7 +21,8 @@ class AccountsController < ApplicationController
       return render :error, status: :unprocessable_entity
     end
 
-    result = fetch_account(@address)
+    network = session[:solana_network] || ENV.fetch("SOLANA_NETWORK", "mainnet-beta")
+    result = fetch_account_cached(@address, network: network, expires_in: 2.minutes)
 
     if result.nil?
       flash.now[:alert] = "Could not reach Solana network. Try again."
@@ -37,33 +40,6 @@ class AccountsController < ApplicationController
   end
 
   private
-
-  def fetch_account(address)
-    network = session[:solana_network] || ENV.fetch("SOLANA_NETWORK", "mainnet-beta")
-    rpc_url = rpc_url_for(network)
-
-    3.times do |attempt|
-      client = Solrengine::Rpc::Client.new(rpc_url: rpc_url)
-      response = client.request("getAccountInfo", [ address, { "encoding" => "base64" } ])
-      return response if response.present?
-    rescue => e
-      Rails.logger.error("RPC error (attempt #{attempt + 1}/3): #{e.class} - #{e.message}")
-      sleep(0.5 * (attempt + 1)) if attempt < 2
-    end
-
-    nil
-  end
-
-  def rpc_url_for(network)
-    case network
-    when "devnet"
-      ENV.fetch("SOLANA_RPC_DEVNET_URL", "https://api.devnet.solana.com")
-    when "testnet"
-      ENV.fetch("SOLANA_RPC_TESTNET_URL", "https://api.testnet.solana.com")
-    else
-      ENV.fetch("SOLANA_RPC_MAINNET_URL", "https://api.mainnet-beta.solana.com")
-    end
-  end
 
   def valid_base58?(address)
     return false if address.blank?
