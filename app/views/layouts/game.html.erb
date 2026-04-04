@@ -52,6 +52,7 @@
           <%= link_to "/leaderboard", class: "hover:opacity-80", style: "font-size:12px" do %>
             <%= pixel_icon(:trophy, size: 16) %>
           <% end %>
+          <%= link_to "Stats", "/stats", class: "text-gray-500 hover:text-gray-300", style: "font-size:10px" %>
           <% if logged_in? %>
             <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1" style="font-size:10px"><%= current_user.short_address %></span>
           <% end %>

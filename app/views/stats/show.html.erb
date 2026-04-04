@@ -1,0 +1,155 @@
+<% content_for(:title, "Stats — Solana Bytes") %>
+
+<div class="max-w-4xl mx-auto">
+  <h1 class="text-white mb-8 flex items-center gap-3" style="font-size:20px;text-shadow:3px 3px 0 #4c1d95"><%= pixel_icon(:target, size: 24) %> Stats</h1>
+
+  <%# Site stats %>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="pixel-card p-4 text-center">
+      <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_visits]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Visitors</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_pageviews]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Pageviews</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:visits_today]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Today</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:visits_week]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">This Week</div>
+    </div>
+  </div>
+
+  <%# Challenge stats %>
+  <h2 class="text-white mb-4 flex items-center gap-2" style="font-size:14px"><%= pixel_icon(:fire, size: 20) %> Challenge Stats</h2>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="pixel-card p-4 text-center">
+      <div class="text-yellow-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_games]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Games Played</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-yellow-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_players]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Players</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-yellow-400" style="font-size:16px"><%= pixel_icon(:fire, size: 16) %> <%= @stats[:highest_streak] %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Best Streak</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-yellow-400" style="font-size:16px"><%= @stats[:total_stars] %> <%= pixel_icon(:star, size: 14) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Stars Earned</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <%# Top players %>
+    <div class="pixel-card" style="padding:0">
+      <div class="px-5 py-3 border-b-2 border-gray-700">
+        <h3 class="text-white flex items-center gap-2" style="font-size:10px"><%= pixel_icon(:trophy, size: 14) %> Top Players</h3>
+      </div>
+      <% if @stats[:top_players].any? %>
+        <div>
+          <% @stats[:top_players].each_with_index do |result, index| %>
+            <div class="px-5 py-3 flex items-center justify-between border-b border-gray-800" style="font-size:10px">
+              <div class="flex items-center gap-3">
+                <span class="w-6 text-center">
+                  <% if index == 0 %>
+                    <%= pixel_icon(:medal_gold, size: 14) %>
+                  <% elsif index == 1 %>
+                    <%= pixel_icon(:medal_silver, size: 14) %>
+                  <% elsif index == 2 %>
+                    <%= pixel_icon(:medal_bronze, size: 14) %>
+                  <% else %>
+                    <span class="text-gray-500"><%= index + 1 %></span>
+                  <% end %>
+                </span>
+                <span class="text-gray-300"><%= result.user.short_address %></span>
+              </div>
+              <div class="flex items-center gap-4">
+                <span class="text-yellow-400"><%= pixel_icon(:fire, size: 12) %> <%= result.best_streak %></span>
+                <span class="text-gray-500"><%= result.games %> games</span>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No games yet</div>
+      <% end %>
+    </div>
+
+    <%# Top pages %>
+    <div class="pixel-card" style="padding:0">
+      <div class="px-5 py-3 border-b-2 border-gray-700">
+        <h3 class="text-white" style="font-size:10px">Top Pages</h3>
+      </div>
+      <% if @stats[:top_pages].any? %>
+        <div>
+          <% @stats[:top_pages].each do |page, count| %>
+            <div class="px-5 py-3 flex items-center justify-between border-b border-gray-800" style="font-size:10px">
+              <span class="text-gray-300"><%= page %></span>
+              <span class="text-gray-500"><%= number_with_delimiter(count) %></span>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No data yet</div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <%# Most targeted fields %>
+    <div class="pixel-card" style="padding:0">
+      <div class="px-5 py-3 border-b-2 border-gray-700">
+        <h3 class="text-white" style="font-size:10px">Most Challenged Fields</h3>
+      </div>
+      <% if @stats[:top_fields].any? %>
+        <div>
+          <% @stats[:top_fields].each do |field, count| %>
+            <div class="px-5 py-3 flex items-center justify-between border-b border-gray-800" style="font-size:10px">
+              <span class="text-purple-300"><%= field %></span>
+              <span class="text-gray-500"><%= count %></span>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No data yet</div>
+      <% end %>
+    </div>
+
+    <%# Activity %>
+    <div class="pixel-card p-5">
+      <h3 class="text-white mb-4" style="font-size:10px">Activity</h3>
+      <div class="space-y-3" style="font-size:10px">
+        <div class="flex justify-between">
+          <span class="text-gray-400">Games today</span>
+          <span class="text-white"><%= @stats[:games_today] %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Games this week</span>
+          <span class="text-white"><%= @stats[:games_week] %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Avg streak</span>
+          <span class="text-white"><%= @stats[:avg_streak] %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Pageviews today</span>
+          <span class="text-white"><%= @stats[:pageviews_today] %></span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-400">Pageviews this week</span>
+          <span class="text-white"><%= @stats[:pageviews_week] %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center text-gray-600 mt-8" style="font-size:8px">
+    Powered by Ahoy — GDPR compliant, no cookies
+  </div>
+</div>

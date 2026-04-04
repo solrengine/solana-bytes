@@ -31,6 +31,9 @@ gem "solid_cable"
 # SolRengine — Ruby gems for Solana + Rails
 gem "solrengine"
 
+# Analytics (GDPR-compliant, no cookies)
+gem "ahoy_matey"
+
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
 
 # Reduces boot times through caching; required in config/boot.rb

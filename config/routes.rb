@@ -15,5 +15,8 @@ Rails.application.routes.draw do
   # Leaderboard
   get "leaderboard", to: "leaderboard#index", as: :leaderboard
 
+  # Public stats
+  get "stats", to: "stats#show"
+
   root "pages#home"
 end
