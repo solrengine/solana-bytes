@@ -37,6 +37,8 @@ class AccountsController < ApplicationController
     end
 
     @account = AccountPresenter.new(@address, account_value, max_data: MAX_DATA_DISPLAY)
+
+    ahoy.track "account_viewed", address: @address, network: network, owner: @account.owner_label
   end
 
   private

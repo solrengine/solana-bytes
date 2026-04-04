@@ -19,6 +19,11 @@ class StatsController < ApplicationController
                               .limit(10)
                               .count,
 
+        # Accounts analyzed
+        accounts_analyzed: Ahoy::Event.where(name: "account_viewed").count,
+        unique_accounts: Ahoy::Event.where(name: "account_viewed")
+                                     .select("DISTINCT json_extract(properties, '$.address')").count,
+
         # Challenge stats (all plays including practice)
         total_challenges: Ahoy::Event.where(name: "challenge_started").count,
         practice_plays: Ahoy::Event.where(name: "challenge_started").where("json_extract(properties, '$.mode') = 'practice'").count,

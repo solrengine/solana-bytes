@@ -4,7 +4,7 @@
   <h1 class="text-white mb-8 flex items-center gap-3" style="font-size:20px;text-shadow:3px 3px 0 #4c1d95"><%= pixel_icon(:target, size: 24) %> Stats</h1>
 
   <%# Site stats %>
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
     <div class="pixel-card p-4 text-center">
       <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_visits]) %></div>
       <div class="text-gray-500 mt-1" style="font-size:9px">Visitors</div>
@@ -12,6 +12,11 @@
     <div class="pixel-card p-4 text-center">
       <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:total_pageviews]) %></div>
       <div class="text-gray-500 mt-1" style="font-size:9px">Pageviews</div>
+    </div>
+    <div class="pixel-card p-4 text-center">
+      <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:accounts_analyzed]) %></div>
+      <div class="text-gray-500 mt-1" style="font-size:9px">Accounts Analyzed</div>
+      <div class="text-gray-600 mt-1" style="font-size:8px"><%= @stats[:unique_accounts] %> unique</div>
     </div>
     <div class="pixel-card p-4 text-center">
       <div class="text-purple-400" style="font-size:16px"><%= number_with_delimiter(@stats[:visits_today]) %></div>
