@@ -26,6 +26,7 @@ class ChallengesController < ApplicationController
   def show
     account_info = CHALLENGE_ACCOUNTS.sample
     @address = account_info[:address]
+    @account_label = account_info[:label]
     @streak = (params[:streak] || 0).to_i
     @max_wrong = MAX_WRONG_ATTEMPTS
 

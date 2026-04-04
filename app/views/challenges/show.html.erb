@@ -41,8 +41,9 @@
 
   <%# Metadata bar %>
   <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4 text-gray-400" style="font-size:10px">
-    <span>Account: <span class="text-gray-300"><%= @address[0..7] %>...<%= @address[-4..] %></span></span>
-    <span>Size: <span class="text-gray-300"><%= number_with_delimiter(@account.raw_bytes.length) %> bytes</span></span>
+    <span class="text-purple-400 border-2 border-purple-800 px-2 py-1"><%= @account_label %></span>
+    <span><%= @address[0..7] %>...<%= @address[-4..] %></span>
+    <span><span class="text-gray-300"><%= number_with_delimiter(@account.raw_bytes.length) %></span> bytes</span>
     <%= link_to "Skip >>", "/challenge", class: "text-gray-500 hover:text-white ml-auto" %>
   </div>
 
