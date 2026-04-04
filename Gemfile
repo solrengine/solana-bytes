@@ -33,6 +33,8 @@ gem "solrengine"
 
 # Analytics (GDPR-compliant, no cookies)
 gem "ahoy_matey"
+gem "geocoder"
+gem "maxminddb"
 
 gem "dotenv-rails", "~> 3.2", groups: [ :development, :test ]
 

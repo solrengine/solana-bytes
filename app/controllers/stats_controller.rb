@@ -48,5 +48,15 @@ class StatsController < ApplicationController
                                       .count,
       }
     end
+
+    # Countries need normalization outside the cache (uses helper)
+    raw_countries = Ahoy::Visit.where.not(country: [ nil, "" ]).group(:country).count
+    code_to_name = ApplicationHelper::COUNTRY_NAME_TO_CODE.invert
+    merged = Hash.new(0)
+    raw_countries.each do |country, count|
+      name = country.length == 2 ? (code_to_name[country.upcase] || country) : country
+      merged[name] += count
+    end
+    @top_countries = merged.sort_by { |_, count| -count }.first(15).to_h
   end
 end

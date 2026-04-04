@@ -149,6 +149,25 @@
     </div>
   </div>
 
+  <%# Top Countries %>
+  <div class="pixel-card mb-8" style="padding:0">
+    <div class="px-5 py-3 border-b-2 border-gray-700">
+      <h3 class="text-white" style="font-size:10px">Top Countries</h3>
+    </div>
+    <% if @top_countries.any? %>
+      <div class="grid grid-cols-2 md:grid-cols-3">
+        <% @top_countries.each do |country, count| %>
+          <div class="px-5 py-3 flex items-center justify-between border-b border-gray-800" style="font-size:10px">
+            <span class="text-gray-300"><%= country_flag(country) %> <%= country %></span>
+            <span class="text-gray-500"><%= number_with_delimiter(count) %></span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No data yet</div>
+    <% end %>
+  </div>
+
   <div class="text-center text-gray-600 mt-8" style="font-size:8px">
     Powered by Ahoy — GDPR compliant, no cookies
   </div>
