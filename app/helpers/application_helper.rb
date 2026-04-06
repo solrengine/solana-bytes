@@ -2,7 +2,7 @@ module ApplicationHelper
   COUNTRY_NAME_TO_CODE = {
     "Afghanistan" => "AF", "Albania" => "AL", "Algeria" => "DZ", "Argentina" => "AR",
     "Australia" => "AU", "Austria" => "AT", "Bangladesh" => "BD", "Belgium" => "BE",
-    "Brazil" => "BR", "Canada" => "CA", "Chile" => "CL", "China" => "CN",
+    "Brazil" => "BR", "Bulgaria" => "BG", "Canada" => "CA", "Chile" => "CL", "China" => "CN",
     "Colombia" => "CO", "Croatia" => "HR", "Czech Republic" => "CZ", "Czechia" => "CZ",
     "Denmark" => "DK", "Egypt" => "EG", "Estonia" => "EE", "Finland" => "FI",
     "France" => "FR", "Germany" => "DE", "Greece" => "GR", "Hong Kong" => "HK",

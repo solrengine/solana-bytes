@@ -87,24 +87,25 @@
       <% end %>
     </div>
 
-    <%# Top pages %>
-    <div class="pixel-card" style="padding:0">
-      <div class="px-5 py-3 border-b-2 border-gray-700">
-        <h3 class="text-white" style="font-size:10px">Top Pages</h3>
-      </div>
-      <% if @stats[:top_pages].any? %>
-        <div>
-          <% @stats[:top_pages].each do |page, count| %>
-            <div class="px-5 py-3 flex items-center justify-between border-b border-gray-800" style="font-size:10px">
-              <span class="text-gray-300"><%= page %></span>
-              <span class="text-gray-500"><%= number_with_delimiter(count) %></span>
-            </div>
-          <% end %>
-        </div>
-      <% else %>
-        <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No data yet</div>
-      <% end %>
+  </div>
+
+  <%# Top pages — full width %>
+  <div class="pixel-card mb-8" style="padding:0">
+    <div class="px-5 py-3 border-b-2 border-gray-700">
+      <h3 class="text-white" style="font-size:10px">Top Pages</h3>
     </div>
+    <% if @stats[:top_pages].any? %>
+      <div>
+        <% @stats[:top_pages].each do |page, count| %>
+          <div class="px-5 py-3 flex items-center justify-between gap-4 border-b border-gray-800" style="font-size:10px">
+            <span class="text-gray-300 truncate" style="min-width:0"><%= page %></span>
+            <span class="text-gray-500 shrink-0"><%= number_with_delimiter(count) %></span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No data yet</div>
+    <% end %>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
