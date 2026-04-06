@@ -51,9 +51,8 @@
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-    <%# Top players %>
-    <div class="pixel-card" style="padding:0">
+  <%# Top players — full width %>
+  <div class="pixel-card mb-8" style="padding:0">
       <div class="px-5 py-3 border-b-2 border-gray-700">
         <h3 class="text-white flex items-center gap-2" style="font-size:10px"><%= pixel_icon(:trophy, size: 14) %> Top Players</h3>
       </div>
@@ -85,8 +84,6 @@
       <% else %>
         <div class="px-5 py-8 text-center text-gray-500" style="font-size:10px">No games yet</div>
       <% end %>
-    </div>
-
   </div>
 
   <%# Top pages — full width %>
