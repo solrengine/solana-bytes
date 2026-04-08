@@ -761,10 +761,10 @@
     "@wallet-standard/base" "^1.1.0"
     "@wallet-standard/features" "^1.1.0"
 
-"@solrengine/wallet-utils@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@solrengine/wallet-utils/-/wallet-utils-0.3.0.tgz#eb9d4b9970ac26a43117a8dc4f399d1849b8f9c5"
-  integrity sha512-OgT0GfVVpMG/9khMck1aipmhOO22GCiLSYbvMM3CFT/j23C3JxwpT4U9uPva47DVswBh5x3f2PWPoPVuYL0gag==
+"@solrengine/wallet-utils@^0.3.1":
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/@solrengine/wallet-utils/-/wallet-utils-0.3.1.tgz#5ddf15a8a129a92f662df1e09516e51775f74a93"
+  integrity sha512-7UgL9unreeMU7N3l4nwjWFsQoR5gn3skYyqMG4ZlOrY4mH7e7BjM7dIgosv5qx6sUnvbojqyuyYwZW68Olzojw==
   dependencies:
     tweetnacl "^1.0.3"
 
