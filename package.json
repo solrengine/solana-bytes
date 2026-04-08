@@ -13,7 +13,7 @@
     "@hotwired/turbo-rails": "^8.0.23",
     "@solana/kit": "^6.7.0",
     "@solana/wallet-standard-features": "^1.3.0",
-    "@solrengine/wallet-utils": "github:solrengine/wallet-utils",
+    "@solrengine/wallet-utils": "^0.3.0",
     "@tailwindcss/cli": "^4.2.2",
     "@wallet-standard/app": "^1.1.0",
     "tailwindcss": "^4.2.2",

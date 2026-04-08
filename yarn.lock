@@ -761,9 +761,10 @@
     "@wallet-standard/base" "^1.1.0"
     "@wallet-standard/features" "^1.1.0"
 
-"@solrengine/wallet-utils@github:solrengine/wallet-utils":
+"@solrengine/wallet-utils@^0.3.0":
   version "0.3.0"
-  resolved "git+ssh://git@github.com/solrengine/wallet-utils.git#efd14764e53e78ee2fb573b8e2e600fbdc0da74e"
+  resolved "https://registry.yarnpkg.com/@solrengine/wallet-utils/-/wallet-utils-0.3.0.tgz#eb9d4b9970ac26a43117a8dc4f399d1849b8f9c5"
+  integrity sha512-OgT0GfVVpMG/9khMck1aipmhOO22GCiLSYbvMM3CFT/j23C3JxwpT4U9uPva47DVswBh5x3f2PWPoPVuYL0gag==
   dependencies:
     tweetnacl "^1.0.3"
 
