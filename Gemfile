@@ -31,6 +31,12 @@ gem "solid_cable"
 # SolRengine — Ruby gems for Solana + Rails
 gem "solrengine"
 
+# Base58 encoding for Solana addresses
+gem "base58"
+
+# Rate limiting
+gem "rack-attack"
+
 # Analytics (GDPR-compliant, no cookies)
 gem "ahoy_matey"
 gem "geocoder"

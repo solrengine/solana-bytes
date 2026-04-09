@@ -1,4 +1,6 @@
 class StatsController < ApplicationController
+  before_action :require_login
+
   def show
     @stats = Rails.cache.fetch("stats:public", expires_in: 5.minutes) do
       {
@@ -56,10 +58,25 @@ class StatsController < ApplicationController
                                       .order(Arel.sql("count(*) DESC"))
                                       .limit(8)
                                       .count,
+
+        # Countries (moved inside cache block)
+        top_countries: normalized_countries
       }
     end
 
-    # Countries need normalization outside the cache (uses helper)
+    @top_countries = @stats[:top_countries]
+  end
+
+  private
+
+  def require_login
+    unless logged_in?
+      flash[:alert] = "Connect your wallet to view stats."
+      redirect_to "/auth/login"
+    end
+  end
+
+  def normalized_countries
     raw_countries = Ahoy::Visit.where.not(country: [ nil, "" ]).group(:country).count
     code_to_name = ApplicationHelper::COUNTRY_NAME_TO_CODE.invert
     merged = Hash.new(0)
@@ -67,6 +84,6 @@ class StatsController < ApplicationController
       name = country.length == 2 ? (code_to_name[country.upcase] || country) : country
       merged[name] += count
     end
-    @top_countries = merged.sort_by { |_, count| -count }.first(15).to_h
+    merged.sort_by { |_, count| -count }.first(15).to_h
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_04_041852) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_09_063255) do
   create_table "ahoy_events", force: :cascade do |t|
     t.string "name"
     t.text "properties"
@@ -48,6 +48,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_041852) do
     t.string "utm_term"
     t.string "visit_token"
     t.string "visitor_token"
+    t.index ["country"], name: "idx_ahoy_visits_country"
     t.index ["user_id"], name: "index_ahoy_visits_on_user_id"
     t.index ["visit_token"], name: "index_ahoy_visits_on_visit_token", unique: true
     t.index ["visitor_token", "started_at"], name: "index_ahoy_visits_on_visitor_token_and_started_at"
@@ -63,6 +64,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_04_041852) do
     t.decimal "time_seconds"
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
+    t.index ["account_address"], name: "idx_challenge_results_account_address"
+    t.index ["created_at"], name: "idx_challenge_results_recent"
+    t.index ["streak", "time_seconds"], name: "idx_challenge_results_leaderboard"
+    t.index ["target_field"], name: "idx_challenge_results_target_field"
     t.index ["user_id"], name: "index_challenge_results_on_user_id"
   end
 

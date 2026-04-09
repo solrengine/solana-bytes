@@ -1,5 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
+function escapeHtml(str) {
+  const div = document.createElement("div")
+  div.textContent = str
+  return div.innerHTML
+}
+
 export default class extends Controller {
   static targets = ["cell", "tooltip"]
 
@@ -7,6 +13,7 @@ export default class extends Controller {
     this.isTouch = "ontouchstart" in window
     this.activeRegion = null
     this.highlightedCells = []
+    this.regionIndex = null
 
     // Grab reference before moving out of controller scope
     this.tip = this.tooltipTarget
@@ -18,12 +25,28 @@ export default class extends Controller {
   }
 
   cellTargetConnected(cell) {
+    // Invalidate region index when new cells are added
+    this.regionIndex = null
+
     if (this.isTouch) {
       cell.addEventListener("click", this.handleTap.bind(this))
     } else {
       cell.addEventListener("mouseenter", this.handleMouseEnter.bind(this))
       cell.addEventListener("mouseleave", this.handleMouseLeave.bind(this))
     }
+  }
+
+  getRegionIndex() {
+    if (!this.regionIndex) {
+      this.regionIndex = {}
+      this.cellTargets.forEach(c => {
+        const id = c.dataset.region
+        if (id) {
+          (this.regionIndex[id] ||= []).push(c)
+        }
+      })
+    }
+    return this.regionIndex
   }
 
   handleMouseEnter(event) {
@@ -52,7 +75,7 @@ export default class extends Controller {
     const regionId = cell.dataset.region
     if (!regionId) return
 
-    const regionCells = this.cellTargets.filter(c => c.dataset.region === regionId)
+    const regionCells = this.getRegionIndex()[regionId] || []
 
     regionCells.forEach(c => {
       c.style.background = "rgba(255,255,255,0.2)"
@@ -97,9 +120,9 @@ export default class extends Controller {
     let html = ""
 
     if (regionName) {
-      html += `<div style="color:#a78bfa;font-weight:600;margin-bottom:4px;font-size:11px">${regionName}</div>`
+      html += `<div style="color:#a78bfa;font-weight:600;margin-bottom:4px;font-size:11px">${escapeHtml(regionName)}</div>`
       if (regionDecoded) {
-        html += `<div style="color:#86efac;word-break:break-all;margin-bottom:4px">${regionDecoded}</div>`
+        html += `<div style="color:#86efac;word-break:break-all;margin-bottom:4px">${escapeHtml(regionDecoded)}</div>`
       }
       html += `<div style="color:#4b5563;font-size:10px">[${regionStart}:${regionStart + regionLength - 1}] ${regionLength} bytes</div>`
     }

@@ -37,13 +37,15 @@ export default class extends Controller {
     this.grid = []
     this.resize()
     this.boundResize = this.resize.bind(this)
+    this.boundAnimate = this.animate.bind(this)
     window.addEventListener("resize", this.boundResize)
     this.animate()
   }
 
   disconnect() {
     window.removeEventListener("resize", this.boundResize)
-    if (this.frameId) clearTimeout(this.frameId)
+    if (this.timeoutId) clearTimeout(this.timeoutId)
+    if (this.rafId) cancelAnimationFrame(this.rafId)
   }
 
   resize() {
@@ -63,7 +65,6 @@ export default class extends Controller {
         row.push({
           color: this.randomColor(),
           alpha: 0.08 + Math.random() * 0.18,
-          targetAlpha: 0.08 + Math.random() * 0.18,
         })
       }
       this.grid.push(row)
@@ -123,8 +124,8 @@ export default class extends Controller {
     }
 
     // Slow frame rate — no need for 60fps on a background
-    this.frameId = setTimeout(() => {
-      requestAnimationFrame(this.animate.bind(this))
+    this.timeoutId = setTimeout(() => {
+      this.rafId = requestAnimationFrame(this.boundAnimate)
     }, 150)
   }
 }

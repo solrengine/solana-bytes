@@ -1,5 +1,11 @@
 import { Controller } from "@hotwired/stimulus"
 
+function escapeHtml(str) {
+  const div = document.createElement("div")
+  div.textContent = str
+  return div.innerHTML
+}
+
 // 8-bit sound effects via Web Audio API
 const SFX = {
   _ctx: null,
@@ -66,6 +72,7 @@ const ICONS = {
 }
 
 export default class extends Controller {
+  static outlets = ["hex-viewer"]
   static targets = ["fieldName", "lives", "modal", "modalContent", "toast", "toastContent"]
   static values = {
     targetRegion: String,
@@ -76,7 +83,11 @@ export default class extends Controller {
     maxWrong: { type: Number, default: 3 },
     saveUrl: String,
     nextUrl: String,
+    nextToken3star: String,
+    nextToken2star: String,
+    nextToken1star: String,
     accountAddress: String,
+    challengeToken: String,
     loggedIn: { type: Boolean, default: false }
   }
 
@@ -112,15 +123,18 @@ export default class extends Controller {
     this.revealRegion(this.targetRegionValue)
 
     const starIcons = ICONS.star.repeat(stars)
+    const nextUrl = stars === 3 ? this.nextToken3starValue
+                  : stars === 2 ? this.nextToken2starValue
+                  : this.nextToken1starValue
     this.showModal("correct", `
       <div class="mb-4">${ICONS.checkmark}</div>
       <div class="text-green-400 mb-2" style="font-size:16px">Correct!</div>
       <div class="text-gray-300 mb-4" style="font-size:12px">
-        <span class="text-purple-400">${this.targetNameValue}</span>
+        <span class="text-purple-400">${escapeHtml(this.targetNameValue)}</span>
       </div>
       <div class="mb-2">${starIcons}</div>
       <div class="text-yellow-400 mb-6" style="font-size:14px">${ICONS.fire} Streak: ${newStreak}</div>
-      <a href="${this.nextUrlValue}?streak=${newStreak}&total_stars=${this.totalStarsValue + stars}" class="pixel-btn pixel-btn-green" style="font-size:12px">
+      <a href="${nextUrl}" class="pixel-btn pixel-btn-green" style="font-size:12px">
         Next Challenge >>
       </a>
     `)
@@ -178,7 +192,7 @@ export default class extends Controller {
       <div class="mb-4">${ICONS.skull}</div>
       <div class="text-red-400 mb-2" style="font-size:16px">Game Over!</div>
       <div class="text-gray-300 mb-1" style="font-size:12px">
-        The answer was <span class="text-purple-400">${this.targetNameValue}</span>
+        The answer was <span class="text-purple-400">${escapeHtml(this.targetNameValue)}</span>
       </div>
       ${this.streakValue > 0
         ? `<div class="text-yellow-400 mt-4 mb-6" style="font-size:14px">${ICONS.fire} Final Streak: ${this.streakValue}</div>`
@@ -191,12 +205,8 @@ export default class extends Controller {
   }
 
   hideHexTooltip() {
-    const tooltip = document.querySelector('.pixel-tooltip')
-    if (tooltip) tooltip.style.display = "none"
-    const hexViewer = this.element.querySelector('[data-controller~="hex-viewer"]')
-    if (hexViewer) {
-      const ctrl = this.application.getControllerForElementAndIdentifier(hexViewer, "hex-viewer")
-      if (ctrl) ctrl.deactivateRegion()
+    if (this.hasHexViewerOutlet) {
+      this.hexViewerOutlet.deactivateRegion()
     }
   }
 
@@ -220,12 +230,10 @@ export default class extends Controller {
           "X-CSRF-Token": csrfToken
         },
         body: JSON.stringify({
-          account_address: this.accountAddressValue,
-          target_field: this.targetNameValue,
+          challenge_token: this.challengeTokenValue,
           time_seconds: 0,
           attempts: this.totalAttempts,
-          stars: stars,
-          streak: streak
+          stars: stars
         })
       })
     } catch (e) {

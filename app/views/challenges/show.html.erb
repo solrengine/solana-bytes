@@ -2,6 +2,7 @@
 <% content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") } %>
 
 <div data-controller="challenge"
+     data-challenge-hex-viewer-outlet="[data-controller='hex-viewer']"
      data-challenge-target-region-value="<%= @target_region.id %>"
      data-challenge-target-name-value="<%= @target_region.name %>"
      data-challenge-target-decoded-value="<%= @target_region.decoded_value %>"
@@ -10,7 +11,11 @@
      data-challenge-max-wrong-value="<%= @max_wrong %>"
      data-challenge-save-url-value="/challenge/result"
      data-challenge-next-url-value="/challenge"
+     data-challenge-next-token3star-value="<%= @next_token_3star %>"
+     data-challenge-next-token2star-value="<%= @next_token_2star %>"
+     data-challenge-next-token1star-value="<%= @next_token_1star %>"
      data-challenge-account-address-value="<%= @address %>"
+     data-challenge-challenge-token-value="<%= @challenge_token %>"
      data-challenge-logged-in-value="<%= logged_in? %>">
 
   <%# Challenge prompt %>
