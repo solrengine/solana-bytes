@@ -147,6 +147,9 @@ export default class extends Controller {
       return
     }
 
+    // Hide tooltip before showing toast
+    this.hideHexTooltip()
+
     // Show wrong toast
     this.toastContentTarget.innerHTML = `
       <div class="mb-2">${ICONS.cross}</div>
@@ -187,7 +190,20 @@ export default class extends Controller {
     `)
   }
 
+  hideHexTooltip() {
+    const tooltip = document.querySelector('.pixel-tooltip')
+    if (tooltip) tooltip.style.display = "none"
+    const hexViewer = this.element.querySelector('[data-controller~="hex-viewer"]')
+    if (hexViewer) {
+      const ctrl = this.application.getControllerForElementAndIdentifier(hexViewer, "hex-viewer")
+      if (ctrl) ctrl.deactivateRegion()
+    }
+  }
+
   showModal(type, content) {
+    // Hide tooltip before showing modal
+    this.hideHexTooltip()
+
     const borderColor = type === "correct" ? "#4ade80" : "#ef4444"
     this.modalContentTarget.style.borderColor = borderColor
     this.modalContentTarget.innerHTML = content

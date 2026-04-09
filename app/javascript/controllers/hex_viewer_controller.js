@@ -77,6 +77,14 @@ export default class extends Controller {
   }
 
   showTooltip(cell) {
+    // Don't show tooltip when a challenge popup is visible (modal or wrong toast)
+    const modal = document.querySelector('[data-challenge-target="modal"]')
+    const toast = document.querySelector('[data-challenge-target="toast"]')
+    if ((modal && !modal.classList.contains("hidden")) || (toast && !toast.classList.contains("hidden"))) {
+      this.hideTooltip()
+      return
+    }
+
     const tip = this.tip
     const regionName = cell.dataset.regionName
     const regionDecoded = cell.dataset.regionDecoded
