@@ -34,6 +34,10 @@ gem "solrengine"
 # Base58 encoding for Solana addresses
 gem "base58"
 
+# Error tracking (production only)
+gem "sentry-ruby"
+gem "sentry-rails"
+
 # Rate limiting
 gem "rack-attack"
 
