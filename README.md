@@ -21,9 +21,11 @@ Built with [SolRengine](https://github.com/solrengine) and Rails 8 for the **Col
 - 8-bit pixel art design (Press Start 2P font, SVG pixel icons, pixel mosaic background)
 - 8-bit sound effects (Web Audio API — correct, wrong, game over, start jingles)
 - Wallet authentication via SIWS (SolRengine Auth Engine)
-- Leaderboard with top streaks
+- Leaderboard with top streaks (anti-cheat via signed challenge tokens)
 - Network selector (mainnet, devnet, testnet)
 - SPA navigation via Turbo Frames
+- Content Security Policy, rate limiting, XSS protection
+- 29 tests covering decoders, base58 encoding, and game integrity
 
 ## Supported Account Types
 
@@ -44,6 +46,7 @@ Built with [SolRengine](https://github.com/solrengine) and Rails 8 for the **Col
 - Tailwind CSS 4 + esbuild
 - SQLite (via Solid Queue/Cache/Cable)
 - Press Start 2P (Google Fonts)
+- Sentry (error tracking), Rack::Attack (rate limiting), Ahoy (privacy-first analytics)
 
 ## Setup
 
@@ -64,6 +67,7 @@ Open `http://localhost:3000`.
 | `SOLANA_RPC_DEVNET_URL` | public RPC | Devnet RPC endpoint |
 | `SOLANA_RPC_TESTNET_URL` | public RPC | Testnet RPC endpoint |
 | `APP_DOMAIN` | — | Domain for SIWS auth (production) |
+| `SENTRY_DSN` | — | Sentry error tracking (production only) |
 
 ## Try These Accounts
 
@@ -79,18 +83,19 @@ Open `http://localhost:3000`.
 
 1. User pastes a Solana address
 2. Server fetches account via `solrengine-rpc` (`getAccountInfo` base64)
-3. `AccountPresenter` decodes metadata + raw bytes into hex rows
-4. `RegionDecoder` identifies byte ranges by owner program
-5. Stimulus `hex-viewer` controller handles hover/tap highlighting and tooltips
+3. `AccountPresenter` decodes metadata + raw bytes into hex rows (O(1) offset lookup)
+4. `RegionDecoder` identifies byte ranges by owner program (separate module)
+5. Stimulus `hex-viewer` controller handles hover/tap highlighting and tooltips (indexed by region)
 
 ### Byte Challenge
 
 1. Random mainnet account loaded (SPL Mints + Token Accounts)
 2. Random field selected as target (e.g., "Supply", "Mint Authority")
-3. All cells rendered gray — player clicks to guess
-4. Hover shows "?????" as field name + decoded value (educational)
-5. 3 wrong clicks = game over. Correct = streak +1, next challenge
-6. Results saved to leaderboard if connected via wallet
+3. Server generates a signed challenge token (prevents streak spoofing)
+4. All cells rendered gray — player clicks to guess
+5. Hover shows "?????" as field name + decoded value (educational)
+6. 3 wrong clicks = game over. Correct = streak +1, next challenge via signed token
+7. Results saved to leaderboard if connected via wallet (server-verified)
 
 ## License
 

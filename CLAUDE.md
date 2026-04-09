@@ -13,6 +13,7 @@ Built with Rails 8 and SolRengine for the Colosseum Frontier Hackathon.
 - `yarn build:css` — compile Tailwind CSS
 - `bin/rails db:prepare` — set up all databases
 - `bin/rails db:migrate` — run pending migrations
+- `bin/rails test` — run all tests (29 tests)
 
 ## Environment Variables
 
@@ -20,19 +21,20 @@ Copy `.env.example` to `.env`:
 - `SOLANA_NETWORK` — mainnet-beta (default), devnet, or testnet
 - `SOLANA_RPC_MAINNET_URL` / `SOLANA_RPC_DEVNET_URL` / `SOLANA_RPC_TESTNET_URL` — RPC endpoints (falls back to public RPCs)
 - `APP_DOMAIN` — domain for SIWS wallet auth (production)
+- `SENTRY_DSN` — Sentry error tracking DSN (production only)
 
 ## Architecture
 
 ### Hex Visualizer
-- **AccountsController** — fetches account via `solrengine-rpc`, validates base58, 3 retry attempts
-- **AccountPresenter** — structures RPC response into summary fields + hex rows with regions (596 lines, all decoders)
-- **RegionDecoder** — per-program decoders: BPF Upgradeable, BPF Loader (ELF), SPL Token, SPL Mint, Token-2022 extensions
+- **AccountsController** — fetches account via `solrengine-rpc`, validates base58, 3 retry attempts with 8s timeout
+- **AccountPresenter** — structures RPC response into summary fields + hex rows, O(1) region lookup via offset map
+- **RegionDecoder** (`app/presenters/region_decoder.rb`) — per-program decoders: BPF Upgradeable, BPF Loader (ELF), SPL Token, SPL Mint, Token-2022 extensions. Uses `base58` gem for address encoding.
 - **Turbo Frame SPA** — results load inline via `account_result` frame, URL updates with `turbo_action: "advance"`
 
 ### Byte Challenge Game
-- **ChallengesController** — loads random mainnet account (Mints + Token Accounts), picks random field as target
-- **challenge_controller.js** (Stimulus) — streak mode with 3 lives, star rating, 8-bit sound effects, modal popups
-- **ChallengeResult model** — persists streak, attempts, stars per game (requires wallet login)
+- **ChallengesController** — loads random mainnet account (Mints + Token Accounts), picks random field as target. Uses signed challenge tokens (`MessageVerifier`) to prevent streak spoofing — streak, account, and target field are server-verified.
+- **challenge_controller.js** (Stimulus) — streak mode with 3 lives, star rating, 8-bit sound effects, modal popups. Uses Stimulus outlets for cross-controller communication with hex-viewer.
+- **ChallengeResult model** — persists streak, attempts, stars per game (requires wallet login). Validates ranges: stars 0-3, streak 0-200, attempts > 0, base58 address format.
 - **LeaderboardController** — top streaks + recent games
 
 ### Wallet Auth
@@ -48,18 +50,28 @@ The SolRengine Auth Engine uses `isolate_namespace`. All views use **literal str
 
 ### Hex Visualizer
 - `app/controllers/accounts_controller.rb` — fetch, validate, retry, lookup redirect
-- `app/presenters/account_presenter.rb` — hex rows, regions, color map, all decoders
+- `app/presenters/account_presenter.rb` — hex rows, O(1) offset map, color constants, HexRow/HexCell structs
+- `app/presenters/region_decoder.rb` — all per-program decoders, base58 encoding, binary read helpers
 - `app/views/accounts/show.html.erb` — details page (Turbo Frame)
 - `app/views/accounts/_hex_view.html.erb` — hex grid with per-cell data attributes
 - `app/views/pages/home.html.erb` — landing with form, examples
 
 ### Byte Challenge
-- `app/controllers/challenges_controller.rb` — random account + field selection, result saving
+- `app/controllers/challenges_controller.rb` — random account + field selection, signed token generation/verification, result saving
 - `app/controllers/leaderboard_controller.rb` — top streaks + recent games
-- `app/javascript/controllers/challenge_controller.js` — game logic, sounds, modals, saves results
+- `app/javascript/controllers/challenge_controller.js` — game logic, sounds, modals, saves results (uses Stimulus outlets)
 - `app/views/challenges/index.html.erb` — game landing (Practice/Connect & Play CTAs, mini leaderboard)
 - `app/views/challenges/show.html.erb` — game board (gray hex grid, click to guess, modal popups)
 - `app/views/leaderboard/index.html.erb` — leaderboard tables
+
+### Security & Infrastructure
+- `config/initializers/content_security_policy.rb` — CSP with nonce-based script-src
+- `config/initializers/rack_attack.rb` — rate limiting (60 req/min general, 20/min RPC, 10/min save)
+- `config/initializers/sentry.rb` — error tracking (production only, 10% trace sampling)
+
+### Tests
+- `test/presenters/region_decoder_test.rb` — 20 tests for all decoders, base58, edge cases
+- `test/controllers/challenges_controller_test.rb` — 9 tests for token signing, model validations
 
 ### Pixel Art System
 - `app/helpers/pixel_icon_helper.rb` — 14 inline SVG pixel sprites (heart, skull, fire, star, trophy, target, lock, medals, checkmark, cross, magnifier, play)
@@ -91,8 +103,8 @@ POST /lookup              → accounts#lookup (redirect)
 GET  /accounts/:address   → accounts#show (hex view)
 PATCH /network            → networks#update (session network switch)
 GET  /challenges          → challenges#index (game landing)
-GET  /challenge           → challenges#show (play — accepts ?streak=N)
-POST /challenge/result    → challenges#save_result (JSON — save game result)
+GET  /challenge           → challenges#show (play — accepts ?token=signed_token)
+POST /challenge/result    → challenges#save_result (JSON — requires signed challenge_token)
 GET  /leaderboard         → leaderboard#index
 /auth/*                   → SolRengine Auth Engine (login, nonce, verify, logout)
 ```
