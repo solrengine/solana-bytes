@@ -3,6 +3,50 @@ module RegionDecoder
 
   Region = AccountPresenter::Region
 
+  # Educational descriptions for region IDs
+  DESCRIPTIONS = {
+    # SPL Mint fields
+    "mint_auth_option" => "COption flag: 1 = authority is set (Some), 0 = no authority (None).",
+    "mint_authority" => "Can mint new tokens. If None (option=0), the supply is permanently fixed.",
+    "supply" => "Total number of tokens in circulation, stored as a u64 in the smallest denomination.",
+    "decimals" => "Number of decimal places. USDC uses 6 (1 USDC = 1,000,000 base units).",
+    "is_initialized" => "Whether this account has been initialized. Uninitialized accounts cannot be used.",
+    "freeze_auth_option" => "COption flag: 1 = freeze authority is set, 0 = tokens can never be frozen.",
+    "freeze_authority" => "Can freeze token accounts, preventing transfers. Used for compliance.",
+    # SPL Token Account fields
+    "mint" => "The token mint this account holds. Identifies which token (USDC, SOL, etc.).",
+    "token_owner" => "The wallet that owns this token account and can transfer tokens from it.",
+    "amount" => "Token balance in the smallest denomination. Divide by 10^decimals for the display amount.",
+    "delegate_option" => "COption flag: 1 = a delegate is authorized, 0 = no delegate.",
+    "delegate" => "A wallet authorized to transfer or burn tokens on behalf of the owner.",
+    "state" => "Account state: 1=Initialized (active), 2=Frozen (transfers blocked).",
+    "is_native" => "Whether this is a wrapped SOL account. Native SOL is stored as lamports.",
+    "delegated_amount" => "How many tokens the delegate is authorized to transfer.",
+    "close_authority" => "Can close this account and reclaim the rent-exempt SOL balance.",
+    # Stake account fields
+    "stake_state" => "Stake account lifecycle: 0=Uninitialized, 1=Initialized, 2=Delegated, 3=RewardsPool.",
+    "rent_exempt_reserve" => "Minimum SOL balance (lamports) required to keep this account rent-free.",
+    "authorized_staker" => "Can delegate or deactivate the stake. Usually the wallet owner.",
+    "authorized_withdrawer" => "Can withdraw SOL from the stake account. Critical security key.",
+    "lockup_timestamp" => "Unix timestamp before which withdrawals are locked. 0 = no time lock.",
+    "lockup_epoch" => "Epoch before which withdrawals are locked. 0 = no epoch lock.",
+    "lockup_custodian" => "Can modify the lockup. If all-zeros, no custodian is set.",
+    "voter_pubkey" => "The validator node's identity. This pubkey is used to identify the validator on the network.",
+    "stake_amount" => "Amount of SOL delegated to the validator, in lamports.",
+    "activation_epoch" => "Epoch when this stake became active. Takes effect after warmup period.",
+    "deactivation_epoch" => "Epoch when deactivation was requested. Max u64 = still active.",
+    "warmup_cooldown_rate" => "Rate at which stake warms up or cools down across epochs.",
+    "credits_observed" => "Vote credits observed at last stake redelegation or reward claim.",
+    # Vote account fields
+    "vote_version" => "Vote account version. Typically 1 for current validators.",
+    "node_pubkey" => "The validator's identity pubkey. Used to identify the node on the network.",
+    "authorized_voter_epoch" => "Epoch for which the authorized voter is valid.",
+    "authorized_voter" => "Pubkey authorized to submit votes. Usually the validator's vote key.",
+    "authorized_vote_withdrawer" => "Can withdraw lamports from the vote account. Critical security key.",
+    "commission" => "Percentage of staking rewards the validator keeps. 0-100%.",
+    "vote_history" => "Variable-length data: recent votes, epoch credits, and last timestamp.",
+  }.freeze
+
   def decode(owner, bytes)
     regions = case owner
     when "BPFLoaderUpgradeab1e11111111111111111111111"
@@ -19,6 +63,10 @@ module RegionDecoder
       else
         []
       end
+    when "Stake11111111111111111111111111111111111111111"
+      decode_stake_account(bytes)
+    when "Vote111111111111111111111111111111111111111111"
+      decode_vote_account(bytes)
     else
       # Try ELF detection for any executable data
       if bytes.length >= 4 && bytes[0..3] == [ 0x7f, 0x45, 0x4c, 0x46 ]
@@ -26,6 +74,11 @@ module RegionDecoder
       else
         []
       end
+    end
+
+    # Attach descriptions to regions
+    regions.each do |r|
+      r.description ||= DESCRIPTIONS[r.id]
     end
 
     # Fill remaining bytes as "Program Bytecode" or "Data"
@@ -144,6 +197,14 @@ module RegionDecoder
     bytes[offset, 2].pack("C*").unpack1("v")
   end
 
+  def read_i16(bytes, offset)
+    bytes[offset, 2].pack("C*").unpack1("s<")
+  end
+
+  def read_i64(bytes, offset)
+    bytes[offset, 8].pack("C*").unpack1("q<")
+  end
+
   def decode_spl_mint(bytes)
     # SPL Mint layout: 82 bytes
     # 0-3:   mint_authority_option (u32)
@@ -255,6 +316,105 @@ module RegionDecoder
     regions
   end
 
+  # --- Stake Account Decoder ---
+
+  STAKE_STATES = {
+    0 => "Uninitialized",
+    1 => "Initialized",
+    2 => "Delegated",
+    3 => "RewardsPool"
+  }.freeze
+
+  def decode_stake_account(bytes)
+    return [] if bytes.length < 4
+
+    state = read_u32(bytes, 0)
+    state_label = STAKE_STATES[state] || "Unknown (#{state})"
+
+    regions = [
+      Region.new(id: "stake_state", name: "State", start: 0, length: 4, color: "yellow", decoded_value: state_label)
+    ]
+
+    # Meta section (offset 4-123)
+    return regions if bytes.length < 124
+
+    rent_exempt = read_u64(bytes, 4)
+    regions << Region.new(id: "rent_exempt_reserve", name: "Rent Exempt Reserve", start: 4, length: 8, color: "orange", decoded_value: "#{rent_exempt} lamports")
+
+    staker = encode_base58(bytes[12, 32])
+    regions << Region.new(id: "authorized_staker", name: "Authorized Staker", start: 12, length: 32, color: "green", decoded_value: staker)
+
+    withdrawer = encode_base58(bytes[44, 32])
+    regions << Region.new(id: "authorized_withdrawer", name: "Authorized Withdrawer", start: 44, length: 32, color: "green", decoded_value: withdrawer)
+
+    lockup_ts = read_i64(bytes, 76)
+    regions << Region.new(id: "lockup_timestamp", name: "Lockup: Unix Timestamp", start: 76, length: 8, color: "orange", decoded_value: lockup_ts.to_s)
+
+    lockup_epoch = read_u64(bytes, 84)
+    regions << Region.new(id: "lockup_epoch", name: "Lockup: Epoch", start: 84, length: 8, color: "orange", decoded_value: lockup_epoch.to_s)
+
+    custodian = encode_base58(bytes[92, 32])
+    regions << Region.new(id: "lockup_custodian", name: "Lockup: Custodian", start: 92, length: 32, color: "cyan", decoded_value: custodian)
+
+    # Stake section (only if state >= Delegated, offset 124-195)
+    if state >= 2 && bytes.length >= 196
+      voter = encode_base58(bytes[124, 32])
+      regions << Region.new(id: "voter_pubkey", name: "Voter Pubkey", start: 124, length: 32, color: "blue", decoded_value: voter)
+
+      stake_amt = read_u64(bytes, 156)
+      regions << Region.new(id: "stake_amount", name: "Stake", start: 156, length: 8, color: "purple", decoded_value: "#{stake_amt} lamports")
+
+      activation = read_u64(bytes, 164)
+      regions << Region.new(id: "activation_epoch", name: "Activation Epoch", start: 164, length: 8, color: "blue", decoded_value: activation.to_s)
+
+      deactivation = read_u64(bytes, 172)
+      deactivation_label = deactivation == 0xFFFFFFFFFFFFFFFF ? "Active (max u64)" : deactivation.to_s
+      regions << Region.new(id: "deactivation_epoch", name: "Deactivation Epoch", start: 172, length: 8, color: "blue", decoded_value: deactivation_label)
+
+      regions << Region.new(id: "warmup_cooldown_rate", name: "Warmup/Cooldown Rate", start: 180, length: 8, color: "gray", decoded_value: "8 raw bytes")
+
+      credits = read_u64(bytes, 188)
+      regions << Region.new(id: "credits_observed", name: "Credits Observed", start: 188, length: 8, color: "purple", decoded_value: credits.to_s)
+    end
+
+    regions
+  end
+
+  # --- Vote Account Decoder ---
+
+  def decode_vote_account(bytes)
+    return [] if bytes.length < 109
+
+    version = read_u32(bytes, 0)
+    regions = [
+      Region.new(id: "vote_version", name: "Version", start: 0, length: 4, color: "yellow", decoded_value: version.to_s)
+    ]
+
+    node_pubkey = encode_base58(bytes[4, 32])
+    regions << Region.new(id: "node_pubkey", name: "Node Pubkey", start: 4, length: 32, color: "blue", decoded_value: node_pubkey)
+
+    auth_voter_epoch = read_u64(bytes, 36)
+    regions << Region.new(id: "authorized_voter_epoch", name: "Authorized Voter Epoch", start: 36, length: 8, color: "orange", decoded_value: auth_voter_epoch.to_s)
+
+    auth_voter = encode_base58(bytes[44, 32])
+    regions << Region.new(id: "authorized_voter", name: "Authorized Voter", start: 44, length: 32, color: "green", decoded_value: auth_voter)
+
+    auth_withdrawer = encode_base58(bytes[76, 32])
+    regions << Region.new(id: "authorized_vote_withdrawer", name: "Authorized Withdrawer", start: 76, length: 32, color: "green", decoded_value: auth_withdrawer)
+
+    commission = bytes[108]
+    regions << Region.new(id: "commission", name: "Commission", start: 108, length: 1, color: "purple", decoded_value: "#{commission}%")
+
+    # Remaining bytes are variable-length vote history
+    if bytes.length > 109
+      regions << Region.new(id: "vote_history", name: "Vote History", start: 109, length: bytes.length - 109, color: "gray", decoded_value: "#{bytes.length - 109} bytes")
+    end
+
+    regions
+  end
+
+  # --- Token-2022 Extensions ---
+
   EXTENSION_TYPES = {
     0 => "Uninitialized",
     1 => "TransferFeeConfig",
@@ -319,7 +479,15 @@ module RegionDecoder
       )
       pos += 4
 
-      break if ext_length == 0 || pos + ext_length > bytes.length
+      # Zero-length extensions (ImmutableOwner, NonTransferable)
+      if ext_length == 0
+        ext_decoded = decode_extension_data(ext_type_raw, bytes, pos, 0)
+        # Zero-length extensions have no data region to add
+        ext_index += 1
+        next
+      end
+
+      break if pos + ext_length > bytes.length
 
       # Extension data — decode known extensions
       ext_decoded = decode_extension_data(ext_type_raw, bytes, pos, ext_length)
@@ -356,6 +524,25 @@ module RegionDecoder
 
   def decode_extension_data(ext_type, bytes, offset, length)
     case ext_type
+    when 1 # TransferFeeConfig
+      fields = []
+      if length >= 32
+        fields << { name: "Transfer Fee Config Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }
+      end
+      if length >= 64
+        fields << { name: "Withdraw Withheld Authority", offset: 32, length: 32, value: encode_base58(bytes[offset + 32, 32]) }
+      end
+      if length > 64
+        fields << { name: "Fee Config Data", offset: 64, length: length - 64, value: "#{length - 64} bytes" }
+      end
+      fields
+    when 2 # TransferFeeAmount
+      if length >= 8
+        withheld = read_u64(bytes, offset)
+        [{ name: "Withheld Amount", offset: 0, length: 8, value: withheld.to_s }]
+      else
+        []
+      end
     when 3 # MintCloseAuthority
       if length >= 32
         [{ name: "Close Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }]
@@ -371,6 +558,46 @@ module RegionDecoder
         else "Unknown (#{bytes[offset]})"
         end
         [{ name: "Default State", offset: 0, length: 1, value: state }]
+      else
+        []
+      end
+    when 7 # ImmutableOwner — 0 bytes, presence only
+      []
+    when 8 # MemoTransfer
+      if length >= 1
+        required = bytes[offset] == 1 ? "Required" : "Not Required"
+        [{ name: "Require Incoming Memos", offset: 0, length: 1, value: required }]
+      else
+        []
+      end
+    when 9 # NonTransferable — 0 bytes, presence only
+      []
+    when 10 # InterestBearingConfig
+      fields = []
+      if length >= 32
+        fields << { name: "Rate Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }
+      end
+      if length >= 40
+        init_ts = read_i64(bytes, offset + 32)
+        fields << { name: "Initialization Timestamp", offset: 32, length: 8, value: init_ts.to_s }
+      end
+      if length >= 42
+        pre_rate = read_i16(bytes, offset + 40)
+        fields << { name: "Pre-update Average Rate", offset: 40, length: 2, value: "#{pre_rate} bps" }
+      end
+      if length >= 50
+        last_ts = read_i64(bytes, offset + 42)
+        fields << { name: "Last Update Timestamp", offset: 42, length: 8, value: last_ts.to_s }
+      end
+      if length >= 52
+        current_rate = read_i16(bytes, offset + 50)
+        fields << { name: "Current Rate", offset: 50, length: 2, value: "#{current_rate} bps" }
+      end
+      fields
+    when 11 # CpiGuard
+      if length >= 1
+        locked = bytes[offset] == 1 ? "Locked" : "Unlocked"
+        [{ name: "Lock CPI", offset: 0, length: 1, value: locked }]
       else
         []
       end
