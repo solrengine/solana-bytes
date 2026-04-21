@@ -31,4 +31,13 @@ document.addEventListener("turbo:before-visit", (event) => {
   }
 })
 
+// Hide the overlay before Turbo caches the page and after every navigation,
+// so browser back/forward doesn't restore a cached snapshot with the overlay visible.
+const hideGameLoading = () => {
+  const overlay = document.getElementById("game-loading")
+  if (overlay) overlay.classList.add("hidden")
+}
+document.addEventListener("turbo:before-cache", hideGameLoading)
+document.addEventListener("turbo:load", hideGameLoading)
+
 export { application }
