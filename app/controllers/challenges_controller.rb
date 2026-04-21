@@ -5,24 +5,29 @@ class ChallengesController < ApplicationController
 
   # Compact accounts only — keeps the hex grid manageable for gameplay
   CHALLENGE_ACCOUNTS = [
-    # SPL Mints (82 bytes, 7-8 fields) — easier
-    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
-    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint" },
-    { address: "So11111111111111111111111111111111111111112", label: "Wrapped SOL Mint" },
-    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint" },
-    # Token Accounts (165 bytes, 11 fields) — harder
-    { address: "CfWX7o2TswwbxusJ4hCaPobu2jLCb1hfXuXJQjVq3jQF", label: "Phantom wSOL" },
-    { address: "ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU", label: "Jupiter USDC" },
-    { address: "9bZucpaB5cSFHD5DSTsvZftUqqP1KgC8SGQkVDu42BBe", label: "Binance USDC" },
-    { address: "8hGBwecvELGSWQkfA64biQtzQKLoa8GoMKvWevCWwJbo", label: "Binance USDT" },
-    # Stake Accounts (200 bytes, 13 fields — intermediate)
-    { address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", label: "Stake Account" },
-    { address: "EmutJdbKJ55hUyth15bar8ZxDCchR44udAXWYg9eLLDL", label: "Stake Account" },
-    # Vote Accounts (3762 bytes, 6 fields — intermediate; display capped to 512 bytes)
-    { address: "J2nUHEAgZFRyuJbFjdqPrAa9gyWDuc7hErtDQHPhsYRp", label: "Vote Account" }
+    # SPL Mints (82 bytes, 7-8 fields)
+    { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint",        tier: :easy },
+    { address: "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB", label: "USDT Mint",        tier: :easy },
+    { address: "So11111111111111111111111111111111111111112",  label: "Wrapped SOL Mint", tier: :easy },
+    { address: "7dHbWXmci3dT8UFYWYZweBLXgycu7Y3iL6trKn1Y7ARj", label: "stSOL Mint",       tier: :easy },
+    # Token Accounts (165 bytes, 11 fields)
+    { address: "CfWX7o2TswwbxusJ4hCaPobu2jLCb1hfXuXJQjVq3jQF", label: "Phantom wSOL",  tier: :medium },
+    { address: "ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU", label: "Jupiter USDC",  tier: :medium },
+    { address: "9bZucpaB5cSFHD5DSTsvZftUqqP1KgC8SGQkVDu42BBe", label: "Binance USDC",  tier: :medium },
+    { address: "8hGBwecvELGSWQkfA64biQtzQKLoa8GoMKvWevCWwJbo", label: "Binance USDT",  tier: :medium },
+    # Stake Accounts (200 bytes, 13 fields) + Vote Account (3762 bytes)
+    { address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", label: "Stake Account", tier: :hard },
+    { address: "EmutJdbKJ55hUyth15bar8ZxDCchR44udAXWYg9eLLDL", label: "Stake Account", tier: :hard },
+    { address: "J2nUHEAgZFRyuJbFjdqPrAa9gyWDuc7hErtDQHPhsYRp", label: "Vote Account",  tier: :hard }
   ].freeze
 
   VALID_ADDRESSES = CHALLENGE_ACCOUNTS.map { |a| a[:address] }.to_set.freeze
+
+  TIERS = {
+    "easy"   => { label: "Easy",   description: "82-byte Mints — 7 fields",          color: "text-green-400" },
+    "medium" => { label: "Medium", description: "165-byte Token Accounts — 11 fields", color: "text-yellow-400" },
+    "hard"   => { label: "Hard",   description: "Stake & Vote — 13+ fields",         color: "text-red-400" }
+  }.freeze
 
   MAX_DATA_DISPLAY = 512
   MAX_WRONG_ATTEMPTS = 3
@@ -30,10 +35,21 @@ class ChallengesController < ApplicationController
   def index
     @user_stats = current_user_stats
     @top_streaks = ChallengeResult.includes(:user).leaderboard.limit(5)
+    @active_tier = resolved_tier
   end
 
   def show
-    account_info = CHALLENGE_ACCOUNTS.sample
+    @tier = resolved_tier
+    session[:challenge_tier] = @tier
+
+    pool = challenge_pool(@tier)
+    account_info = pool.sample
+
+    if account_info.nil?
+      flash[:alert] = "No challenge accounts available for this tier."
+      return redirect_to challenges_path
+    end
+
     @address = account_info[:address]
     @account_label = account_info[:label]
     @streak = verified_streak
@@ -74,11 +90,11 @@ class ChallengesController < ApplicationController
     })
 
     # Pre-generate signed tokens for correct answer (streak+1) with 1/2/3 star variants
-    @next_token_3star = next_challenge_token(@streak + 1, @total_stars + 3)
-    @next_token_2star = next_challenge_token(@streak + 1, @total_stars + 2)
-    @next_token_1star = next_challenge_token(@streak + 1, @total_stars + 1)
+    @next_token_3star = next_challenge_token(@streak + 1, @total_stars + 3, @tier)
+    @next_token_2star = next_challenge_token(@streak + 1, @total_stars + 2, @tier)
+    @next_token_1star = next_challenge_token(@streak + 1, @total_stars + 1, @tier)
 
-    ahoy.track "challenge_started", mode: logged_in? ? "ranked" : "practice"
+    ahoy.track "challenge_started", mode: logged_in? ? "ranked" : "practice", tier: @tier || "all"
   end
 
   def save_result
@@ -135,9 +151,21 @@ class ChallengesController < ApplicationController
     }
   end
 
-  def next_challenge_token(streak, total_stars)
+  def next_challenge_token(streak, total_stars, tier = nil)
     token = challenge_verifier.generate({ streak: streak, total_stars: total_stars, issued_at: Time.current.to_i })
-    "/challenge?token=#{CGI.escape(token)}"
+    url = "/challenge?token=#{CGI.escape(token)}"
+    url += "&tier=#{tier}" if tier.present?
+    url
+  end
+
+  def resolved_tier
+    candidate = (params[:tier] || session[:challenge_tier]).to_s
+    TIERS.key?(candidate) ? candidate : nil
+  end
+
+  def challenge_pool(tier)
+    return CHALLENGE_ACCOUNTS if tier.nil?
+    CHALLENGE_ACCOUNTS.select { |a| a[:tier].to_s == tier }
   end
 
   def challenge_verifier

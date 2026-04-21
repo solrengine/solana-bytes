@@ -12,14 +12,37 @@
       Build streaks, earn stars, climb the leaderboard.
     </p>
 
+    <%# Difficulty tier selector %>
+    <div class="mb-5">
+      <p class="text-gray-500 mb-3" style="font-size:10px">Difficulty</p>
+      <div class="flex flex-wrap items-center justify-center gap-2">
+        <% tiers_with_all = [[nil, "All", "Every account type"]] + ChallengesController::TIERS.map { |k, v| [k, v[:label], v[:description]] } %>
+        <% tiers_with_all.each do |key, label, description| %>
+          <% active = (@active_tier || nil) == key %>
+          <%= link_to(
+                "/challenges#{"?tier=#{key}" if key}",
+                title: description,
+                class: "px-3 py-2 border-2 #{active ? 'border-purple-500 text-purple-300 bg-purple-900/30' : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'}",
+                style: "font-size:10px"
+              ) { label } %>
+        <% end %>
+      </div>
+      <% if @active_tier %>
+        <p class="text-gray-500 mt-3" style="font-size:9px">
+          <%= ChallengesController::TIERS.dig(@active_tier, :description) %>
+        </p>
+      <% end %>
+    </div>
+
     <%# Play buttons %>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+      <% play_url = "/challenge#{"?tier=#{@active_tier}" if @active_tier}" %>
       <% if logged_in? %>
-        <%= link_to "/challenge", class: "pixel-btn", style: "font-size:12px" do %>
+        <%= link_to play_url, class: "pixel-btn", style: "font-size:12px" do %>
           <%= pixel_icon(:play, size: 18) %> Play Challenge
         <% end %>
       <% else %>
-        <%= link_to "/challenge", class: "pixel-btn pixel-btn-secondary", style: "font-size:12px" do %>
+        <%= link_to play_url, class: "pixel-btn pixel-btn-secondary", style: "font-size:12px" do %>
           <%= pixel_icon(:play, size: 18) %> Practice
         <% end %>
         <%= link_to "/auth/login", class: "pixel-btn", style: "font-size:12px" do %>
