@@ -55,6 +55,84 @@ class RegionDecoderTest < ActiveSupport::TestCase
     bytes
   end
 
+  def build_stake_bytes(state: 2, rent_exempt: 2282880, lockup_ts: 0, lockup_epoch: 0, stake_amount: 1_000_000_000)
+    bytes = []
+
+    # State (u32 LE)
+    bytes += [ state ].pack("V").bytes
+
+    # Meta: Rent Exempt Reserve (u64 LE)
+    bytes += [ rent_exempt ].pack("Q<").bytes
+
+    # Authorized Staker (32 bytes)
+    bytes += (1..32).to_a
+
+    # Authorized Withdrawer (32 bytes)
+    bytes += (33..64).to_a
+
+    # Lockup: Unix Timestamp (i64 LE)
+    bytes += [ lockup_ts ].pack("q<").bytes
+
+    # Lockup: Epoch (u64 LE)
+    bytes += [ lockup_epoch ].pack("Q<").bytes
+
+    # Lockup: Custodian (32 bytes)
+    bytes += [ 0 ] * 32
+
+    # Stake section (only for Delegated state)
+    if state >= 2
+      # Voter Pubkey (32 bytes)
+      bytes += (65..96).to_a
+
+      # Stake (u64 LE)
+      bytes += [ stake_amount ].pack("Q<").bytes
+
+      # Activation Epoch (u64 LE)
+      bytes += [ 100 ].pack("Q<").bytes
+
+      # Deactivation Epoch (u64 LE) — max u64 = still active
+      bytes += [ 0xFFFFFFFFFFFFFFFF ].pack("Q<").bytes
+
+      # Warmup Cooldown Rate (8 bytes)
+      bytes += [ 0 ] * 8
+
+      # Credits Observed (u64 LE)
+      bytes += [ 12345 ].pack("Q<").bytes
+    end
+
+    bytes
+  end
+
+  def build_vote_bytes(version: 1, commission: 10)
+    bytes = []
+
+    # Version (u32 LE)
+    bytes += [ version ].pack("V").bytes
+
+    # Node Pubkey (32 bytes)
+    bytes += (1..32).to_a
+
+    # Authorized Voter Epoch (u64 LE)
+    bytes += [ 500 ].pack("Q<").bytes
+
+    # Authorized Voter (32 bytes)
+    bytes += (33..64).to_a
+
+    # Authorized Withdrawer (32 bytes)
+    bytes += (65..96).to_a
+
+    # Commission (u8)
+    bytes << commission
+
+    # Some vote history data
+    bytes += [ 0 ] * 50
+
+    bytes
+  end
+
+  STAKE_OWNER = "Stake11111111111111111111111111111111111111"
+  VOTE_OWNER = "Vote111111111111111111111111111111111111111"
+
   # --- SPL Mint Tests ---
 
   test "decode_spl_mint returns correct number of regions for basic mint" do
@@ -284,5 +362,246 @@ class RegionDecoderTest < ActiveSupport::TestCase
 
     assert_equal 1, regions.length
     assert_equal "Data", regions.first.name
+  end
+
+  # --- Stake Account Tests ---
+
+  test "decode_stake_account returns correct regions for delegated stake" do
+    bytes = build_stake_bytes(state: 2)
+    assert_equal 196, bytes.length
+
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+    named_regions = regions.reject { |r| r.name == "Data" }
+
+    # state + rent_exempt + staker + withdrawer + lockup_ts + lockup_epoch + custodian
+    # + voter + stake + activation + deactivation + warmup + credits = 13
+    assert_equal 13, named_regions.length
+  end
+
+  test "decode_stake_account parses state correctly" do
+    { 0 => "Uninitialized", 1 => "Initialized", 2 => "Delegated", 3 => "RewardsPool" }.each do |val, label|
+      bytes = build_stake_bytes(state: val)
+      regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+      state_region = regions.find { |r| r.id == "stake_state" }
+      assert_equal label, state_region.decoded_value, "State #{val} should decode to #{label}"
+    end
+  end
+
+  test "decode_stake_account parses rent exempt reserve" do
+    bytes = build_stake_bytes(rent_exempt: 2282880)
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+
+    rent_region = regions.find { |r| r.id == "rent_exempt_reserve" }
+    assert_not_nil rent_region
+    assert_equal "2282880 lamports", rent_region.decoded_value
+    assert_equal 4, rent_region.start
+    assert_equal 8, rent_region.length
+  end
+
+  test "decode_stake_account parses stake amount for delegated" do
+    bytes = build_stake_bytes(state: 2, stake_amount: 5_000_000_000)
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+
+    stake_region = regions.find { |r| r.id == "stake_amount" }
+    assert_not_nil stake_region
+    assert_equal "5000000000 lamports", stake_region.decoded_value
+  end
+
+  test "decode_stake_account initialized only has no stake section" do
+    bytes = build_stake_bytes(state: 1)
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+
+    voter_region = regions.find { |r| r.id == "voter_pubkey" }
+    assert_nil voter_region, "Initialized stake should not have voter pubkey"
+  end
+
+  test "decode_stake_account deactivation epoch shows Active for max u64" do
+    bytes = build_stake_bytes(state: 2)
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+
+    deact_region = regions.find { |r| r.id == "deactivation_epoch" }
+    assert_not_nil deact_region
+    assert_equal "Active (max u64)", deact_region.decoded_value
+  end
+
+  test "decode_stake_account regions have no gaps for delegated" do
+    bytes = build_stake_bytes(state: 2)
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+
+    sorted = regions.sort_by(&:start)
+    sorted.each_cons(2) do |a, b|
+      assert_equal a.start + a.length, b.start,
+        "Gap or overlap between '#{a.name}' (#{a.start}+#{a.length}) and '#{b.name}' (#{b.start})"
+    end
+  end
+
+  # --- Vote Account Tests ---
+
+  test "decode_vote_account returns correct regions" do
+    bytes = build_vote_bytes(version: 1, commission: 7)
+    regions = RegionDecoder.decode(VOTE_OWNER, bytes)
+    named_regions = regions.reject { |r| r.name == "Data" }
+
+    # version + node_pubkey + auth_voter_epoch + auth_voter + auth_withdrawer + commission + vote_history = 7
+    assert_equal 7, named_regions.length
+  end
+
+  test "decode_vote_account parses commission" do
+    bytes = build_vote_bytes(commission: 8)
+    regions = RegionDecoder.decode(VOTE_OWNER, bytes)
+
+    commission_region = regions.find { |r| r.id == "commission" }
+    assert_not_nil commission_region
+    assert_equal "8%", commission_region.decoded_value
+    assert_equal 108, commission_region.start
+    assert_equal 1, commission_region.length
+  end
+
+  test "decode_vote_account parses node pubkey" do
+    bytes = build_vote_bytes
+    regions = RegionDecoder.decode(VOTE_OWNER, bytes)
+
+    node_region = regions.find { |r| r.id == "node_pubkey" }
+    assert_not_nil node_region
+    assert_equal 4, node_region.start
+    assert_equal 32, node_region.length
+    assert node_region.decoded_value.length > 0
+  end
+
+  test "decode_vote_account includes vote history for remaining bytes" do
+    bytes = build_vote_bytes
+    regions = RegionDecoder.decode(VOTE_OWNER, bytes)
+
+    history_region = regions.find { |r| r.id == "vote_history" }
+    assert_not_nil history_region
+    assert_equal "Vote History", history_region.name
+    assert_equal "gray", history_region.color
+    assert_equal 109, history_region.start
+  end
+
+  test "decode_vote_account regions cover all bytes" do
+    bytes = build_vote_bytes
+    regions = RegionDecoder.decode(VOTE_OWNER, bytes)
+
+    total_covered = regions.sum(&:length)
+    assert_equal bytes.length, total_covered
+  end
+
+  # --- Token-2022 Extension Tests ---
+
+  test "decode_extension_data for TransferFeeConfig" do
+    # Build minimal TransferFeeConfig: 2 pubkeys + some fee data
+    ext_data = (1..32).to_a + (33..64).to_a + [ 0 ] * 44
+    result = RegionDecoder.send(:decode_extension_data, 1, ext_data, 0, ext_data.length)
+
+    assert_equal 3, result.length
+    assert_equal "Transfer Fee Config Authority", result[0][:name]
+    assert_equal 32, result[0][:length]
+    assert_equal "Withdraw Withheld Authority", result[1][:name]
+    assert_equal 32, result[1][:length]
+    assert_equal "Fee Config Data", result[2][:name]
+  end
+
+  test "decode_extension_data for TransferFeeAmount" do
+    ext_data = [ 100, 0, 0, 0, 0, 0, 0, 0 ] # u64 LE = 100
+    result = RegionDecoder.send(:decode_extension_data, 2, ext_data, 0, 8)
+
+    assert_equal 1, result.length
+    assert_equal "Withheld Amount", result[0][:name]
+    assert_equal "100", result[0][:value]
+  end
+
+  test "decode_extension_data for ImmutableOwner" do
+    # ImmutableOwner has 0 bytes of data
+    result = RegionDecoder.send(:decode_extension_data, 7, [], 0, 0)
+    assert_equal 0, result.length, "ImmutableOwner is a zero-length extension"
+  end
+
+  test "decode_extension_data for NonTransferable" do
+    # NonTransferable has 0 bytes of data
+    result = RegionDecoder.send(:decode_extension_data, 9, [], 0, 0)
+    assert_equal 0, result.length, "NonTransferable is a zero-length extension"
+  end
+
+  test "decode_extension_data for MemoTransfer" do
+    ext_data = [ 1 ] # required = true
+    result = RegionDecoder.send(:decode_extension_data, 8, ext_data, 0, 1)
+
+    assert_equal 1, result.length
+    assert_equal "Require Incoming Memos", result[0][:name]
+    assert_equal "Required", result[0][:value]
+  end
+
+  test "decode_extension_data for CpiGuard" do
+    ext_data = [ 1 ] # locked
+    result = RegionDecoder.send(:decode_extension_data, 11, ext_data, 0, 1)
+
+    assert_equal 1, result.length
+    assert_equal "Lock CPI", result[0][:name]
+    assert_equal "Locked", result[0][:value]
+  end
+
+  test "decode_extension_data for InterestBearingConfig" do
+    ext_data = []
+    # Rate Authority (32 bytes)
+    ext_data += (1..32).to_a
+    # Initialization Timestamp (i64 LE)
+    ext_data += [ 1_700_000_000 ].pack("q<").bytes
+    # Pre-update Average Rate (i16 LE)
+    ext_data += [ 500 ].pack("s<").bytes
+    # Last Update Timestamp (i64 LE)
+    ext_data += [ 1_700_100_000 ].pack("q<").bytes
+    # Current Rate (i16 LE)
+    ext_data += [ 750 ].pack("s<").bytes
+
+    result = RegionDecoder.send(:decode_extension_data, 10, ext_data, 0, ext_data.length)
+
+    assert_equal 5, result.length
+    assert_equal "Rate Authority", result[0][:name]
+    assert_equal 32, result[0][:length]
+    assert_equal "Initialization Timestamp", result[1][:name]
+    assert_equal "1700000000", result[1][:value]
+    assert_equal "Pre-update Average Rate", result[2][:name]
+    assert_equal "500 bps", result[2][:value]
+    assert_equal "Last Update Timestamp", result[3][:name]
+    assert_equal "Current Rate", result[4][:name]
+    assert_equal "750 bps", result[4][:value]
+  end
+
+  # --- Educational Descriptions Tests ---
+
+  test "regions include descriptions for known field IDs" do
+    bytes = build_spl_mint_bytes(mint_authority: (1..32).to_a, supply: 1000)
+    regions = RegionDecoder.decode(USDC_MINT_OWNER, bytes)
+
+    supply_region = regions.find { |r| r.id == "supply" }
+    assert_not_nil supply_region.description
+    assert_includes supply_region.description, "smallest denomination"
+
+    decimals_region = regions.find { |r| r.id == "decimals" }
+    assert_not_nil decimals_region.description
+    assert_includes decimals_region.description, "USDC"
+  end
+
+  test "stake account regions include descriptions" do
+    bytes = build_stake_bytes(state: 2)
+    regions = RegionDecoder.decode(STAKE_OWNER, bytes)
+
+    staker_region = regions.find { |r| r.id == "authorized_staker" }
+    assert_not_nil staker_region.description
+    assert_includes staker_region.description, "delegate"
+
+    voter_region = regions.find { |r| r.id == "voter_pubkey" }
+    assert_not_nil voter_region.description
+    assert_includes voter_region.description, "validator"
+  end
+
+  test "vote account regions include descriptions" do
+    bytes = build_vote_bytes(commission: 5)
+    regions = RegionDecoder.decode(VOTE_OWNER, bytes)
+
+    commission_region = regions.find { |r| r.id == "commission" }
+    assert_not_nil commission_region.description
+    assert_includes commission_region.description, "staking rewards"
   end
 end

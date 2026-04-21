@@ -60,6 +60,9 @@
                   data-region-decoded="<%= cell.region.decoded_value %>"
                   data-region-start="<%= cell.region.start %>"
                   data-region-length="<%= cell.region.length %>"
+                  <% if cell.region.description %>
+                    data-region-description="<%= cell.region.description %>"
+                  <% end %>
                 <% end %>
               ><%= cell.hex %></td>
             <% end %>

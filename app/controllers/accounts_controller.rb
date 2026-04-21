@@ -4,7 +4,8 @@ class AccountsController < ApplicationController
   EXAMPLE_ADDRESSES = [
     { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
     { address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", label: "Token Program (ELF)" },
-    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" }
+    { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" },
+    { address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", label: "Stake Account" }
   ].freeze
 
   MAX_DATA_DISPLAY = 10_240 # 10KB

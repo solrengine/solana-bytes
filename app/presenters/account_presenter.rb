@@ -75,7 +75,7 @@ class AccountPresenter
   }.freeze
 
   # A named region of bytes with a color and decoded value
-  Region = Struct.new(:id, :name, :start, :length, :color, :decoded_value, keyword_init: true) do
+  Region = Struct.new(:id, :name, :start, :length, :color, :decoded_value, :description, keyword_init: true) do
     def text_color
       REGION_COLORS.dig(color, :text) || "#d1d5db"
     end
@@ -151,5 +151,4 @@ class AccountPresenter
       region&.bg_color || "rgba(107,114,128,0.15)"
     end
   end
-
 end

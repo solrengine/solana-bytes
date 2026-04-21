@@ -113,6 +113,7 @@ export default class extends Controller {
     const regionDecoded = cell.dataset.regionDecoded
     const regionStart = parseInt(cell.dataset.regionStart)
     const regionLength = parseInt(cell.dataset.regionLength)
+    const regionDescription = cell.dataset.regionDescription
     const offset = parseInt(cell.dataset.offset)
     const hex = cell.dataset.value
     const decimal = parseInt(cell.dataset.decimal)
@@ -123,6 +124,9 @@ export default class extends Controller {
       html += `<div style="color:#a78bfa;font-weight:600;margin-bottom:4px;font-size:11px">${escapeHtml(regionName)}</div>`
       if (regionDecoded) {
         html += `<div style="color:#86efac;word-break:break-all;margin-bottom:4px">${escapeHtml(regionDecoded)}</div>`
+      }
+      if (regionDescription) {
+        html += `<div style="color:#9ca3af;font-size:9px;margin-bottom:4px;line-height:1.4">${escapeHtml(regionDescription)}</div>`
       }
       html += `<div style="color:#4b5563;font-size:10px">[${regionStart}:${regionStart + regionLength - 1}] ${regionLength} bytes</div>`
     }

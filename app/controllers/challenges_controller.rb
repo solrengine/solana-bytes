@@ -15,6 +15,11 @@ class ChallengesController < ApplicationController
     { address: "ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU", label: "Jupiter USDC" },
     { address: "9bZucpaB5cSFHD5DSTsvZftUqqP1KgC8SGQkVDu42BBe", label: "Binance USDC" },
     { address: "8hGBwecvELGSWQkfA64biQtzQKLoa8GoMKvWevCWwJbo", label: "Binance USDT" },
+    # Stake Accounts (200 bytes, 13 fields — intermediate)
+    { address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", label: "Stake Account" },
+    { address: "EmutJdbKJ55hUyth15bar8ZxDCchR44udAXWYg9eLLDL", label: "Stake Account" },
+    # Vote Accounts (3762 bytes, 6 fields — intermediate; display capped to 512 bytes)
+    { address: "J2nUHEAgZFRyuJbFjdqPrAa9gyWDuc7hErtDQHPhsYRp", label: "Vote Account" }
   ].freeze
 
   VALID_ADDRESSES = CHALLENGE_ACCOUNTS.map { |a| a[:address] }.to_set.freeze
