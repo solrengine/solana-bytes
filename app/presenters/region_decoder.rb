@@ -63,9 +63,9 @@ module RegionDecoder
       else
         []
       end
-    when "Stake11111111111111111111111111111111111111111"
+    when "Stake11111111111111111111111111111111111111"
       decode_stake_account(bytes)
-    when "Vote111111111111111111111111111111111111111111"
+    when "Vote111111111111111111111111111111111111111"
       decode_vote_account(bytes)
     else
       # Try ELF detection for any executable data
