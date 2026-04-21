@@ -132,6 +132,80 @@ class RegionDecoderTest < ActiveSupport::TestCase
 
   STAKE_OWNER = "Stake11111111111111111111111111111111111111"
   VOTE_OWNER = "Vote111111111111111111111111111111111111111"
+  METAPLEX_OWNER = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+
+  # Builds a Metaplex MetadataV1 account with padded strings (modern layout).
+  # Returns bytes matching the Borsh encoding the Metaplex program produces.
+  def build_metaplex_metadata_bytes(name: "Test NFT", symbol: "TST", uri: "https://example.com/m.json", seller_fee: 500, creators: [], primary_sale: false, mutable: true, edition_nonce: 255, token_standard: 4, collection_key: nil)
+    bytes = []
+    bytes << 4                                   # key = MetadataV1
+    bytes += (1..32).to_a                        # update_authority
+    bytes += (33..64).to_a                       # mint
+
+    # Data: name (padded to 32)
+    padded_name = name.dup.force_encoding("UTF-8").ljust(32, "\x00")
+    bytes += [ 32 ].pack("V").bytes
+    bytes += padded_name.bytes
+
+    # symbol (padded to 10)
+    padded_sym = symbol.dup.force_encoding("UTF-8").ljust(10, "\x00")
+    bytes += [ 10 ].pack("V").bytes
+    bytes += padded_sym.bytes
+
+    # uri (padded to 200)
+    padded_uri = uri.dup.force_encoding("UTF-8").ljust(200, "\x00")
+    bytes += [ 200 ].pack("V").bytes
+    bytes += padded_uri.bytes
+
+    # seller_fee_basis_points (u16)
+    bytes += [ seller_fee ].pack("v").bytes
+
+    # creators Option<Vec<Creator>>
+    if creators.any?
+      bytes << 1
+      bytes += [ creators.length ].pack("V").bytes
+      creators.each do |c|
+        bytes += c[:address]            # 32 bytes
+        bytes << (c[:verified] ? 1 : 0)
+        bytes << c[:share]
+      end
+    else
+      bytes << 0
+    end
+
+    bytes << (primary_sale ? 1 : 0)
+    bytes << (mutable ? 1 : 0)
+
+    # edition_nonce Option<u8>
+    if edition_nonce
+      bytes << 1
+      bytes << edition_nonce
+    else
+      bytes << 0
+    end
+
+    # token_standard Option<TokenStandard>
+    if token_standard
+      bytes << 1
+      bytes << token_standard
+    else
+      bytes << 0
+    end
+
+    # collection Option<{verified, key}>
+    if collection_key
+      bytes << 1
+      bytes << 1                   # verified
+      bytes += collection_key      # 32 bytes
+    else
+      bytes << 0
+    end
+
+    # uses: None
+    bytes << 0
+
+    bytes
+  end
 
   # --- SPL Mint Tests ---
 
@@ -485,6 +559,118 @@ class RegionDecoderTest < ActiveSupport::TestCase
 
     total_covered = regions.sum(&:length)
     assert_equal bytes.length, total_covered
+  end
+
+  # --- Metaplex Token Metadata Tests ---
+
+  test "decode_metaplex_metadata identifies MetadataV1 key" do
+    bytes = build_metaplex_metadata_bytes
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    key_region = regions.find { |r| r.id == "meta_key" }
+    assert_equal "MetadataV1", key_region.decoded_value
+    assert_equal 0, key_region.start
+    assert_equal 1, key_region.length
+  end
+
+  test "decode_metaplex_metadata parses name symbol and uri" do
+    bytes = build_metaplex_metadata_bytes(name: "Mad Lads #1", symbol: "MAD", uri: "https://example.com/1.json")
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    name = regions.find { |r| r.id == "meta_name" }
+    assert_equal "Mad Lads #1", name.decoded_value
+
+    symbol = regions.find { |r| r.id == "meta_symbol" }
+    assert_equal "MAD", symbol.decoded_value
+
+    uri = regions.find { |r| r.id == "meta_uri" }
+    assert_equal "https://example.com/1.json", uri.decoded_value
+  end
+
+  test "decode_metaplex_metadata parses seller fee basis points" do
+    bytes = build_metaplex_metadata_bytes(seller_fee: 420)
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    sfbp = regions.find { |r| r.id == "seller_fee_basis_points" }
+    assert_equal "420 bps (4.2%)", sfbp.decoded_value
+  end
+
+  test "decode_metaplex_metadata parses creators array" do
+    creators = [
+      { address: (1..32).to_a, verified: true, share: 30 },
+      { address: (33..64).to_a, verified: false, share: 70 }
+    ]
+    bytes = build_metaplex_metadata_bytes(creators: creators)
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    count = regions.find { |r| r.id == "creators_count" }
+    assert_equal "2", count.decoded_value
+
+    c1 = regions.find { |r| r.id == "creator_0" }
+    assert_includes c1.decoded_value, "verified=true"
+    assert_includes c1.decoded_value, "share=30%"
+    assert_equal 34, c1.length
+
+    c2 = regions.find { |r| r.id == "creator_1" }
+    assert_includes c2.decoded_value, "verified=false"
+    assert_includes c2.decoded_value, "share=70%"
+  end
+
+  test "decode_metaplex_metadata handles no creators (None)" do
+    bytes = build_metaplex_metadata_bytes(creators: [])
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    opt = regions.find { |r| r.id == "creators_option" }
+    assert_equal "None", opt.decoded_value
+    assert_nil regions.find { |r| r.id == "creators_count" }
+  end
+
+  test "decode_metaplex_metadata parses optional collection when set" do
+    bytes = build_metaplex_metadata_bytes(collection_key: (100..131).to_a)
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    col = regions.find { |r| r.id == "collection" }
+    assert_equal 34, col.length
+    assert_includes col.decoded_value, "verified=true"
+  end
+
+  test "decode_metaplex_metadata parses token standard as ProgrammableNonFungible" do
+    bytes = build_metaplex_metadata_bytes(token_standard: 4)
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    std = regions.find { |r| r.id == "token_standard" }
+    assert_equal "ProgrammableNonFungible", std.decoded_value
+  end
+
+  test "decode_metaplex_metadata stops at key region for non-MetadataV1 accounts" do
+    bytes = [ 6 ] + [ 0 ] * 100  # MasterEditionV2 (key=6)
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    key_region = regions.find { |r| r.id == "meta_key" }
+    assert_equal "MasterEditionV2", key_region.decoded_value
+    # Only key + a "Data" tail region (from the decode() fallback); no update_authority/mint
+    assert_nil regions.find { |r| r.id == "meta_update_authority" }
+  end
+
+  test "decode_metaplex_metadata regions cover all bytes without gaps" do
+    bytes = build_metaplex_metadata_bytes(creators: [ { address: (1..32).to_a, verified: true, share: 100 } ], collection_key: (50..81).to_a)
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    sorted = regions.sort_by(&:start)
+    sorted.each_cons(2) do |a, b|
+      assert_equal a.start + a.length, b.start,
+        "Gap or overlap between '#{a.name}' (#{a.start}+#{a.length}) and '#{b.name}' (#{b.start})"
+    end
+    assert_equal bytes.length, regions.sum(&:length)
+  end
+
+  test "decode_metaplex_metadata handles truncated data gracefully" do
+    bytes = [ 4 ] + (1..32).to_a  # key + partial update_authority
+    regions = RegionDecoder.decode(METAPLEX_OWNER, bytes)
+
+    # Should have at least the key region and bail out cleanly
+    assert regions.any? { |r| r.id == "meta_key" }
+    assert_nil regions.find { |r| r.id == "meta_name" }
   end
 
   # --- Token-2022 Extension Tests ---

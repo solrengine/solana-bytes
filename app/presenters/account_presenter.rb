@@ -71,7 +71,8 @@ class AccountPresenter
     "Vote111111111111111111111111111111111111111" => "Vote Program",
     "Stake11111111111111111111111111111111111111" => "Stake Program",
     "ComputeBudget111111111111111111111111111111" => "Compute Budget Program",
-    "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" => "Memo Program"
+    "MemoSq4gqABAXKb96qnH8TysNcWxMyWCqXgDLGmfcHr" => "Memo Program",
+    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s" => "Metaplex Token Metadata"
   }.freeze
 
   # A named region of bytes with a color and decoded value

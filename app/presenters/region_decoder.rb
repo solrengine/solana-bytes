@@ -44,7 +44,27 @@ module RegionDecoder
     "authorized_voter" => "Pubkey authorized to submit votes. Usually the validator's vote key.",
     "authorized_vote_withdrawer" => "Can withdraw lamports from the vote account. Critical security key.",
     "commission" => "Percentage of staking rewards the validator keeps. 0-100%.",
-    "vote_history" => "Variable-length data: recent votes, epoch credits, and last timestamp."
+    "vote_history" => "Variable-length data: recent votes, epoch credits, and last timestamp.",
+    # Metaplex Token Metadata fields
+    "meta_key" => "Metaplex account type discriminator. 4 = MetadataV1 (NFT or token metadata).",
+    "meta_update_authority" => "Can update the metadata fields (name, URI, creators). Set to null to freeze.",
+    "meta_mint" => "The SPL mint this metadata describes. Metadata is a PDA derived from the mint.",
+    "meta_name_len" => "Borsh u32 length prefix for the name. Modern metadata pads to 32 bytes.",
+    "meta_name" => "The NFT or token's display name (up to 32 chars, null-padded).",
+    "meta_symbol_len" => "Borsh u32 length prefix for the symbol (modern: padded to 10 bytes).",
+    "meta_symbol" => "Ticker symbol, e.g. 'MAD', 'DEGOD', 'y00ts'. Up to 10 chars.",
+    "meta_uri_len" => "Borsh u32 length prefix for the URI (modern: padded to 200 bytes).",
+    "meta_uri" => "Off-chain JSON metadata URL containing image, attributes, description.",
+    "seller_fee_basis_points" => "Royalty in basis points. 500 = 5%, 420 = 4.2%. Honored by compliant marketplaces.",
+    "creators_option" => "COption flag: 1 = creators list is present, 0 = no on-chain creators.",
+    "creators_count" => "Number of creators (u32). Each creator is 34 bytes (pubkey + verified + share).",
+    "primary_sale_happened" => "True once the NFT is first sold. Locks some metadata mutations.",
+    "is_mutable" => "If false, metadata is permanently frozen — even the authority can't update it.",
+    "edition_nonce" => "Optional u8 bump seed for the Edition PDA (used in master/print editions).",
+    "token_standard" => "Fungibility: NonFungible (NFT), ProgrammableNonFungible (pNFT), Fungible (SPL).",
+    "collection" => "Optional parent collection ref: 1-byte verified flag + 32-byte collection mint.",
+    "uses" => "Optional consumable tracker (use_method + remaining + total) for usable NFTs.",
+    "meta_tail" => "Remaining optional fields (collection_details, programmable_config)."
   }.freeze
 
   def decode(owner, bytes)
@@ -67,6 +87,8 @@ module RegionDecoder
       decode_stake_account(bytes)
     when "Vote111111111111111111111111111111111111111"
       decode_vote_account(bytes)
+    when "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+      decode_metaplex_metadata(bytes)
     else
       # Try ELF detection for any executable data
       if bytes.length >= 4 && bytes[0..3] == [ 0x7f, 0x45, 0x4c, 0x46 ]
@@ -413,6 +435,189 @@ module RegionDecoder
     regions
   end
 
+  # --- Metaplex Token Metadata Decoder ---
+
+  METAPLEX_KEYS = {
+    0 => "Uninitialized",
+    1 => "EditionV1",
+    2 => "MasterEditionV1",
+    3 => "ReservationListV1",
+    4 => "MetadataV1",
+    5 => "ReservationListV2",
+    6 => "MasterEditionV2",
+    7 => "EditionMarker",
+    8 => "UseAuthorityRecord",
+    9 => "CollectionAuthorityRecord",
+    10 => "TokenOwnedEscrow",
+    11 => "TokenRecord",
+    12 => "MetadataDelegate",
+    13 => "EditionMarkerV2",
+    14 => "HolderDelegate"
+  }.freeze
+
+  TOKEN_STANDARDS = {
+    0 => "NonFungible",
+    1 => "FungibleAsset",
+    2 => "Fungible",
+    3 => "NonFungibleEdition",
+    4 => "ProgrammableNonFungible",
+    5 => "ProgrammableNonFungibleEdition"
+  }.freeze
+
+  def decode_metaplex_metadata(bytes)
+    return [] if bytes.length < 1
+
+    key = bytes[0]
+    key_label = METAPLEX_KEYS[key] || "Unknown (#{key})"
+    regions = [ Region.new(id: "meta_key", name: "Key", start: 0, length: 1, color: "yellow", decoded_value: key_label) ]
+
+    # Only MetadataV1 has the layout decoded below
+    return regions unless key == 4
+    return regions if bytes.length < 65
+
+    regions << Region.new(id: "meta_update_authority", name: "Update Authority", start: 1, length: 32, color: "green", decoded_value: encode_base58(bytes[1, 32]))
+    regions << Region.new(id: "meta_mint", name: "Mint", start: 33, length: 32, color: "blue", decoded_value: encode_base58(bytes[33, 32]))
+
+    offset = 65
+
+    # Name: u32 length + bytes (padded to 32)
+    return regions if bytes.length < offset + 4
+    name_len = read_u32(bytes, offset)
+    regions << Region.new(id: "meta_name_len", name: "Name Length", start: offset, length: 4, color: "orange", decoded_value: name_len.to_s)
+    offset += 4
+    if name_len > 0 && bytes.length >= offset + name_len
+      regions << Region.new(id: "meta_name", name: "Name", start: offset, length: name_len, color: "purple", decoded_value: read_padded_string(bytes, offset, name_len))
+      offset += name_len
+    end
+
+    # Symbol: u32 length + bytes (padded to 10)
+    return regions if bytes.length < offset + 4
+    sym_len = read_u32(bytes, offset)
+    regions << Region.new(id: "meta_symbol_len", name: "Symbol Length", start: offset, length: 4, color: "orange", decoded_value: sym_len.to_s)
+    offset += 4
+    if sym_len > 0 && bytes.length >= offset + sym_len
+      regions << Region.new(id: "meta_symbol", name: "Symbol", start: offset, length: sym_len, color: "cyan", decoded_value: read_padded_string(bytes, offset, sym_len))
+      offset += sym_len
+    end
+
+    # URI: u32 length + bytes (padded to 200)
+    return regions if bytes.length < offset + 4
+    uri_len = read_u32(bytes, offset)
+    regions << Region.new(id: "meta_uri_len", name: "URI Length", start: offset, length: 4, color: "orange", decoded_value: uri_len.to_s)
+    offset += 4
+    if uri_len > 0 && bytes.length >= offset + uri_len
+      regions << Region.new(id: "meta_uri", name: "URI", start: offset, length: uri_len, color: "yellow", decoded_value: read_padded_string(bytes, offset, uri_len))
+      offset += uri_len
+    end
+
+    # seller_fee_basis_points (u16)
+    return regions if bytes.length < offset + 2
+    sfbp = read_u16(bytes, offset)
+    regions << Region.new(id: "seller_fee_basis_points", name: "Seller Fee", start: offset, length: 2, color: "purple", decoded_value: "#{sfbp} bps (#{(sfbp / 100.0).round(2)}%)")
+    offset += 2
+
+    # creators: Option<Vec<Creator>>
+    return regions if bytes.length < offset + 1
+    creators_flag = bytes[offset]
+    regions << Region.new(id: "creators_option", name: "Creators", start: offset, length: 1, color: "orange", decoded_value: creators_flag == 1 ? "Some" : "None")
+    offset += 1
+
+    if creators_flag == 1 && bytes.length >= offset + 4
+      num = read_u32(bytes, offset)
+      regions << Region.new(id: "creators_count", name: "Creators Count", start: offset, length: 4, color: "orange", decoded_value: num.to_s)
+      offset += 4
+
+      num.times do |i|
+        break if bytes.length < offset + 34
+        addr = encode_base58(bytes[offset, 32])
+        verified = bytes[offset + 32] == 1
+        share = bytes[offset + 33]
+        label = "#{addr[0, 6]}…#{addr[-4..]} verified=#{verified} share=#{share}%"
+        regions << Region.new(
+          id: "creator_#{i}",
+          name: "Creator ##{i + 1}",
+          start: offset,
+          length: 34,
+          color: "green",
+          decoded_value: label,
+          description: "Creator entry: 32-byte pubkey + 1-byte verified flag + 1-byte royalty share (0-100%)."
+        )
+        offset += 34
+      end
+    end
+
+    # primary_sale_happened (bool)
+    if bytes.length >= offset + 1
+      regions << Region.new(id: "primary_sale_happened", name: "Primary Sale Happened", start: offset, length: 1, color: "blue", decoded_value: bytes[offset] == 1 ? "true" : "false")
+      offset += 1
+    end
+
+    # is_mutable (bool)
+    if bytes.length >= offset + 1
+      regions << Region.new(id: "is_mutable", name: "Is Mutable", start: offset, length: 1, color: "blue", decoded_value: bytes[offset] == 1 ? "true" : "false")
+      offset += 1
+    end
+
+    # edition_nonce: Option<u8>
+    if bytes.length >= offset + 1
+      flag = bytes[offset]
+      if flag == 1 && bytes.length >= offset + 2
+        regions << Region.new(id: "edition_nonce", name: "Edition Nonce", start: offset, length: 2, color: "cyan", decoded_value: "Some(#{bytes[offset + 1]})")
+        offset += 2
+      else
+        regions << Region.new(id: "edition_nonce", name: "Edition Nonce", start: offset, length: 1, color: "cyan", decoded_value: "None")
+        offset += 1
+      end
+    end
+
+    # token_standard: Option<TokenStandard>
+    if bytes.length >= offset + 1
+      flag = bytes[offset]
+      if flag == 1 && bytes.length >= offset + 2
+        std = TOKEN_STANDARDS[bytes[offset + 1]] || "Unknown (#{bytes[offset + 1]})"
+        regions << Region.new(id: "token_standard", name: "Token Standard", start: offset, length: 2, color: "yellow", decoded_value: std)
+        offset += 2
+      else
+        regions << Region.new(id: "token_standard", name: "Token Standard", start: offset, length: 1, color: "yellow", decoded_value: "None")
+        offset += 1
+      end
+    end
+
+    # collection: Option<{verified: bool, key: Pubkey}> — 1 + 1 + 32 = 34 when Some
+    if bytes.length >= offset + 1
+      flag = bytes[offset]
+      if flag == 1 && bytes.length >= offset + 34
+        verified = bytes[offset + 1] == 1
+        col_key = encode_base58(bytes[offset + 2, 32])
+        regions << Region.new(id: "collection", name: "Collection", start: offset, length: 34, color: "purple", decoded_value: "verified=#{verified} key=#{col_key[0, 6]}…#{col_key[-4..]}")
+        offset += 34
+      else
+        regions << Region.new(id: "collection", name: "Collection", start: offset, length: 1, color: "purple", decoded_value: "None")
+        offset += 1
+      end
+    end
+
+    # uses: Option<Uses> — 1 + 17 when Some
+    if bytes.length >= offset + 1
+      flag = bytes[offset]
+      if flag == 1 && bytes.length >= offset + 18
+        regions << Region.new(id: "uses", name: "Uses", start: offset, length: 18, color: "orange", decoded_value: "Some (use_method + remaining + total)")
+        offset += 18
+      else
+        regions << Region.new(id: "uses", name: "Uses", start: offset, length: 1, color: "orange", decoded_value: "None")
+        offset += 1
+      end
+    end
+
+    # Any remaining bytes are collection_details + programmable_config options
+    if offset < bytes.length
+      remaining = bytes.length - offset
+      regions << Region.new(id: "meta_tail", name: "Collection Details / Programmable Config", start: offset, length: remaining, color: "gray", decoded_value: "#{remaining} bytes of remaining optional fields")
+    end
+
+    regions
+  end
+
   # --- Token-2022 Extensions ---
 
   EXTENSION_TYPES = {
@@ -660,5 +865,9 @@ module RegionDecoder
 
   def encode_base58(bytes)
     Base58.binary_to_base58(bytes.pack("C*"), :bitcoin)
+  end
+
+  def read_padded_string(bytes, offset, length)
+    bytes[offset, length].pack("C*").force_encoding("UTF-8").delete("\x00").strip
   end
 end

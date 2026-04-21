@@ -5,7 +5,8 @@ class AccountsController < ApplicationController
     { address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", label: "USDC Mint" },
     { address: "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA", label: "Token Program (ELF)" },
     { address: "2b1kV6DkPAnxd5ixfnxCpjxmKwqjjaYmCZfHsFu24GXo", label: "PYUSD (Token-2022)" },
-    { address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", label: "Stake Account" }
+    { address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", label: "Stake Account" },
+    { address: "5nav91dPXh4B6tXsG8duVQnrmyEbgRQBfYgn2BGs3Ag9", label: "NFT Metadata" }
   ].freeze
 
   MAX_DATA_DISPLAY = 10_240 # 10KB
