@@ -18,5 +18,8 @@ Rails.application.routes.draw do
   # Public stats
   get "stats", to: "stats#show"
 
+  # Account type taxonomy
+  get "types", to: "types#index", as: :types
+
   root "pages#home"
 end
