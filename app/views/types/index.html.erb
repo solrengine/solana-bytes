@@ -1,0 +1,65 @@
+<% content_for(:title, "Account Types — Solana Bytes") %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="mb-10">
+    <h1 class="text-white flex items-center gap-3 mb-3" style="font-size:20px;text-shadow:3px 3px 0 #4c1d95">
+      <%= pixel_icon(:magnifier, size: 24) %> Account Types
+    </h1>
+    <p class="text-gray-400 max-w-3xl" style="font-size:12px;line-height:2">
+      Every supported account type Solana Bytes can decode, grouped by program. Click an example to see its raw bytes rendered with colored regions and field tooltips.
+    </p>
+  </div>
+
+  <% @groups.each do |group| %>
+    <section class="mb-12">
+      <div class="mb-5">
+        <h2 class="text-white mb-2" style="font-size:14px"><%= group.name %></h2>
+        <p class="text-gray-500 max-w-3xl" style="font-size:10px;line-height:1.8"><%= group.description %></p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <% group.entries.each do |entry| %>
+          <div class="pixel-card" style="padding:20px">
+            <div class="flex items-start justify-between gap-3 mb-3">
+              <h3 class="text-purple-300" style="font-size:12px"><%= entry.name %></h3>
+              <% if entry.size %>
+                <span class="text-gray-500 shrink-0" style="font-size:10px"><%= number_with_delimiter(entry.size) %> B</span>
+              <% else %>
+                <span class="text-gray-500 shrink-0" style="font-size:10px">variable</span>
+              <% end %>
+            </div>
+
+            <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.8">
+              <%= entry.description %>
+            </p>
+
+            <div class="mb-4">
+              <div class="text-gray-500 mb-2" style="font-size:8px">Program</div>
+              <div class="text-gray-300" style="font-size:10px">
+                <%= entry.program_label %>
+                <span class="text-gray-600 ml-1"><%= entry.program_id[0..7] %>…<%= entry.program_id[-4..] %></span>
+              </div>
+            </div>
+
+            <div class="mb-5">
+              <div class="text-gray-500 mb-2" style="font-size:8px">Key fields</div>
+              <div class="flex flex-wrap gap-1.5">
+                <% entry.fields.each do |field| %>
+                  <span class="bg-gray-900 border border-gray-700 px-2 py-1 text-gray-400" style="font-size:9px"><%= field %></span>
+                <% end %>
+              </div>
+            </div>
+
+            <% if entry.example_address %>
+              <%= link_to "/accounts/#{entry.example_address}",
+                    class: "pixel-btn inline-block",
+                    style: "font-size:10px;padding:6px 12px" do %>
+                <%= pixel_icon(:play, size: 10) %> <%= entry.example_label %>
+              <% end %>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>
