@@ -44,7 +44,7 @@ module RegionDecoder
     "authorized_voter" => "Pubkey authorized to submit votes. Usually the validator's vote key.",
     "authorized_vote_withdrawer" => "Can withdraw lamports from the vote account. Critical security key.",
     "commission" => "Percentage of staking rewards the validator keeps. 0-100%.",
-    "vote_history" => "Variable-length data: recent votes, epoch credits, and last timestamp.",
+    "vote_history" => "Variable-length data: recent votes, epoch credits, and last timestamp."
   }.freeze
 
   def decode(owner, bytes)
@@ -539,13 +539,13 @@ module RegionDecoder
     when 2 # TransferFeeAmount
       if length >= 8
         withheld = read_u64(bytes, offset)
-        [{ name: "Withheld Amount", offset: 0, length: 8, value: withheld.to_s }]
+        [ { name: "Withheld Amount", offset: 0, length: 8, value: withheld.to_s } ]
       else
         []
       end
     when 3 # MintCloseAuthority
       if length >= 32
-        [{ name: "Close Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }]
+        [ { name: "Close Authority", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) } ]
       else
         []
       end
@@ -557,7 +557,7 @@ module RegionDecoder
         when 2 then "Frozen"
         else "Unknown (#{bytes[offset]})"
         end
-        [{ name: "Default State", offset: 0, length: 1, value: state }]
+        [ { name: "Default State", offset: 0, length: 1, value: state } ]
       else
         []
       end
@@ -566,7 +566,7 @@ module RegionDecoder
     when 8 # MemoTransfer
       if length >= 1
         required = bytes[offset] == 1 ? "Required" : "Not Required"
-        [{ name: "Require Incoming Memos", offset: 0, length: 1, value: required }]
+        [ { name: "Require Incoming Memos", offset: 0, length: 1, value: required } ]
       else
         []
       end
@@ -597,13 +597,13 @@ module RegionDecoder
     when 11 # CpiGuard
       if length >= 1
         locked = bytes[offset] == 1 ? "Locked" : "Unlocked"
-        [{ name: "Lock CPI", offset: 0, length: 1, value: locked }]
+        [ { name: "Lock CPI", offset: 0, length: 1, value: locked } ]
       else
         []
       end
     when 12 # PermanentDelegate
       if length >= 32
-        [{ name: "Delegate", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) }]
+        [ { name: "Delegate", offset: 0, length: 32, value: encode_base58(bytes[offset, 32]) } ]
       else
         []
       end

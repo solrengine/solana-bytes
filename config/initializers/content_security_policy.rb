@@ -14,7 +14,7 @@ Rails.application.configure do
     policy.style_src   :self, :unsafe_inline, "https://fonts.googleapis.com"
     policy.connect_src :self
     policy.frame_ancestors :none
-    policy.base_uri    :self
+    policy.base_uri :self
   end
 
   # Generate session nonces for permitted importmap, inline scripts, and inline styles.

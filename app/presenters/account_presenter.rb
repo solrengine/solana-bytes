@@ -151,5 +151,4 @@ class AccountPresenter
       region&.bg_color || "rgba(107,114,128,0.15)"
     end
   end
-
 end
