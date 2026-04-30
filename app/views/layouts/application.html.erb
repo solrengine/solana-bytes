@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Solana Bytes — Interactive Account Hex Visualizer" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Visualize Solana account data as interactive, color-coded hex dumps. Built with Rails 8 and SolRengine.">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Solana Bytes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <%# Open Graph %>
+    <meta property="og:title" content="Solana Bytes — Interactive Hex Visualizer + Byte Challenge Game">
+    <meta property="og:description" content="Visualize Solana account data as color-coded hex dumps. Play the Byte Challenge to test your knowledge of Solana data structures.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://bytes.solrengine.org/og.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <%# Twitter Card %>
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Solana Bytes — Interactive Hex Visualizer + Byte Challenge Game">
+    <meta name="twitter:description" content="Visualize Solana account data as color-coded hex dumps. Play the Byte Challenge to test your knowledge of Solana data structures.">
+    <meta name="twitter:image" content="https://bytes.solrengine.org/og.png">
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <meta name="turbo-prefetch" content="false">
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <%# Hide navbar on landing's hero state. The loading_controller toggles
+        the .landing-hero-active class off when the user submits the form
+        (so the navbar reappears on the result view) and back on when the
+        user navigates home (so the hero reads cleanly again). %>
+    <style>
+      body.landing-hero-active nav.pixel-nav { display: none; }
+    </style>
+  </head>
+
+  <body class="min-h-screen bg-gray-950 text-gray-100<%= ' landing-hero-active' if content_for?(:hide_navbar) %>">
+    <%# Loading overlay — shown during challenge navigation %>
+    <div id="game-loading" class="hidden fixed inset-0 flex items-center justify-center bg-black/80" style="z-index:200">
+      <div class="text-center">
+        <div class="text-purple-400 mb-4" style="font-size:14px">
+          <span class="pixel-loading">Loading</span>
+        </div>
+        <div class="text-gray-500" style="font-size:10px">Fetching account from Solana...</div>
+      </div>
+    </div>
+
+    <div data-controller="hex-rain" class="fixed inset-0" style="z-index:0">
+      <canvas data-hex-rain-target="canvas" class="w-full h-full"></canvas>
+      <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at center, rgba(3,7,18,0.3) 0%, rgba(3,7,18,0.7) 50%, rgba(3,7,18,0.95) 100%)"></div>
+    </div>
+
+    <nav class="relative pixel-nav" style="z-index:10">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
+        <%= link_to "/", class: "text-white hover:text-purple-400 shrink-0" do %>
+          <span style="font-size:12px;text-shadow:3px 3px 0 #4c1d95" class="sm:hidden">SB</span>
+          <span style="font-size:14px;text-shadow:3px 3px 0 #4c1d95" class="hidden sm:inline">Solana Bytes</span>
+        <% end %>
+        <div class="flex items-center gap-2 sm:gap-4">
+          <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:10px" do %>
+            <%= pixel_icon(:target, size: 14) %><span class="hidden sm:inline"> Challenge</span>
+          <% end %>
+          <%= link_to "/types", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Learn<% end %>
+          <%= link_to "/leaderboard", class: "hover:opacity-80" do %>
+            <%= pixel_icon(:trophy, size: 14) %>
+          <% end %>
+          <%= link_to "/stats", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Stats<% end %>
+          <% if logged_in? %>
+            <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1 hidden sm:inline" style="font-size:10px"><%= current_user.short_address %></span>
+            <%= link_to "x", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white", style: "font-size:10px" %>
+          <% end %>
+          <%= form_with url: "/network", method: :patch, class: "hidden sm:flex items-center", data: { controller: "auto-submit", turbo_frame: "_top" } do |f| %>
+            <%= f.select :network,
+                  options_for_select(
+                    [["Mainnet", "mainnet-beta"], ["Devnet", "devnet"], ["Testnet", "testnet"]],
+                    session[:solana_network] || "mainnet-beta"
+                  ),
+                  {},
+                  class: "pixel-input cursor-pointer",
+                  style: "font-size:10px;padding:4px 8px;border-width:2px",
+                  data: { action: "change->auto-submit#submit" } %>
+          <% end %>
+        </div>
+      </div>
+    </nav>
+
+    <main class="relative max-w-[1200px] mx-auto px-6 sm:px-8 lg:px-12 py-8" style="z-index:10">
+      <% if flash[:alert] %>
+        <div class="mb-6 p-4 pixel-card text-red-400" style="border-color:#991b1b">
+          <%= flash[:alert] %>
+        </div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+
+    <footer class="relative border-t-3 border-gray-800 mt-16" style="z-index:10">
+      <div class="max-w-6xl mx-auto px-4 py-6 text-center text-gray-600" style="font-size:8px">
+        Built with <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300">SolRengine</a>
+      </div>
+    </footer>
+  </body>
+</html>

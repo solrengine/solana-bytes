@@ -1,0 +1,56 @@
+# Name of your application. Used to uniquely configure containers.
+service: solana_bytes
+
+# Name of the container image.
+image: your-user/solana_bytes
+
+# Deploy to these servers.
+servers:
+  web:
+    - YOUR_SERVER_IP
+
+# SSL via Let's Encrypt + Kamal proxy (multiple apps on same server).
+proxy:
+  ssl: true
+  hosts:
+    - your-domain.com
+
+# Local registry on the deploy server.
+registry:
+  server: "localhost:5555"
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+
+# Inject ENV variables into containers (secrets come from .kamal/secrets).
+env:
+  secret:
+    - RAILS_MASTER_KEY
+    - SOLANA_RPC_MAINNET_URL
+    - APP_DOMAIN
+  clear:
+    SOLANA_NETWORK: mainnet-beta
+    SOLID_QUEUE_IN_PUMA: true
+
+# Aliases are triggered with "bin/kamal <alias>".
+aliases:
+  console: app exec --interactive --reuse "bin/rails console"
+  shell: app exec --interactive --reuse "bash"
+  logs: app logs -f
+  dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
+
+# Persistent storage for SQLite databases and local files.
+volumes:
+  - "solana_bytes_storage:/rails/storage"
+
+# Bridge fingerprinted assets between versions.
+asset_path: /rails/public/assets
+
+# Configure the image builder.
+builder:
+  arch: amd64
+  cache:
+    type: registry
+
+# SSH user for deploy server.
+ssh:
+  user: your-user

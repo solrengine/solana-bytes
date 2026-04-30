@@ -1,0 +1,37 @@
+<div class="flex items-center justify-center min-h-[70vh]">
+  <div class="max-w-sm w-full mx-4" data-controller="wallet" data-wallet-nonce-url-value="<%= solrengine_auth.nonce_path %>" data-wallet-verify-url-value="<%= solrengine_auth.verify_path %>" data-wallet-dashboard-url-value="<%= Solrengine::Auth.configuration.after_sign_in_path %>">
+
+    <div class="text-center mb-8">
+      <div class="mb-4"><%= pixel_icon(:lock, size: 48) %></div>
+      <h1 class="text-white mb-2" style="font-size:18px">Connect Wallet</h1>
+      <p class="text-gray-400" style="font-size:10px;line-height:2">Sign in to save scores and appear on the leaderboard</p>
+    </div>
+
+    <div class="pixel-card p-6">
+      <div data-wallet-target="status" class="hidden mb-4 p-3 text-center" style="font-size:10px"></div>
+
+      <div data-wallet-target="walletList" class="hidden mb-4 space-y-2"></div>
+
+      <button
+        data-wallet-target="connectBtn"
+        data-action="click->wallet#authenticate"
+        class="w-full pixel-btn justify-center"
+        style="font-size:12px"
+      >
+        <%= pixel_icon(:lock, size: 18) %>
+        Connect Wallet
+      </button>
+
+      <div data-wallet-target="signing" class="hidden">
+        <div class="text-center">
+          <div class="text-purple-400 mb-3" style="font-size:16px">...</div>
+          <p class="text-gray-300" style="font-size:10px">Approve the sign-in request in your wallet...</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-center text-gray-600 mt-6" style="font-size:8px">
+      Powered by <a href="https://solrengine.org" class="text-purple-400/60 hover:text-purple-400">SolRengine</a>
+    </p>
+  </div>
+</div>

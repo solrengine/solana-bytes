@@ -1,0 +1,26 @@
+alice_top:
+  user: alice
+  account_address: EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+  target_field: mint_authority
+  time_seconds: 12.4
+  attempts: 1
+  total_stars: 3
+  streak: 25
+
+bob_second:
+  user: bob
+  account_address: ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU
+  target_field: token_owner
+  time_seconds: 18.0
+  attempts: 1
+  total_stars: 3
+  streak: 18
+
+carol_third:
+  user: carol
+  account_address: CfWX7o2TswwbxusJ4hCaPobu2jLCb1hfXuXJQjVq3jQF
+  target_field: amount
+  time_seconds: 22.5
+  attempts: 2
+  total_stars: 2
+  streak: 12

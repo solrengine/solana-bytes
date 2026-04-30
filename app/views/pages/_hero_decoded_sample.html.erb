@@ -1,0 +1,12 @@
+<%# Hero decoded sample.
+    Renders a compact, interactive hex view of a featured mainnet account.
+    Hidden on mobile via `hidden md:block` (a 16-byte hex row exceeds a
+    375px viewport). Caller controls the surrounding layout (the landing
+    hero uses a 2-column grid; this partial does not constrain its width).
+    Locals: account — an AccountPresenter instance. %>
+<div class="hidden md:block">
+  <p class="text-gray-500 mb-3" style="font-size:10px">
+    USDC mint, decoded — hover any byte
+  </p>
+  <%= render "accounts/hex_view", account: account, compact: true %>
+</div>

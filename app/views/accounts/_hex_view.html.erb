@@ -1,0 +1,86 @@
+<%# Optional `compact:` local — when true, hides the ASCII column and tightens
+    spacing so the grid fits in narrower containers (used by the landing-page
+    hero, where the right column is ~50% of viewport). Defaults to false. %>
+<% compact = local_assigns.fetch(:compact, false) %>
+<div data-controller="hex-viewer">
+  <%# Legend %>
+  <% if account.regions.length > 1 || account.regions.first&.name != "Data" %>
+    <div class="flex flex-wrap gap-x-5 gap-y-1.5 mb-5" style="font-size:10px">
+      <% seen = Set.new %>
+      <% account.regions.each do |region| %>
+        <% next if seen.include?(region.id) %>
+        <% seen.add(region.id) %>
+        <span class="flex items-center gap-2">
+          <span class="w-3 h-3 inline-block" style="background:<%= region.legend_bg %>;border:2px solid <%= region.legend_border %>"></span>
+          <span class="text-gray-400"><%= region.name %></span>
+        </span>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if account.truncated %>
+    <div class="text-yellow-500 mb-3" style="font-size:10px">
+      showing <%= number_with_delimiter(account.raw_bytes.length) %> of <%= number_with_delimiter(account.truncated) %> bytes
+    </div>
+  <% end %>
+
+  <%# Tooltip %>
+  <div
+    data-hex-viewer-target="tooltip"
+    class="pixel-tooltip"
+    style="display:none;position:fixed;z-index:50;pointer-events:none;max-width:400px"
+  >
+  </div>
+
+  <%# Hex Grid %>
+  <div class="<%= compact ? "overflow-hidden" : "overflow-x-auto" %>">
+    <table class="w-full" style="font-size:11px;line-height:2.4">
+      <thead>
+        <tr>
+          <th class="text-left pr-4 pb-3 font-normal text-gray-600" style="font-size:10px"></th>
+          <% 16.times do |i| %>
+            <th class="<%= compact ? "px-0.5" : "px-1" %> pb-3 font-normal text-center text-gray-600" style="font-size:10px"><%= format("%X", i) %></th>
+          <% end %>
+          <% unless compact %>
+            <th class="pl-6 pb-3 font-normal text-left text-gray-600" style="font-size:10px"></th>
+          <% end %>
+        </tr>
+      </thead>
+      <tbody>
+        <% account.hex_rows.each do |row| %>
+          <tr>
+            <td class="text-gray-600 pr-4 select-none" style="font-size:10px"><%= row.offset_hex %></td>
+            <% row.cells.each do |cell| %>
+              <td
+                class="<%= compact ? "px-0.5" : "px-1" %> text-center cursor-default"
+                style="color:<%= cell.text_color %>;background:<%= cell.bg_color %>"
+                data-hex-viewer-target="cell"
+                data-region="<%= cell.region_id %>"
+                data-offset="<%= cell.offset %>"
+                data-value="<%= cell.hex %>"
+                data-decimal="<%= cell.byte %>"
+                data-base-color="<%= cell.text_color %>"
+                data-base-bg="<%= cell.bg_color %>"
+                <% if cell.region %>
+                  data-region-name="<%= cell.region.name %>"
+                  data-region-decoded="<%= cell.region.decoded_value %>"
+                  data-region-start="<%= cell.region.start %>"
+                  data-region-length="<%= cell.region.length %>"
+                  <% if cell.region.description %>
+                    data-region-description="<%= cell.region.description %>"
+                  <% end %>
+                <% end %>
+              ><%= cell.hex %></td>
+            <% end %>
+            <% row.padding_cells.times do %>
+              <td class="<%= compact ? "px-0.5" : "px-1" %>"></td>
+            <% end %>
+            <% unless compact %>
+              <td class="pl-6 text-gray-500 select-none whitespace-pre" style="font-size:10px"><%= row.ascii %></td>
+            <% end %>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

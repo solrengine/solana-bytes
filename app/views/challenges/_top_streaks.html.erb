@@ -1,0 +1,37 @@
+<%# Top streaks mini-leaderboard partial.
+    Rendered from challenges/index.html.erb and pages/home.html.erb.
+    Locals: top_streaks — enumerable of ChallengeResult records ordered by streak desc. %>
+<div class="pixel-card text-left max-w-md mx-auto" style="padding:0">
+  <div class="px-5 py-3 border-b-2 border-gray-700 flex items-center justify-between">
+    <h2 class="text-white flex items-center gap-2" style="font-size:14px"><%= pixel_icon(:trophy, size: 16) %> Top Streaks</h2>
+    <%= link_to "View all", "/leaderboard", class: "text-purple-400 hover:text-purple-300", style: "font-size:10px" %>
+  </div>
+
+  <% if top_streaks.any? %>
+    <div>
+      <% top_streaks.each_with_index do |result, index| %>
+        <div class="px-5 py-3 flex items-center justify-between border-b border-gray-800">
+          <div class="flex items-center gap-3">
+            <span class="w-6 text-center">
+              <% if index == 0 %>
+                <%= pixel_icon(:medal_gold, size: 18) %>
+              <% elsif index == 1 %>
+                <%= pixel_icon(:medal_silver, size: 18) %>
+              <% elsif index == 2 %>
+                <%= pixel_icon(:medal_bronze, size: 18) %>
+              <% else %>
+                <span class="text-gray-500" style="font-size:12px"><%= index + 1 %></span>
+              <% end %>
+            </span>
+            <span class="text-gray-300" style="font-size:10px"><%= result.user.short_address %></span>
+          </div>
+          <span class="text-yellow-400" style="font-size:12px"><%= pixel_icon(:fire, size: 16) %> <%= result.streak %></span>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="px-5 py-8 text-center">
+      <p class="text-gray-500" style="font-size:10px">No scores yet — be the first!</p>
+    </div>
+  <% end %>
+</div>

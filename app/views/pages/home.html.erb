@@ -1,0 +1,173 @@
+<% content_for :hide_navbar, "true" %>
+<div data-controller="loading">
+  <div data-loading-target="hero">
+    <%# Hero band — 2-column on desktop (text + live decoded mint), stacks on mobile. %>
+    <div class="pt-2 mb-12">
+      <%# 2-column on desktop (text + live decode), stacks on mobile %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        <%# Left: copy, left-aligned on desktop, centered on mobile %>
+        <div class="text-center md:text-left">
+          <h1 class="mb-3 text-white text-[20px] md:text-[32px] lg:text-[40px]" style="text-shadow:3px 3px 0 #4c1d95;line-height:1.2">
+            Solana Bytes
+          </h1>
+          <p class="text-purple-300 text-[13px] md:text-[15px] lg:text-[16px]">
+            A field guide to Solana accounts.
+          </p>
+          <p class="hidden md:block text-gray-400 text-[12px] mt-4" style="line-height:1.9">
+            Most tools tell you what bytes mean. Solana Bytes shows you, and lets you prove you understand.
+          </p>
+
+          <%# Three-promise bullets that preview the bento tiles below
+              and gloss what the live-decoded sample on the right is showing.
+              Desktop only (matches the body paragraph above). %>
+          <ul class="hidden md:block mt-6 space-y-2 text-gray-400" style="font-size:12px">
+            <li class="flex items-center gap-3">
+              <%= pixel_icon(:magnifier, size: 12) %>
+              <span>Hover any byte to decode it</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <%= pixel_icon(:lock, size: 12) %>
+              <span>Browse <%= AccountTaxonomy.flat_entries.length %> account types</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <%= pixel_icon(:target, size: 12) %>
+              <span>Hunt the field in raw hex</span>
+            </li>
+          </ul>
+        </div>
+
+        <%# Right: live-decoded hero — only renders when the cached/fetched sample is available %>
+        <% if @featured_account %>
+          <%= render "hero_decoded_sample", account: @featured_account %>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Three-pillar Bento: 2-up (Visualize + Learn) above 1-wide (Play) %>
+    <div class="pb-8">
+      <div class="text-center mb-8">
+        <h2 class="text-purple-300 mb-2" style="font-size:13px;letter-spacing:0.1em">
+          THREE WAYS IN
+        </h2>
+        <p class="text-gray-500" style="font-size:10px">
+          Inspect, learn, or test your eye.
+        </p>
+      </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <%# Visualize tile %>
+      <div class="pixel-card flex flex-col" style="padding:16px">
+        <h2 class="text-white flex items-center gap-2 mb-2" style="font-size:14px">
+          <%= pixel_icon(:magnifier, size: 16) %> Visualize
+        </h2>
+        <p class="text-gray-400 mb-3" style="font-size:10px;line-height:1.8">
+          Paste any address — decode it field-by-field.
+        </p>
+
+        <%# Example chips above the form (per R4) %>
+        <div class="mb-4">
+          <p class="text-gray-500 mb-2" style="font-size:9px">Try one:</p>
+          <div class="flex flex-wrap gap-1.5">
+            <% AccountsController::EXAMPLE_ADDRESSES.each do |example| %>
+              <%= link_to "/accounts/#{example[:address]}",
+                    data: { turbo_frame: "account_result" },
+                    class: "bg-gray-900 border-2 border-gray-700 px-2 py-1 text-gray-400 hover:text-purple-400 hover:border-purple-500",
+                    style: "font-size:9px" do %>
+                <%= example[:label] %>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Address form (preserves data-controller, Turbo Frame target, turbo_action) %>
+        <div data-controller="address-form" class="mt-auto">
+          <%= form_with url: "/lookup", method: :post, data: { turbo_frame: "account_result", action: "submit->address-form#submit" } do |f| %>
+            <div class="flex flex-col gap-2">
+              <%= f.text_field :address,
+                    placeholder: "Enter address...",
+                    class: "pixel-input",
+                    style: "font-size:11px;padding:10px 12px",
+                    autocomplete: "off",
+                    "data-form-type": "other",
+                    "data-lpignore": "true",
+                    "data-1p-ignore": "true",
+                    data: { address_form_target: "input", action: "input->address-form#validate" } %>
+              <button
+                type="submit"
+                disabled="disabled"
+                data-address-form-target="submit"
+                class="pixel-btn min-h-[44px] sm:min-h-0"
+                style="font-size:11px;opacity:0.4;cursor:not-allowed"
+              >
+                Visualize
+              </button>
+            </div>
+            <p data-address-form-target="error" class="text-red-400 mt-2" style="display:none;font-size:10px"></p>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Learn tile %>
+      <div class="pixel-card flex flex-col" style="padding:16px">
+        <h2 class="text-white flex items-center gap-2 mb-2" style="font-size:14px">
+          <%= pixel_icon(:lock, size: 16) %> Learn
+        </h2>
+        <p class="text-gray-400 mb-3" style="font-size:10px;line-height:1.8">
+          <%= AccountTaxonomy.flat_entries.length %> account types, byte-by-byte.
+        </p>
+
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          <% AccountTaxonomy.flat_entries.each do |entry| %>
+            <%= link_to "/types",
+                  class: "bg-gray-900 border-2 border-gray-700 px-2 py-1 text-gray-400 hover:text-purple-400 hover:border-purple-500",
+                  style: "font-size:9px" do %>
+              <%= entry.name %>
+            <% end %>
+          <% end %>
+        </div>
+
+        <%= link_to "/types",
+              class: "pixel-btn inline-block text-center mt-auto",
+              style: "font-size:11px;padding:10px 14px",
+              data: { turbo: false } do %>
+          <%= pixel_icon(:play, size: 10) %> Browse the taxonomy
+        <% end %>
+      </div>
+
+      <%# Play tile %>
+      <div class="pixel-card flex flex-col" style="padding:16px">
+        <h2 class="text-white flex items-center gap-2 mb-2" style="font-size:14px">
+          <%= pixel_icon(:target, size: 16) %> Play
+        </h2>
+        <p class="text-gray-400 mb-3" style="font-size:10px;line-height:1.8">
+          Find the mint authority in 165 bytes — can you?
+        </p>
+
+        <ul class="text-gray-500 mb-4 space-y-1" style="font-size:10px;line-height:1.6">
+          <li class="flex items-center gap-2"><%= pixel_icon(:heart, size: 10) %> 3 lives, no hints</li>
+          <li class="flex items-center gap-2"><%= pixel_icon(:fire, size: 10) %> Build streaks</li>
+          <li class="flex items-center gap-2"><%= pixel_icon(:trophy, size: 10) %> Climb the leaderboard</li>
+        </ul>
+
+        <%= link_to "/challenges",
+              class: "pixel-btn inline-block text-center mt-auto",
+              style: "font-size:11px;padding:10px 14px",
+              data: { turbo: false } do %>
+          <%= pixel_icon(:play, size: 10) %> Play Byte Challenge
+        <% end %>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <%# Loading spinner %>
+  <div data-loading-target="spinner" class="items-center justify-center min-h-[40vh]" style="display:none">
+    <div class="text-center">
+      <div class="text-purple-400 mb-4" style="font-size:16px">...</div>
+      <p class="text-gray-400" style="font-size:12px">Fetching account data...</p>
+    </div>
+  </div>
+
+  <%# Results load here %>
+  <%= turbo_frame_tag "account_result", data: { turbo_action: "advance", loading_target: "frame" } do %>
+  <% end %>
+</div>

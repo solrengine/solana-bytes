@@ -1,0 +1,130 @@
+<% content_for(:title, "Byte Challenge — Solana Bytes") %>
+<% content_for(:head) { tag.meta(name: "turbo-cache-control", content: "no-cache") } %>
+
+<div data-controller="challenge"
+     data-challenge-hex-viewer-outlet="[data-controller='hex-viewer']"
+     data-challenge-target-region-value="<%= @target_region.id %>"
+     data-challenge-target-name-value="<%= @target_region.name %>"
+     data-challenge-streak-value="<%= @streak %>"
+     data-challenge-total-stars-value="<%= @total_stars %>"
+     data-challenge-max-wrong-value="<%= @max_wrong %>"
+     data-challenge-save-url-value="/challenge/result"
+     data-challenge-next-token3star-value="<%= @next_token_3star %>"
+     data-challenge-next-token2star-value="<%= @next_token_2star %>"
+     data-challenge-next-token1star-value="<%= @next_token_1star %>"
+     data-challenge-challenge-token-value="<%= @challenge_token %>"
+     data-challenge-logged-in-value="<%= logged_in? %>">
+
+  <%# Challenge prompt %>
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <%= pixel_icon(:target, size: 24) %>
+          <span class="text-white" style="font-size:14px">Find the bytes for:</span>
+        </div>
+        <div class="pixel-card inline-block px-5 py-3" style="border-color:#7c3aed">
+          <span class="text-purple-300" style="font-size:14px" data-challenge-target="fieldName"><%= @target_region.name %></span>
+        </div>
+      </div>
+      <div class="flex items-center gap-6">
+        <% if @streak > 0 %>
+          <div class="text-right">
+            <div class="text-gray-500" style="font-size:10px">Streak</div>
+            <div class="text-yellow-400 mt-1" style="font-size:16px"><%= pixel_icon(:fire, size: 20) %> <%= @streak %></div>
+          </div>
+        <% end %>
+        <div class="text-right">
+          <div class="text-gray-500" style="font-size:10px">Lives</div>
+          <div class="mt-1" data-challenge-target="lives"><%= pixel_icon(:heart, size: 18, css_class: "text-red-500") %><%= pixel_icon(:heart, size: 18, css_class: "text-red-500") %><%= pixel_icon(:heart, size: 18, css_class: "text-red-500") %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%# Metadata bar %>
+  <div class="flex flex-wrap items-center gap-x-6 gap-y-2 mb-4 text-gray-400" style="font-size:10px">
+    <% if @tier %>
+      <% tier_info = ChallengesController::TIERS[@tier] %>
+      <span class="<%= tier_info[:color] %> border-2 border-gray-700 px-2 py-1" title="<%= tier_info[:description] %>"><%= tier_info[:label] %></span>
+    <% end %>
+    <span class="text-purple-400 border-2 border-purple-800 px-2 py-1"><%= @account_label %></span>
+    <span><%= @address[0..7] %>...<%= @address[-4..] %></span>
+    <span><span class="text-gray-300"><%= number_with_delimiter(@account.raw_bytes.length) %></span> bytes</span>
+    <%= link_to "Skip >>", "/challenge#{"?tier=#{@tier}" if @tier}", class: "text-gray-500 hover:text-white ml-auto" %>
+  </div>
+
+  <%# Hex grid %>
+  <div data-controller="hex-viewer">
+    <% if @account.truncated %>
+      <div class="text-yellow-500 mb-3" style="font-size:10px">
+        showing <%= number_with_delimiter(@account.raw_bytes.length) %> of <%= number_with_delimiter(@account.truncated) %> bytes
+      </div>
+    <% end %>
+
+    <%# Tooltip %>
+    <div
+      data-hex-viewer-target="tooltip"
+      class="pixel-tooltip"
+      style="display:none;position:fixed;z-index:50;pointer-events:none;max-width:400px"
+    >
+    </div>
+
+    <%# Hex Grid — all cells same gray color (challenge mode) %>
+    <div class="overflow-x-auto">
+      <table class="w-full" style="font-size:11px;line-height:2.4">
+        <thead>
+          <tr>
+            <th class="text-left pr-4 pb-3 font-normal text-gray-600" style="font-size:10px"></th>
+            <% 16.times do |i| %>
+              <th class="px-1 pb-3 font-normal text-center text-gray-600" style="font-size:10px"><%= format("%X", i) %></th>
+            <% end %>
+            <th class="pl-6 pb-3 font-normal text-left text-gray-600" style="font-size:10px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @account.hex_rows.each do |row| %>
+            <tr>
+              <td class="text-gray-600 pr-4 select-none" style="font-size:10px"><%= row.offset_hex %></td>
+              <% row.cells.each do |cell| %>
+                <td
+                  class="px-1 text-center cursor-pointer hover:bg-gray-700/50"
+                  style="color:#9ca3af;background:#111318"
+                  data-hex-viewer-target="cell"
+                  data-action="click->challenge#guess"
+                  data-region="<%= cell.region_id %>"
+                  data-offset="<%= cell.offset %>"
+                  data-value="<%= cell.hex %>"
+                  data-decimal="<%= cell.byte %>"
+                  data-base-color="<%= cell.text_color %>"
+                  data-base-bg="<%= cell.bg_color %>"
+                  <% if cell.region %>
+                    data-region-name="?????"
+                    data-region-decoded="<%= cell.region.decoded_value %>"
+                    data-region-start="<%= cell.region.start %>"
+                    data-region-length="<%= cell.region.length %>"
+                  <% end %>
+                ><%= cell.hex %></td>
+              <% end %>
+              <% row.padding_cells.times do %>
+                <td class="px-1"></td>
+              <% end %>
+              <td class="pl-6 text-gray-500 select-none whitespace-pre" style="font-size:10px"><%= row.ascii %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <%# Wrong click toast %>
+  <div data-challenge-target="toast" class="hidden fixed inset-0 flex items-center justify-center pointer-events-none" style="z-index:90">
+    <div data-challenge-target="toastContent" class="pixel-dialog" style="border-color:#ef4444"></div>
+  </div>
+
+  <%# Result modal %>
+  <div data-challenge-target="modal" class="hidden fixed inset-0 flex items-center justify-center" style="z-index:100">
+    <div class="absolute inset-0 bg-black/80"></div>
+    <div data-challenge-target="modalContent" class="relative pixel-dialog max-w-sm w-full mx-4 text-center"></div>
+  </div>
+</div>
