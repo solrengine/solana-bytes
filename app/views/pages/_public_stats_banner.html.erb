@@ -1,0 +1,43 @@
+<%# Public stats banner.
+    Locals: stats — hash from PagesController#fetch_public_stats, or nil.
+    Renders nothing if stats are nil (DB error) or if no accounts have been
+    analyzed yet — never show "0 accounts decoded" to a first visitor. %>
+<% if stats && stats[:accounts_analyzed].to_i > 0 %>
+  <div class="mt-12 mb-4">
+    <p class="text-center text-purple-300 mb-1" style="font-size:11px;letter-spacing:0.12em">
+      LIVE FROM THE SITE
+    </p>
+    <p class="text-center text-gray-500 mb-6" style="font-size:9px">
+      Real numbers, updated every 5 minutes.
+    </p>
+
+    <div class="pixel-card" style="padding:18px 16px">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+        <div>
+          <div class="text-purple-400" style="font-size:18px">
+            <%= number_with_delimiter(stats[:accounts_analyzed]) %>
+          </div>
+          <div class="text-gray-500 mt-1" style="font-size:9px">accounts decoded</div>
+        </div>
+        <div>
+          <div class="text-purple-400" style="font-size:18px">
+            <%= number_with_delimiter(stats[:total_countries]) %>
+          </div>
+          <div class="text-gray-500 mt-1" style="font-size:9px">countries</div>
+        </div>
+        <div>
+          <div class="text-purple-400" style="font-size:18px">
+            <%= number_with_delimiter(stats[:total_pageviews]) %>
+          </div>
+          <div class="text-gray-500 mt-1" style="font-size:9px">pageviews</div>
+        </div>
+        <div>
+          <div class="text-purple-400" style="font-size:18px">
+            <%= number_with_delimiter(stats[:total_challenges]) %>
+          </div>
+          <div class="text-gray-500 mt-1" style="font-size:9px">challenges played</div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>

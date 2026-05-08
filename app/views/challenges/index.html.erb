@@ -35,18 +35,15 @@
     </div>
 
     <%# Play buttons %>
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
       <% play_url = "/challenge#{"?tier=#{@active_tier}" if @active_tier}" %>
       <% if logged_in? %>
         <%= link_to play_url, class: "pixel-btn", style: "font-size:12px" do %>
           <%= pixel_icon(:play, size: 18) %> Play Challenge
         <% end %>
       <% else %>
-        <%= link_to play_url, class: "pixel-btn pixel-btn-secondary", style: "font-size:12px" do %>
-          <%= pixel_icon(:play, size: 18) %> Practice
-        <% end %>
-        <%= link_to "/auth/login", class: "pixel-btn", style: "font-size:12px" do %>
-          <%= pixel_icon(:lock, size: 18) %> Connect & Play
+        <%= link_to play_url, class: "pixel-btn", style: "font-size:12px" do %>
+          <%= pixel_icon(:play, size: 18) %> Start Playing
         <% end %>
       <% end %>
     </div>
@@ -56,8 +53,12 @@
         Playing as <span class="text-purple-400"><%= current_user.short_address %></span> — results saved
       </p>
     <% else %>
-      <p class="text-gray-500 mb-10" style="font-size:10px">
-        Connect wallet to save scores
+      <p class="text-gray-300 mb-2" style="font-size:10px">
+        No login needed — start playing now.
+      </p>
+      <p class="text-gray-500 mb-10" style="font-size:9px;line-height:1.8">
+        Want streaks on the leaderboard?
+        <%= link_to "Connect a wallet →", "/auth/login", class: "text-purple-400 hover:text-purple-300" %>
       </p>
     <% end %>
 
