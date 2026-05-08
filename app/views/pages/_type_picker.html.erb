@@ -1,0 +1,48 @@
+<%# Type-picker grid. Iterates AccountTaxonomy.flat_entries and renders
+    one pixel-card per account type. Each card links to its example
+    address (Turbo Frame inline decode). Replaces the prior Visualize +
+    Learn + Play bento. %>
+<div class="mb-12">
+  <p class="text-center text-gray-500 mb-6" style="font-size:10px">
+    — or pick a type to decode —
+  </p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <% AccountTaxonomy.flat_entries.each do |entry| %>
+      <%= link_to "/accounts/#{entry.example_address}",
+            data: { turbo_frame: "account_result" },
+            class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
+            style: "padding:14px;text-decoration:none" do %>
+        <h3 class="text-white mb-1" style="font-size:13px">
+          <%= entry.name %>
+        </h3>
+        <p class="text-gray-500 mb-3" style="font-size:9px">
+          <%= entry.program_label %><% if entry.size %> &middot; <%= entry.size %> bytes<% end %>
+        </p>
+        <p class="text-gray-400 mb-3" style="font-size:10px;line-height:1.6;flex:1">
+          <%= truncate(entry.description, length: 110) %>
+        </p>
+        <p class="mt-auto text-purple-400" style="font-size:10px">
+          Try <%= entry.example_label %> &rarr;
+        </p>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%# Secondary links: route to the broader explore + play surfaces. %>
+  <div class="text-center mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+    <%= link_to "/types",
+          class: "text-gray-400 hover:text-purple-300 flex items-center gap-2",
+          style: "font-size:10px",
+          data: { turbo: false } do %>
+      <%= pixel_icon(:lock, size: 12) %> Browse the full taxonomy
+    <% end %>
+    <span class="text-gray-700 hidden sm:inline">·</span>
+    <%= link_to "/challenges",
+          class: "text-gray-400 hover:text-purple-300 flex items-center gap-2",
+          style: "font-size:10px",
+          data: { turbo: false } do %>
+      <%= pixel_icon(:target, size: 12) %> Test your eye in Byte Challenge
+    <% end %>
+  </div>
+</div>
