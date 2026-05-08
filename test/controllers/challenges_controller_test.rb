@@ -195,10 +195,40 @@ class ChallengesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "GET /challenges defaults to easy when no tier param or session is set" do
+    get "/challenges"
+    assert_response :success
+    # First-time visitors land on Easy so the gentlest tier is the default play.
+    assert_match %r{border-purple-500[^"]*"[^>]*>\s*Easy}, response.body
+  end
+
   test "GET /challenges?tier=easy marks easy button as active" do
     get "/challenges?tier=easy"
     assert_response :success
     # Active buttons have purple border class
     assert_match %r{border-purple-500[^"]*"[^>]*>\s*Easy}, response.body
+  end
+
+  test "GET /challenges?tier=all marks the All button as active" do
+    get "/challenges?tier=all"
+    assert_response :success
+    # Explicit "all" choice highlights the All tab
+    assert_match %r{border-purple-500[^"]*"[^>]*>\s*All}, response.body
+  end
+
+  # Regression: picking "All" on /challenges and clicking Play used to drop
+  # the tier param, falling through to the easy default. The play link must
+  # carry the tier choice (including the "all" sentinel) so the show action
+  # plays from the full pool.
+  test "play link carries the tier when All is selected" do
+    get "/challenges?tier=all"
+    assert_response :success
+    assert_match %r{href="/challenge\?tier=all"}, response.body
+  end
+
+  test "play link carries the tier when a specific tier is selected" do
+    get "/challenges?tier=medium"
+    assert_response :success
+    assert_match %r{href="/challenge\?tier=medium"}, response.body
   end
 end

@@ -27,6 +27,12 @@ class ChallengesController < ApplicationController
     "hard"   => { label: "Hard",   description: "Stake & Vote — 13+ fields",         color: "text-red-400" }
   }.freeze
 
+  # Sentinel for the explicit "every tier" choice. Stored in the session so a
+  # user who picked "All" doesn't get pulled back to the easy default on the
+  # next request; resolved_tier translates it to nil for `challenge_pool`.
+  ALL_TIER_KEY = "all".freeze
+  DEFAULT_TIER = "easy".freeze
+
   MAX_DATA_DISPLAY = 512
   MAX_WRONG_ATTEMPTS = 3
 
@@ -34,11 +40,19 @@ class ChallengesController < ApplicationController
     @user_stats = current_user_stats
     @top_streaks = ChallengeResult.includes(:user).leaderboard.limit(5)
     @active_tier = resolved_tier
+    # Persist explicit tier picks made on the index page itself so the choice
+    # survives navigation to /challenge (or away and back) without depending
+    # on the show action being visited first.
+    if params[:tier].present?
+      session[:challenge_tier] = @active_tier.nil? ? ALL_TIER_KEY : @active_tier
+    end
   end
 
   def show
     @tier = resolved_tier
-    session[:challenge_tier] = @tier
+    # Persist the user's choice. nil (= "All") is stored as the sentinel
+    # so it survives the round-trip back into resolved_tier.
+    session[:challenge_tier] = @tier.nil? ? ALL_TIER_KEY : @tier
 
     pool = challenge_pool(@tier)
     account_info = pool.sample
@@ -176,8 +190,9 @@ class ChallengesController < ApplicationController
   end
 
   def resolved_tier
-    candidate = (params[:tier] || session[:challenge_tier]).to_s
-    TIERS.key?(candidate) ? candidate : nil
+    raw = (params[:tier].presence || session[:challenge_tier].presence || DEFAULT_TIER).to_s
+    return nil if raw == ALL_TIER_KEY
+    TIERS.key?(raw) ? raw : DEFAULT_TIER
   end
 
   def challenge_pool(tier)
