@@ -1,7 +1,8 @@
 <%# Endorsements from the Solana ecosystem (public quotes from X).
-    Each card links to the original tweet — paste the URL into the `href`
-    when you have it. Cards stack on mobile, sit in a 3-column grid on
-    desktop, and reuse the existing pixel-card aesthetic. %>
+    Each card is a single anchor wrapping the entire pixel-card so the
+    whole tile is clickable; opens the original tweet in a new tab.
+    Avatars are served via unavatar.io, which proxies the latest X profile
+    image. Falls back to its default if the handle ever changes. %>
 <div class="mb-12">
   <p class="text-center text-purple-300 mb-1" style="font-size:11px;letter-spacing:0.12em">
     FROM THE SOLANA ECOSYSTEM
@@ -12,47 +13,74 @@
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <%# Chase Barker — Solana Foundation %>
-    <a href="#"
+    <a href="https://x.com/therealchaseeb/status/2046487070630404506"
        target="_blank"
        rel="noopener"
        class="pixel-card flex flex-col hover:border-purple-500 transition-colors"
        style="padding:14px;text-decoration:none">
-      <p class="text-gray-200 mb-3" style="font-size:11px;line-height:1.7">
+      <p class="text-gray-200 mb-4" style="font-size:11px;line-height:1.7">
         &ldquo;Could be a useful learning tool for students.&rdquo;
       </p>
-      <div class="mt-auto pt-2 border-t border-gray-800">
-        <p class="text-purple-400" style="font-size:10px">Chase Barker</p>
-        <p class="text-gray-500" style="font-size:9px">Solana Foundation</p>
+      <div class="mt-auto pt-3 border-t border-gray-800 flex items-center gap-3">
+        <img src="https://unavatar.io/x/therealchaseeb"
+             alt="Chase Barker"
+             loading="lazy"
+             width="32"
+             height="32"
+             class="rounded-full border-2 border-gray-700"
+             style="width:32px;height:32px;object-fit:cover">
+        <div>
+          <p class="text-purple-400" style="font-size:10px">Chase Barker</p>
+          <p class="text-gray-500" style="font-size:9px">@therealchaseeb &middot; Solana Foundation</p>
+        </div>
       </div>
     </a>
 
     <%# Mike MacCana — QuickNode %>
-    <a href="#"
+    <a href="https://x.com/mikemaccana/status/2046640657326875068"
        target="_blank"
        rel="noopener"
        class="pixel-card flex flex-col hover:border-purple-500 transition-colors"
        style="padding:14px;text-decoration:none">
-      <p class="text-gray-200 mb-3" style="font-size:11px;line-height:1.7">
+      <p class="text-gray-200 mb-4" style="font-size:11px;line-height:1.7">
         &ldquo;Would love this on Explorer.&rdquo;
       </p>
-      <div class="mt-auto pt-2 border-t border-gray-800">
-        <p class="text-purple-400" style="font-size:10px">Mike MacCana</p>
-        <p class="text-gray-500" style="font-size:9px">QuickNode</p>
+      <div class="mt-auto pt-3 border-t border-gray-800 flex items-center gap-3">
+        <img src="https://unavatar.io/x/mikemaccana"
+             alt="Mike MacCana"
+             loading="lazy"
+             width="32"
+             height="32"
+             class="rounded-full border-2 border-gray-700"
+             style="width:32px;height:32px;object-fit:cover">
+        <div>
+          <p class="text-purple-400" style="font-size:10px">Mike MacCana</p>
+          <p class="text-gray-500" style="font-size:9px">@mikemaccana &middot; QuickNode</p>
+        </div>
       </div>
     </a>
 
     <%# Jonas Hahn — Solana Foundation / SolPlay %>
-    <a href="#"
+    <a href="https://x.com/SolPlay_jonas/status/2046666458931835301"
        target="_blank"
        rel="noopener"
        class="pixel-card flex flex-col hover:border-purple-500 transition-colors"
        style="padding:14px;text-decoration:none">
-      <p class="text-gray-200 mb-3" style="font-size:11px;line-height:1.7">
+      <p class="text-gray-200 mb-4" style="font-size:11px;line-height:1.7">
         &ldquo;Cool. Explorer is open source. Happy to review it.&rdquo;
       </p>
-      <div class="mt-auto pt-2 border-t border-gray-800">
-        <p class="text-purple-400" style="font-size:10px">Jonas Hahn</p>
-        <p class="text-gray-500" style="font-size:9px">Solana Foundation &middot; SolPlay</p>
+      <div class="mt-auto pt-3 border-t border-gray-800 flex items-center gap-3">
+        <img src="https://unavatar.io/x/SolPlay_jonas"
+             alt="Jonas Hahn"
+             loading="lazy"
+             width="32"
+             height="32"
+             class="rounded-full border-2 border-gray-700"
+             style="width:32px;height:32px;object-fit:cover">
+        <div>
+          <p class="text-purple-400" style="font-size:10px">Jonas Hahn</p>
+          <p class="text-gray-500" style="font-size:9px">@SolPlay_jonas &middot; Solana Foundation</p>
+        </div>
       </div>
     </a>
   </div>
