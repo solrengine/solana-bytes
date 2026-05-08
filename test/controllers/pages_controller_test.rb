@@ -35,13 +35,17 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # Secondary navigation under the type-picker: full taxonomy + challenge.
+  # The challenge CTA copy varies based on whether @public_stats has counts:
+  # falls back to a "Test your eye..." hook when stats are absent or zero,
+  # and surfaces "X challenges played..." as social proof when populated.
   test "type-picker exposes secondary links to the taxonomy and challenge" do
     get "/"
     assert_response :success
     assert_match %r{href="/types"}, response.body
     assert_match %r{href="/challenges"}, response.body
     assert_includes response.body, "Browse the full taxonomy"
-    assert_includes response.body, "Test your eye in Byte Challenge"
+    assert_match %r{Test your eye|challenges played}, response.body,
+      "Challenge CTA should render either the fallback hook or the live count"
   end
 
   # The type-picker grid uses responsive Tailwind utilities so cards stack on

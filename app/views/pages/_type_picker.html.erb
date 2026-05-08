@@ -29,20 +29,32 @@
     <% end %>
   </div>
 
-  <%# Secondary links: route to the broader explore + play surfaces. %>
-  <div class="text-center mt-8 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-6">
+  <%# Secondary nav (taxonomy) + Byte Challenge CTA with live count.
+      The challenge gets its own line and pixel-btn-secondary styling so
+      it reads as an action, not just a footnote. The count pulls from
+      `stats` when available and falls back to a plain hook otherwise. %>
+  <div class="text-center mt-8">
     <%= link_to "/types",
-          class: "text-gray-400 hover:text-purple-300 flex items-center gap-2",
+          class: "text-gray-400 hover:text-purple-300 inline-flex items-center gap-2",
           style: "font-size:10px",
           data: { turbo: false } do %>
-      <%= pixel_icon(:lock, size: 12) %> Browse the full taxonomy
+      <%= pixel_icon(:lock, size: 12) %> Browse the full taxonomy &rarr;
     <% end %>
-    <span class="text-gray-700 hidden sm:inline">·</span>
+  </div>
+
+  <% challenges_count = local_assigns[:stats] && stats[:total_challenges].to_i %>
+  <div class="text-center mt-4">
     <%= link_to "/challenges",
-          class: "text-gray-400 hover:text-purple-300 flex items-center gap-2",
-          style: "font-size:10px",
+          class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+          style: "font-size:10px;padding:10px 18px",
           data: { turbo: false } do %>
-      <%= pixel_icon(:target, size: 12) %> Test your eye in Byte Challenge
+      <%= pixel_icon(:target, size: 14) %>
+      <% if challenges_count.to_i > 0 %>
+        <span><%= number_with_delimiter(challenges_count) %> challenges played &mdash; can you beat them?</span>
+      <% else %>
+        <span>Test your eye &mdash; find the mint authority in 165 bytes</span>
+      <% end %>
+      <span>&rarr;</span>
     <% end %>
   </div>
 </div>
