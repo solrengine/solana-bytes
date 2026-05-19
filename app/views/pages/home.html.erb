@@ -1,12 +1,29 @@
 <% content_for :hide_navbar, "true" %>
 <div data-controller="loading">
   <div data-loading-target="hero">
-    <%# Hero band — centered logo + title + tagline + supporting copy + search.
-        Replaces the prior 2-column (text + live decoded mint) layout. The
-        live-decoded sample retired with _hero_decoded_sample.html.erb. %>
-    <div class="pt-8 mb-12 text-center">
-      <%= pixel_logo(variant: :dark, size: 128, css_class: "mx-auto mb-6") %>
+    <%# Hero band — logo on the left, Learn + Challenge CTAs on the right.
+        Title / tagline / supporting copy / search stay centered below. %>
+    <div class="pt-8 mb-10 flex items-center justify-between gap-6 flex-wrap">
+      <%= pixel_logo(variant: :dark, size: 128, css_class: "shrink-0") %>
 
+      <div class="flex items-center gap-3 sm:gap-4">
+        <%= link_to "/learn",
+              class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+              style: "font-size:11px;padding:12px 18px" do %>
+          <%= pixel_icon(:lock, size: 16) %>
+          <span>Learn</span>
+        <% end %>
+        <%= link_to "/challenges",
+              class: "pixel-btn inline-flex items-center gap-2",
+              style: "font-size:11px;padding:12px 18px" do %>
+          <%= pixel_icon(:target, size: 16) %>
+          <span>Challenge</span>
+        <% end %>
+      </div>
+    </div>
+
+    <%# Title + tagline + supporting copy + search, centered below. %>
+    <div class="mb-12 text-center">
       <h1 class="mb-4 text-white text-[24px] md:text-[36px] lg:text-[44px]" style="text-shadow:4px 4px 0 #4c1d95;line-height:1.2">
         Solana Bytes
       </h1>
