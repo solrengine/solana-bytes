@@ -1,10 +1,9 @@
 class PagesController < ApplicationController
-  FEATURED_ACCOUNT_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v".freeze
-
   def home
-    account_data = RpcAccountFetcher.fetch(FEATURED_ACCOUNT_ADDRESS, network: "mainnet-beta", expires_in: 1.hour, race_condition_ttl: 30.seconds)
-    account_value = account_data&.dig("result", "value")
-    @featured_account = account_value ? AccountPresenter.new(FEATURED_ACCOUNT_ADDRESS, account_value) : nil
+    # The centered hero (U4) replaced the prior 2-column layout that paired
+    # the copy with a live-decoded USDC mint sample, so @featured_account is
+    # no longer needed. The featured-account fetch was the only place we
+    # consumed FEATURED_ACCOUNT_ADDRESS — both removed together.
     @public_stats = fetch_public_stats
   end
 

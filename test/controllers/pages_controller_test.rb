@@ -5,7 +5,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get "/"
     assert_response :success
     assert_includes response.body, "A field guide to Solana accounts."
-    assert_includes response.body, "Solana Bytes shows you, and lets you prove you understand."
+    assert_includes response.body, "Inspect and understand raw Solana account bytes, structures, and on-chain data."
   end
 
   # The full-width paste form (extracted from the Visualize tile in the prior
@@ -86,76 +86,32 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  # --- Live-decoded hero ---
+  # --- Centered hero (U4) ---
+  # The prior 2-column hero with a live-decoded USDC mint sample on the
+  # right was retired in U4 (mockup-driven centered layout). The
+  # _hero_decoded_sample partial and FEATURED_ACCOUNT_ADDRESS constant were
+  # deleted in the same unit.
 
-  USDC_MINT_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-
-  # Build a valid 82-byte SPL Mint payload (all-zero authorities, supply 0,
-  # decimals 0). Decodes cleanly through RegionDecoder; produces 7 named regions.
-  def usdc_sample_account_response(bytes_array: Array.new(82, 0))
-    base64 = Base64.strict_encode64(bytes_array.pack("C*"))
-    {
-      "result" => {
-        "context" => { "slot" => 12345 },
-        "value" => {
-          "lamports" => 369_583_392,
-          "owner" => "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-          "executable" => false,
-          "rentEpoch" => 0,
-          "space" => 82,
-          "data" => [ base64, "base64" ]
-        }
-      }
-    }
-  end
-
-  test "hero renders interactive hex grid when featured account loads successfully" do
-    RpcStubRegistry.responses[USDC_MINT_ADDRESS] = usdc_sample_account_response
+  test "centered hero renders the new logo, title, and tagline copy" do
     get "/"
     assert_response :success
-    assert_match %r{class="hidden md:block[^"]*"}, response.body
-    assert_includes response.body, "USDC mint, decoded — hover any byte"
-    assert_includes response.body, 'data-controller="hex-viewer"'
-    assert_includes response.body, "Mint Authority Option"
-    assert_includes response.body, "Supply"
-  end
-
-  # Graceful fallback when the sample is unavailable: hero copy and the
-  # type-picker grid both still render so the page never falls back to
-  # an empty state.
-  test "hero degrades cleanly when featured account cannot be loaded" do
-    get "/"
-    assert_response :success
+    # Logo image is in the hero band as well as the nav (the nav assertion
+    # in `global nav renders the new pixel logo` covers both — the hero one
+    # is asserted here for completeness)
+    assert_match %r{<img[^>]+src="[^"]*sb-logo-dark[^"]*"}, response.body
+    assert_includes response.body, "Solana Bytes"
     assert_includes response.body, "A field guide to Solana accounts."
-    assert_includes response.body, "Solana Bytes shows you, and lets you prove you understand."
-    # Type-picker still renders — sample a couple of stable entry names
-    assert_includes response.body, "Mint"
-    assert_includes response.body, "Token Account"
-    # Hero partial caption is NOT present (partial did not render)
-    refute_includes response.body, "USDC mint, decoded — hover any byte"
+    assert_includes response.body, "Inspect and understand raw Solana account bytes, structures, and on-chain data."
   end
 
-  # The hero partial wraps the hex grid in `hidden md:block`. Anchor on the
-  # endorsements section heading (which immediately follows the hero) to
-  # scope the regex to the hero region.
-  test "hero hex grid is hidden on mobile via Tailwind responsive utility" do
-    RpcStubRegistry.responses[USDC_MINT_ADDRESS] = usdc_sample_account_response
+  test "loading-spinner card matches the mockup treatment" do
     get "/"
     assert_response :success
-    hero_section = response.body.match(/Solana Bytes shows you(?:.*?)(?=FROM THE SOLANA ECOSYSTEM)/m).to_s
-    assert_match %r{hidden md:block}, hero_section,
-      "Hero partial should carry `hidden md:block` so the hex grid hides at mobile widths"
-  end
-
-  # Hero hex cells must remain hover-only (no anchor wrappers) so clicks
-  # don't navigate. Scoped to the region between the hero caption and the
-  # endorsements heading.
-  test "hero hex grid cells are not wrapped in anchor links" do
-    RpcStubRegistry.responses[USDC_MINT_ADDRESS] = usdc_sample_account_response
-    get "/"
-    assert_response :success
-    hero_section = response.body.match(/USDC mint, decoded(?:.*?)(?=FROM THE SOLANA ECOSYSTEM)/m).to_s
-    refute_match %r{<a[^>]*>\s*<td[^>]*data-region}, hero_section,
-      "Hero hex cells must not be wrapped in anchor tags (hover-only, non-navigating)"
+    # The spinner uses the pixel-loading dots class + the "Fetching account
+    # from Solana" copy + the "This may take a few seconds." caption.
+    spinner_section = response.body.match(/data-loading-target="spinner".*?<\/div>\s*<\/div>\s*<\/div>/m).to_s
+    assert_includes spinner_section, "Fetching account from Solana"
+    assert_includes spinner_section, "This may take a few seconds."
+    assert_match %r{pixel-loading}, spinner_section
   end
 end
