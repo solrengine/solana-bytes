@@ -63,7 +63,7 @@
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
         <%# Brand: pixel logo + wordmark. Literal "/" path — engine-isolation safe. %>
         <%= link_to "/", class: "text-white hover:text-purple-400 shrink-0 flex items-center gap-3" do %>
-          <%= pixel_logo(variant: :dark, size: 40) %>
+          <%= pixel_logo(variant: :dark, size: 56) %>
           <span style="font-size:14px;text-shadow:3px 3px 0 #4c1d95" class="hidden sm:inline">Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-3 sm:gap-4">
@@ -113,7 +113,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
           <%# Left: brand mark + tagline (logo on the left, text stacked beside it) %>
           <div class="flex items-center gap-3">
-            <%= pixel_logo(variant: :dark, size: 48, css_class: "shrink-0") %>
+            <%= pixel_logo(variant: :dark, size: 72, css_class: "shrink-0") %>
             <div>
               <p class="text-white" style="font-size:10px;text-shadow:2px 2px 0 #4c1d95">Solana Bytes</p>
               <p class="text-gray-500 mt-1" style="font-size:8px;line-height:1.6">A field guide to Solana accounts.</p>
