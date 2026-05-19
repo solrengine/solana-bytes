@@ -111,11 +111,13 @@
     <footer class="relative border-t-3 border-gray-800 mt-16" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-8">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
-          <%# Left: brand stack — logo over wordmark over tagline. %>
-          <div class="flex flex-col items-center md:items-start gap-2">
-            <%= pixel_logo(variant: :dark, size: 56) %>
-            <p class="text-white" style="font-size:12px;text-shadow:2px 2px 0 #4c1d95">Solana Bytes</p>
-            <p class="text-gray-500" style="font-size:9px;line-height:1.6">A field guide to Solana accounts.</p>
+          <%# Left: brand mark + tagline (logo on the left, text stacked beside it) %>
+          <div class="flex items-center gap-3">
+            <%= pixel_logo(variant: :dark, size: 48, css_class: "shrink-0") %>
+            <div>
+              <p class="text-white" style="font-size:10px;text-shadow:2px 2px 0 #4c1d95">Solana Bytes</p>
+              <p class="text-gray-500 mt-1" style="font-size:8px;line-height:1.6">A field guide to Solana accounts.</p>
+            </div>
           </div>
 
           <%# Centre: nav links. Literal string paths for engine isolation.
