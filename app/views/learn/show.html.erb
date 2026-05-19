@@ -1,0 +1,121 @@
+<% content_for(:title, "#{@entry.name} — Learn — Solana Bytes") %>
+
+<div class="max-w-4xl mx-auto">
+  <%# Breadcrumb-style back-link at the top so the page has an obvious
+      exit upward. The full back/forward CTAs at the bottom give a
+      secondary exit after reading. %>
+  <div class="mb-6">
+    <%= link_to "/learn", class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
+      <span aria-hidden="true">&larr;</span> Learn
+    <% end %>
+  </div>
+
+  <%# Header: title + description + program pill + byte size %>
+  <div class="mb-8">
+    <h1 class="text-white mb-3" style="font-size:24px;text-shadow:3px 3px 0 #4c1d95">
+      <%= @entry.name %>
+    </h1>
+    <p class="text-gray-300 mb-4" style="font-size:12px;line-height:1.8">
+      <%= @entry.description %>
+    </p>
+    <div class="flex flex-wrap items-center gap-3" style="font-size:9px">
+      <span class="text-purple-300 px-3 py-1 border-2 border-purple-700" style="background:#1a0a2e">
+        <%= @entry.program_label %>
+      </span>
+      <% if @entry.size %>
+        <span class="text-gray-400">
+          <%= number_with_delimiter(@entry.size) %> bytes
+        </span>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Live sample section. The sample comes BEFORE the explainer prose —
+      audience is Solana devs who already know the basics and want to see
+      bytes first, read the depth after. Heading is "Sample: <label>" with
+      a cached-hourly caption (honest framing — Vote vote_history, Stake
+      epoch fields, ALT address count all mutate within the hour-long TTL). %>
+  <div class="mb-10">
+    <div class="mb-4">
+      <h2 class="text-white mb-1" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+        Sample: <%= @entry.example_label %>
+      </h2>
+      <p class="text-gray-500" style="font-size:9px">
+        (cached; refreshes hourly &middot; mainnet only)
+      </p>
+    </div>
+
+    <% if @presenter %>
+      <%# Overflow cap via CSS wrapper. Approach B from U17 in the plan —
+          keeps _hex_view.html.erb unchanged. ~320px ≈ 12 rows at the
+          hex grid's existing row line-height; covers Mint/Token/Stake/
+          Metadata in full and clips Vote/ALT with a fade-out so the
+          page flow stays clean. %>
+      <div class="relative" style="max-height:340px;overflow:hidden">
+        <%= render "accounts/hex_view", account: @presenter, compact: true %>
+        <%# Bottom fade gradient that only renders when the hex view
+            actually exceeds the cap — purely cosmetic. %>
+        <div class="absolute bottom-0 left-0 right-0 pointer-events-none" style="height:80px;background:linear-gradient(to bottom, rgba(10,10,20,0) 0%, rgba(10,10,20,0.95) 90%)"></div>
+      </div>
+      <div class="mt-4 text-center">
+        <%= link_to "/accounts/#{@entry.example_address}",
+              class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+              style: "font-size:10px;padding:10px 18px",
+              data: { turbo: false } do %>
+          <%= pixel_icon(:magnifier, size: 12) %>
+          <span>View full hex</span>
+          <span aria-hidden="true">&rarr;</span>
+        <% end %>
+      </div>
+    <% else %>
+      <%# Fallback: RPC fetch failed or decode raised. Page still teaches
+          via the explainer prose below; the sample card explains what's
+          missing and points at the visualizer so the user can retry. %>
+      <div class="pixel-card text-center" style="padding:24px;border-color:#78350f">
+        <p class="text-yellow-400 mb-2" style="font-size:11px">
+          Sample temporarily unavailable
+        </p>
+        <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.7">
+          We couldn&rsquo;t fetch the cached sample from mainnet right now.
+          The full hex view will try again live.
+        </p>
+        <%= link_to "/accounts/#{@entry.example_address}",
+              class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+              style: "font-size:10px;padding:10px 18px",
+              data: { turbo: false } do %>
+          <%= pixel_icon(:magnifier, size: 12) %>
+          <span>Try the visualizer</span>
+          <span aria-hidden="true">&rarr;</span>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Explainer prose — plain prose rendered via simple_format. U21 wrote
+      the content as heredocs wrapped at ~75 chars for Ruby readability.
+      Single newlines within paragraphs are joined to spaces so the browser
+      handles wrapping; double-newlines stay as paragraph breaks. %>
+  <% if @entry.explainer_text.present? %>
+    <% cleaned_explainer = @entry.explainer_text.split(/\n{2,}/).map { |p| p.tr("\n", " ").squeeze(" ").strip }.join("\n\n") %>
+    <div class="pixel-card mb-10" style="padding:24px">
+      <div class="text-gray-200 [&>p]:mb-5 [&>p:last-child]:mb-0" style="font-size:11px;line-height:1.9">
+        <%= simple_format(cleaned_explainer) %>
+      </div>
+    </div>
+  <% end %>
+
+  <%# Exit affordances: back to /learn + Challenge CTA. Removes the
+      dead-end identified during plan review. %>
+  <div class="border-t-2 border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <%= link_to "/learn", class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
+      <span aria-hidden="true">&larr;</span> Back to Learn
+    <% end %>
+    <%= link_to "/challenges",
+          class: "pixel-btn inline-flex items-center gap-2",
+          style: "font-size:11px;padding:10px 18px" do %>
+      <%= pixel_icon(:target, size: 14) %>
+      <span>Try the Byte Challenge</span>
+      <span aria-hidden="true">&rarr;</span>
+    <% end %>
+  </div>
+</div>

@@ -1,62 +1,73 @@
 <% content_for :hide_navbar, "true" %>
 <div data-controller="loading">
   <div data-loading-target="hero">
-    <%# Hero band — 2-column on desktop (text + live decoded mint), stacks on mobile. %>
-    <div class="pt-2 mb-12">
-      <%# 2-column on desktop (text + live decode), stacks on mobile %>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-        <%# Left: copy, left-aligned on desktop, centered on mobile %>
-        <div class="text-center md:text-left">
-          <h1 class="mb-3 text-white text-[20px] md:text-[32px] lg:text-[40px]" style="text-shadow:3px 3px 0 #4c1d95;line-height:1.2">
-            Solana Bytes
-          </h1>
-          <p class="text-purple-300 text-[13px] md:text-[15px] lg:text-[16px]">
-            A field guide to Solana accounts.
-          </p>
-          <p class="hidden md:block text-gray-400 text-[12px] mt-4" style="line-height:1.9">
-            Most tools tell you what bytes mean. Solana Bytes shows you, and lets you prove you understand.
-          </p>
+    <%# Hero band — logo on the left, Learn + Challenge CTAs on the right.
+        Title / tagline / supporting copy / search stay centered below. %>
+    <div class="pt-8 mb-16 flex items-center justify-between gap-6 flex-wrap">
+      <%= pixel_logo(variant: :dark, size: 128, css_class: "shrink-0") %>
 
-          <%# Three-promise bullets that preview the bento tiles below
-              and gloss what the live-decoded sample on the right is showing.
-              Desktop only (matches the body paragraph above). %>
-          <ul class="hidden md:block mt-6 space-y-2 text-gray-400" style="font-size:12px">
-            <li class="flex items-center gap-3">
-              <%= pixel_icon(:magnifier, size: 12) %>
-              <span>Hover any byte to decode it</span>
-            </li>
-            <li class="flex items-center gap-3">
-              <%= pixel_icon(:lock, size: 12) %>
-              <span>Browse <%= AccountTaxonomy.flat_entries.length %> account types</span>
-            </li>
-            <li class="flex items-center gap-3">
-              <%= pixel_icon(:target, size: 12) %>
-              <span>Hunt the field in raw hex</span>
-            </li>
-          </ul>
-        </div>
-
-        <%# Right: live-decoded hero — only renders when the cached/fetched sample is available %>
-        <% if @featured_account %>
-          <%= render "hero_decoded_sample", account: @featured_account %>
+      <div class="flex items-center gap-3 sm:gap-4">
+        <%= link_to "/learn",
+              class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+              style: "font-size:11px;padding:12px 18px" do %>
+          <%= pixel_icon(:book, size: 16) %>
+          <span>Learn</span>
+        <% end %>
+        <%= link_to "/challenges",
+              class: "pixel-btn inline-flex items-center gap-2",
+              style: "font-size:11px;padding:12px 18px" do %>
+          <%= pixel_icon(:target, size: 16) %>
+          <span>Challenge</span>
         <% end %>
       </div>
     </div>
 
-    <%= render "pages/endorsements" %>
+    <%# Title + tagline + supporting copy + search, centered below. %>
+    <div class="mb-20 text-center">
+      <h1 class="mb-5 text-white text-[28px] md:text-[44px] lg:text-[56px]" style="text-shadow:4px 4px 0 #4c1d95;line-height:1.2">
+        Solana Bytes
+      </h1>
 
-    <%= render "pages/paste_address_form" %>
+      <p class="text-purple-300 text-[15px] md:text-[18px] lg:text-[20px] mb-4">
+        A field guide to Solana accounts.
+      </p>
 
-    <%= render "pages/type_picker", stats: @public_stats %>
+      <p class="text-gray-400 max-w-2xl mx-auto" style="font-size:12px;line-height:1.9">
+        Inspect and understand raw Solana account bytes, structures, and on-chain data.
+      </p>
+
+      <div class="mt-10 max-w-3xl mx-auto">
+        <%= render "pages/paste_address_form" %>
+      </div>
+    </div>
+
+    <%= render "pages/intro_cards" %>
 
     <%= render "pages/public_stats_banner", stats: @public_stats %>
+
+    <%= render "pages/type_grid", stats: @public_stats %>
+
+    <%= render "pages/endorsements" %>
   </div>
 
-  <%# Loading spinner %>
+  <%# Loading state — mockup-style card that replaces the hero while the
+      Turbo Frame fetches. Driven by loading_controller targets (no changes
+      to the controller). %>
   <div data-loading-target="spinner" class="items-center justify-center min-h-[40vh]" style="display:none">
-    <div class="text-center">
-      <div class="text-purple-400 mb-4" style="font-size:16px">...</div>
-      <p class="text-gray-400" style="font-size:12px">Fetching account data...</p>
+    <div class="pixel-card max-w-2xl mx-auto" style="padding:24px">
+      <div class="flex items-center gap-4">
+        <div class="text-purple-400 shrink-0">
+          <%= pixel_icon(:magnifier, size: 24) %>
+        </div>
+        <div>
+          <p class="text-white mb-2" style="font-size:12px">
+            <span class="pixel-loading">Fetching account from Solana</span>
+          </p>
+          <p class="text-gray-500" style="font-size:10px;line-height:1.6">
+            This may take a few seconds.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 

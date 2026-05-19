@@ -5,7 +5,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get "/"
     assert_response :success
     assert_includes response.body, "A field guide to Solana accounts."
-    assert_includes response.body, "Solana Bytes shows you, and lets you prove you understand."
+    assert_includes response.body, "Inspect and understand raw Solana account bytes, structures, and on-chain data."
   end
 
   # The full-width paste form (extracted from the Visualize tile in the prior
@@ -20,37 +20,50 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, 'data-controller="address-form"'
   end
 
-  # The type-picker grid replaces the prior Learn tile. Every taxonomy entry
-  # gets its own card whose primary action links to the entry's example
-  # address (Turbo Frame inline decode), not to /types.
-  test "type-picker renders one card per AccountTaxonomy entry, linking to each example address" do
+  # U8 — the 6-card type grid renders exactly Mint, Token Account,
+  # Stake Account, Vote Account, Token Metadata, Address Lookup Table in
+  # mockup order. The five other AccountTaxonomy entries (Multisig,
+  # Token-2022, BPF Upgradeable, ELF, etc.) are intentionally NOT in this
+  # grid — they're discoverable via "Browse all account types →" → /learn.
+  test "type grid renders exactly the six mockup-fixed cards in order" do
     get "/"
     assert_response :success
-    AccountTaxonomy.flat_entries.each do |entry|
-      assert_includes response.body, entry.name,
-        "Type-picker should include a card for entry '#{entry.name}'"
-      assert_includes response.body, "/accounts/#{entry.example_address}",
-        "Type-picker card for '#{entry.name}' should link to /accounts/#{entry.example_address}"
+
+    expected_order = [ "Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table" ]
+    indices = expected_order.map { |name| response.body.index(">\n          #{name}\n") || response.body.index(name) }
+    assert indices.none?(&:nil?), "All six expected card names should be present"
+    assert_equal indices, indices.sort, "Cards should appear in mockup-specified order: #{expected_order.inspect}"
+
+    # U15 swapped link targets from interim /accounts/<addr> to /learn/<slug>
+    # now that the Learn pages exist.
+    expected_order.each do |name|
+      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
+      assert_includes response.body, "/learn/#{entry.slug}",
+        "Type grid card '#{name}' should link to /learn/#{entry.slug}"
     end
+
+    # Entries NOT in the mockup grid should NOT appear as card headings on home
+    refute_includes response.body, "Multisig"
+    refute_includes response.body, "BPF Upgradeable Program"
   end
 
-  # Secondary navigation under the type-picker: full taxonomy + challenge.
-  # The challenge CTA copy varies based on whether @public_stats has counts:
-  # falls back to a "Test your eye..." hook when stats are absent or zero,
-  # and surfaces "X challenges played..." as social proof when populated.
-  test "type-picker exposes secondary links to the taxonomy and challenge" do
+  # U8 — "Browse all account types →" link below the grid points to /learn
+  # (which will 404 until U15 ships the route). Preserves discoverability of
+  # the entries excluded from the 6-card grid.
+  test "type grid exposes a Browse-all link to /learn and the Challenge CTA" do
     get "/"
     assert_response :success
-    assert_match %r{href="/types"}, response.body
+    assert_match %r{href="/learn"}, response.body
+    assert_includes response.body, "Browse all account types"
     assert_match %r{href="/challenges"}, response.body
-    assert_includes response.body, "Browse the full taxonomy"
     assert_match %r{Test your eye|challenges played}, response.body,
       "Challenge CTA should render either the fallback hook or the live count"
   end
 
-  # The type-picker grid uses responsive Tailwind utilities so cards stack on
-  # mobile, sit 2-up on small screens, and 3-up on desktop.
-  test "type-picker uses responsive grid classes for mobile stacking" do
+  # The type grid uses the same responsive Tailwind utilities as before
+  # so cards stack on mobile, sit 2-up on small screens, and 3-up on
+  # desktop.
+  test "type grid uses responsive grid classes for mobile stacking" do
     get "/"
     assert_response :success
     assert_match %r{grid-cols-1}, response.body
@@ -67,76 +80,204 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, 'data-loading-target="frame"'
   end
 
-  # --- Live-decoded hero ---
-
-  USDC_MINT_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-
-  # Build a valid 82-byte SPL Mint payload (all-zero authorities, supply 0,
-  # decimals 0). Decodes cleanly through RegionDecoder; produces 7 named regions.
-  def usdc_sample_account_response(bytes_array: Array.new(82, 0))
-    base64 = Base64.strict_encode64(bytes_array.pack("C*"))
-    {
-      "result" => {
-        "context" => { "slot" => 12345 },
-        "value" => {
-          "lamports" => 369_583_392,
-          "owner" => "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-          "executable" => false,
-          "rentEpoch" => 0,
-          "space" => 82,
-          "data" => [ base64, "base64" ]
-        }
-      }
-    }
-  end
-
-  test "hero renders interactive hex grid when featured account loads successfully" do
-    RpcStubRegistry.responses[USDC_MINT_ADDRESS] = usdc_sample_account_response
+  # Nav uses the new SB pixel logo (U2). Renders even when the landing hero
+  # state hides the nav from view — the markup is in the DOM regardless.
+  test "global nav renders the new pixel logo" do
     get "/"
     assert_response :success
-    assert_match %r{class="hidden md:block[^"]*"}, response.body
-    assert_includes response.body, "USDC mint, decoded — hover any byte"
-    assert_includes response.body, 'data-controller="hex-viewer"'
-    assert_includes response.body, "Mint Authority Option"
-    assert_includes response.body, "Supply"
+    assert_match %r{<img[^>]+src="[^"]*sb-logo-dark[^"]*"}, response.body
+    assert_match %r{alt="Solana Bytes"}, response.body
   end
 
-  # Graceful fallback when the sample is unavailable: hero copy and the
-  # type-picker grid both still render so the page never falls back to
-  # an empty state.
-  test "hero degrades cleanly when featured account cannot be loaded" do
+  # Engine-isolation regression guard (U2): the shared application layout is
+  # also rendered inside the SolRengine Auth Engine at /auth/login, where the
+  # host app's named-route helpers are unreachable. This test catches any
+  # accidental use of `_path` helpers in the layout that would NoMethodError
+  # on the login page.
+  test "GET /auth/login renders the shared layout without engine-isolation errors" do
+    get "/auth/login"
+    assert_response :success
+  end
+
+  # --- Centered hero (U4) ---
+  # The prior 2-column hero with a live-decoded USDC mint sample on the
+  # right was retired in U4 (mockup-driven centered layout). The
+  # _hero_decoded_sample partial and FEATURED_ACCOUNT_ADDRESS constant were
+  # deleted in the same unit.
+
+  test "centered hero renders the new logo, title, and tagline copy" do
     get "/"
     assert_response :success
+    # Logo image is in the hero band as well as the nav (the nav assertion
+    # in `global nav renders the new pixel logo` covers both — the hero one
+    # is asserted here for completeness)
+    assert_match %r{<img[^>]+src="[^"]*sb-logo-dark[^"]*"}, response.body
+    assert_includes response.body, "Solana Bytes"
     assert_includes response.body, "A field guide to Solana accounts."
-    assert_includes response.body, "Solana Bytes shows you, and lets you prove you understand."
-    # Type-picker still renders — sample a couple of stable entry names
-    assert_includes response.body, "Mint"
-    assert_includes response.body, "Token Account"
-    # Hero partial caption is NOT present (partial did not render)
-    refute_includes response.body, "USDC mint, decoded — hover any byte"
+    assert_includes response.body, "Inspect and understand raw Solana account bytes, structures, and on-chain data."
   end
 
-  # The hero partial wraps the hex grid in `hidden md:block`. Anchor on the
-  # endorsements section heading (which immediately follows the hero) to
-  # scope the regex to the hero region.
-  test "hero hex grid is hidden on mobile via Tailwind responsive utility" do
-    RpcStubRegistry.responses[USDC_MINT_ADDRESS] = usdc_sample_account_response
+  test "homepage renders the two intro cards from U6" do
     get "/"
     assert_response :success
-    hero_section = response.body.match(/Solana Bytes shows you(?:.*?)(?=FROM THE SOLANA ECOSYSTEM)/m).to_s
-    assert_match %r{hidden md:block}, hero_section,
-      "Hero partial should carry `hidden md:block` so the hex grid hides at mobile widths"
+    assert_includes response.body, "What is Solana Bytes?"
+    assert_includes response.body, "How it works"
+    assert_includes response.body, "Paste any Solana account address."
+    assert_includes response.body, "Explore the raw bytes and field decoding."
+    assert_includes response.body, "Take the Byte Challenge and test your eye."
   end
 
-  # Hero hex cells must remain hover-only (no anchor wrappers) so clicks
-  # don't navigate. Scoped to the region between the hero caption and the
-  # endorsements heading.
-  test "hero hex grid cells are not wrapped in anchor links" do
-    RpcStubRegistry.responses[USDC_MINT_ADDRESS] = usdc_sample_account_response
+  test "loading-spinner card matches the mockup treatment" do
     get "/"
     assert_response :success
-    hero_section = response.body.match(/USDC mint, decoded(?:.*?)(?=FROM THE SOLANA ECOSYSTEM)/m).to_s
-    refute_match %r{<a[^>]*>\s*<td[^>]*data-region}, hero_section,
-      "Hero hex cells must not be wrapped in anchor tags (hover-only, non-navigating)"
+    # The spinner uses the pixel-loading dots class + the "Fetching account
+    # from Solana" copy + the "This may take a few seconds." caption.
+    spinner_section = response.body.match(/data-loading-target="spinner".*?<\/div>\s*<\/div>\s*<\/div>/m).to_s
+    assert_includes spinner_section, "Fetching account from Solana"
+    assert_includes spinner_section, "This may take a few seconds."
+    assert_match %r{pixel-loading}, spinner_section
+  end
+
+  # --- bytes_decoded counter (U5) ---
+
+  # The controller helper is private; reach through the controller class to
+  # exercise the SQL aggregate against the test DB.
+  def stats
+    PagesController.new.send(:fetch_public_stats)
+  end
+
+  # Ahoy::Event belongs_to :visit (required in our subclass), so seeded
+  # events need a Visit FK target.
+  def seed_visit
+    @seed_visit ||= Ahoy::Visit.create!(started_at: Time.current, visit_token: SecureRandom.uuid, visitor_token: SecureRandom.uuid)
+  end
+
+  def seed_event(name:, properties: {})
+    Ahoy::Event.create!(name: name, properties: properties, time: Time.current, visit: seed_visit)
+  end
+
+  test "fetch_public_stats includes bytes_decoded summed from account_viewed event size properties" do
+    seed_event(name: "account_viewed", properties: { "address" => "a", "size" => 82 })
+    seed_event(name: "account_viewed", properties: { "address" => "b", "size" => 165 })
+    seed_event(name: "account_viewed", properties: { "address" => "c", "size" => 3762 })
+
+    assert_equal 82 + 165 + 3762, stats[:bytes_decoded]
+    assert_equal 3, stats[:accounts_analyzed]
+  end
+
+  test "bytes_decoded is 0 when no account_viewed events exist" do
+    assert_equal 0, Ahoy::Event.where(name: "account_viewed").count
+    assert_equal 0, stats[:bytes_decoded]
+  end
+
+  test "bytes_decoded handles events missing the size property (NULL -> 0)" do
+    # Legacy events tracked before U5 lack size; CAST(NULL AS INTEGER) is 0
+    # in SQLite so total remains correct.
+    seed_event(name: "account_viewed", properties: { "address" => "legacy" })
+    seed_event(name: "account_viewed", properties: { "address" => "new", "size" => 200 })
+
+    assert_equal 200, stats[:bytes_decoded]
+  end
+
+  # The "one metric fails, all four blank" failure mode is guarded by
+  # wrapping sum_bytes_decoded in its own begin/rescue returning 0
+  # (see PagesController#sum_bytes_decoded). Without Mocha available we
+  # can't easily stub the SQL aggregate to raise from inside a test; the
+  # protection lives in the method shape itself and is left to code review.
+
+  # --- Live stats card (U7) ---
+
+  # Covers AE1: zero-state hides the card. The early-return guard reads
+  # :accounts_analyzed (NOT :accounts_decoded — the symbol stayed the same
+  # in U5; only the user-visible label changed).
+  test "live stats card renders nothing on a fresh database (zero accounts analyzed)" do
+    assert_equal 0, Ahoy::Event.where(name: "account_viewed").count
+    get "/"
+    assert_response :success
+    refute_includes response.body, "LIVE FROM THE SITE"
+    refute_includes response.body, "accounts decoded"
+    refute_includes response.body, "bytes decoded"
+  end
+
+  # Covers AE2: with populated stats the card renders the four blended
+  # metrics in the specified order (accounts decoded → challenges played
+  # → bytes decoded → countries). bytes_decoded is humanized via
+  # number_to_human_size; the decorative hex-grid element is present.
+  test "live stats card renders four metrics in order with humanized bytes_decoded" do
+    seed_event(name: "account_viewed", properties: { "address" => "a", "size" => 82 })
+    seed_event(name: "account_viewed", properties: { "address" => "b", "size" => 165 })
+    seed_event(name: "account_viewed", properties: { "address" => "c", "size" => 16_240 })
+    seed_event(name: "challenge_started", properties: {})
+    seed_event(name: "challenge_started", properties: {})
+
+    get "/"
+    assert_response :success
+    assert_includes response.body, "LIVE FROM THE SITE"
+    assert_includes response.body, "accounts decoded"
+    assert_includes response.body, "challenges played"
+    assert_includes response.body, "bytes decoded"
+    assert_includes response.body, "countries"
+    # bytes_decoded is humanized — 82 + 165 + 16240 = 16487 bytes ≈ "16.1 KB"
+    # (Rails default number_to_human_size; exact format may include "KB").
+    assert_match %r{1[56]\.\d+ KB|16 KB|1[56]\.\d+\s*KB}, response.body,
+      "bytes_decoded should render via number_to_human_size, not raw integer"
+    # Decorative hex grid present
+    assert_includes response.body, "pixel-hex-grid"
+
+    # Order check: accounts decoded comes before bytes decoded which comes
+    # before countries.
+    body = response.body
+    accounts_idx = body.index("accounts decoded")
+    challenges_idx = body.index("challenges played")
+    bytes_idx = body.index("bytes decoded")
+    countries_idx = body.index("countries")
+    assert accounts_idx < challenges_idx, "accounts decoded should precede challenges played"
+    assert challenges_idx < bytes_idx, "challenges played should precede bytes decoded"
+    assert bytes_idx < countries_idx, "bytes decoded should precede countries"
+  end
+
+  # --- About link in nav + footer (U20) ---
+
+  test "nav exposes the About link" do
+    get "/"
+    assert_response :success
+    # Both nav and footer have an /about link; assert at least one.
+    assert_match %r{href="/about"[^>]*>About</a>}, response.body
+  end
+
+  test "footer exposes the About link" do
+    get "/"
+    assert_response :success
+    # Footer About link should be present alongside the other centre-column links.
+    footer = response.body.match(/<footer.*?<\/footer>/m).to_s
+    assert_match %r{href="/about"}, footer, "footer should link to /about"
+  end
+
+  # --- About page (U19) ---
+
+  test "GET /about renders with What / Why / Who / Tech stack / Links sections" do
+    get "/about"
+    assert_response :success
+    assert_includes response.body, "About"
+    assert_includes response.body, "What it is"
+    assert_includes response.body, "Why it exists"
+    assert_includes response.body, "Who built it"
+    assert_includes response.body, "Tech stack"
+    assert_includes response.body, "Colosseum Frontier Hackathon"
+    assert_includes response.body, "SolRengine"
+    assert_includes response.body, "github.com/solrengine/solana-bytes"
+  end
+
+  # The stats hash retains :total_pageviews for /stats page consumption
+  # even though the homepage banner doesn't render it.
+  test "fetch_public_stats retains total_pageviews even though homepage drops it" do
+    seed_event(name: "account_viewed", properties: { "address" => "a", "size" => 82 })
+    seed_event(name: "pageview", properties: {})
+    seed_event(name: "pageview", properties: {})
+
+    assert_equal 2, stats[:total_pageviews]
+
+    get "/"
+    refute_includes response.body, "pageviews"
   end
 end

@@ -1,18 +1,33 @@
-<%# Public stats banner.
+<%# Public stats banner (U7 — Live stats card with blended metrics).
     Locals: stats — hash from PagesController#fetch_public_stats, or nil.
     Renders nothing if stats are nil (DB error) or if no accounts have been
-    analyzed yet — never show "0 accounts decoded" to a first visitor. %>
+    analyzed yet — never show "0 accounts decoded" to a first visitor.
+
+    Metric set (4 tiles, drops pageviews from display per the brainstorm's
+    Live-stats Blend decision):
+      - accounts decoded  → stats[:accounts_analyzed]
+      - challenges played → stats[:total_challenges]
+      - bytes decoded     → stats[:bytes_decoded] (humanized via number_to_human_size)
+      - countries         → stats[:total_countries]
+
+    Key name is :accounts_analyzed (existing controller symbol, NOT renamed
+    in U5). %>
 <% if stats && stats[:accounts_analyzed].to_i > 0 %>
-  <div class="mt-12 mb-4">
-    <p class="text-center text-purple-300 mb-1" style="font-size:11px;letter-spacing:0.12em">
+  <div class="mb-20">
+    <p class="text-center text-purple-300 mb-2" style="font-size:13px;letter-spacing:0.12em">
       LIVE FROM THE SITE
     </p>
-    <p class="text-center text-gray-500 mb-6" style="font-size:9px">
-      Real numbers, updated every 5 minutes.
+    <p class="text-center text-gray-500 mb-8" style="font-size:10px">
+      Refreshed every 5 minutes.
     </p>
 
-    <div class="pixel-card" style="padding:18px 16px">
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+    <div class="pixel-card relative overflow-hidden" style="padding:24px 20px">
+      <%# Decorative hex-grid pattern in the top-right corner. Pure CSS —
+          random-stable grid of pixel squares matching the brand palette.
+          Hidden on small viewports so it doesn't crowd the metrics. %>
+      <div class="pixel-hex-grid hidden md:block absolute top-3 right-3" aria-hidden="true"></div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center relative" style="z-index:1">
         <div>
           <div class="text-purple-400" style="font-size:18px">
             <%= number_with_delimiter(stats[:accounts_analyzed]) %>
@@ -21,21 +36,21 @@
         </div>
         <div>
           <div class="text-purple-400" style="font-size:18px">
-            <%= number_with_delimiter(stats[:total_countries]) %>
-          </div>
-          <div class="text-gray-500 mt-1" style="font-size:9px">countries</div>
-        </div>
-        <div>
-          <div class="text-purple-400" style="font-size:18px">
-            <%= number_with_delimiter(stats[:total_pageviews]) %>
-          </div>
-          <div class="text-gray-500 mt-1" style="font-size:9px">pageviews</div>
-        </div>
-        <div>
-          <div class="text-purple-400" style="font-size:18px">
             <%= number_with_delimiter(stats[:total_challenges]) %>
           </div>
           <div class="text-gray-500 mt-1" style="font-size:9px">challenges played</div>
+        </div>
+        <div>
+          <div class="text-purple-400" style="font-size:18px">
+            <%= number_to_human_size(stats[:bytes_decoded].to_i, precision: 2) %>
+          </div>
+          <div class="text-gray-500 mt-1" style="font-size:9px">bytes decoded</div>
+        </div>
+        <div>
+          <div class="text-purple-400" style="font-size:18px">
+            <%= number_with_delimiter(stats[:total_countries]) %>
+          </div>
+          <div class="text-gray-500 mt-1" style="font-size:9px">countries</div>
         </div>
       </div>
     </div>

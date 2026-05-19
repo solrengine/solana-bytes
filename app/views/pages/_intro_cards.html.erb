@@ -1,0 +1,43 @@
+<%# Two info cards below the hero (U6): "What is Solana Bytes?" and
+    "How it works". Mockup-driven content; copy stays terse to fit the
+    Press Start 2P density. %>
+<div class="mb-20">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <%# Left card: what the product is %>
+    <div class="pixel-card" style="padding:24px">
+      <h2 class="text-white mb-4" style="font-size:18px;text-shadow:3px 3px 0 #4c1d95">
+        What is Solana Bytes?
+      </h2>
+      <p class="text-gray-300 mb-4" style="font-size:11px;line-height:1.8">
+        Solana Bytes is an interactive explorer that helps you understand Solana account
+        data by inspecting raw bytes, structures, and on-chain programs.
+      </p>
+      <a href="/about" class="text-purple-400 hover:text-purple-300 inline-flex items-center gap-2"
+         style="font-size:10px"
+         data-turbo="false">
+        Learn more <span aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+    <%# Right card: three-step "How it works" %>
+    <div class="pixel-card" style="padding:24px">
+      <h2 class="text-white mb-4" style="font-size:18px;text-shadow:3px 3px 0 #4c1d95">
+        How it works
+      </h2>
+      <ol class="space-y-3 text-gray-300" style="font-size:11px;line-height:1.7">
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 shrink-0" style="font-size:10px;min-width:14px">01</span>
+          <span>Paste any Solana account address.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 shrink-0" style="font-size:10px;min-width:14px">02</span>
+          <span>Explore the raw bytes and field decoding.</span>
+        </li>
+        <li class="flex items-start gap-3">
+          <span class="text-purple-400 shrink-0" style="font-size:10px;min-width:14px">03</span>
+          <span>Take the Byte Challenge and test your eye.</span>
+        </li>
+      </ol>
+    </div>
+  </div>
+</div>

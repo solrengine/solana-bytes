@@ -196,3 +196,48 @@
   font-family: 'Press Start 2P', monospace !important;
   font-size: 10px !important;
 }
+
+/* ═══════════════════════════════════════════
+   PIXEL HEX GRID (decorative — Live stats card)
+   ═══════════════════════════════════════════ */
+
+/* A 6×4 grid of 4×4-pixel cells, colored from the brand palette in a
+   random-stable pattern. Pure CSS — no JS, no SVG. Used as a decorative
+   flourish in the top-right corner of the Live stats card. */
+.pixel-hex-grid {
+  width: 56px;
+  height: 36px;
+  background-image:
+    linear-gradient(90deg, transparent 0 4px, #4c1d95 4px 8px, transparent 8px 12px, #7c3aed 12px 16px, transparent 16px 20px, #a78bfa 20px 24px, transparent 24px 28px, #4c1d95 28px 32px, transparent 32px 36px, #7c3aed 36px 40px, transparent 40px 44px, #1f2937 44px 48px, transparent 48px 52px, #4c1d95 52px 56px),
+    linear-gradient(90deg, #7c3aed 0 4px, transparent 4px 8px, #4c1d95 8px 12px, transparent 12px 16px, #1f2937 16px 20px, transparent 20px 24px, #7c3aed 24px 28px, transparent 28px 32px, #a78bfa 32px 36px, transparent 36px 40px, #4c1d95 40px 44px, transparent 44px 48px, #7c3aed 48px 52px, transparent 52px 56px),
+    linear-gradient(90deg, transparent 0 4px, #1f2937 4px 8px, transparent 8px 12px, #a78bfa 12px 16px, transparent 16px 20px, #4c1d95 20px 24px, transparent 24px 28px, #7c3aed 28px 32px, transparent 32px 36px, #4c1d95 36px 40px, transparent 40px 44px, #a78bfa 44px 48px, transparent 48px 52px, #1f2937 52px 56px);
+  background-size: 56px 4px, 56px 4px, 56px 4px;
+  background-position: 0 0, 0 8px, 0 16px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+
+/* ═══════════════════════════════════════════
+   PIXEL TAB (segmented control — used in Challenge tier selector)
+   ═══════════════════════════════════════════ */
+
+.pixel-tab {
+  border: 2px solid #4b5563;
+  background: #0a0a14;
+  color: #9ca3af;
+  padding: 8px 14px;
+  font-size: 10px;
+  box-shadow: inset -2px -2px 0 #000, inset 2px 2px 0 #1f2937;
+}
+
+.pixel-tab:hover {
+  border-color: #6b7280;
+  color: #e5e7eb;
+}
+
+.pixel-tab.pixel-tab-active {
+  border-color: #7c3aed;
+  background: #1a0a2e;
+  color: #c4b5fd;
+  box-shadow: inset -2px -2px 0 #4c1d95, inset 2px 2px 0 #a78bfa;
+}
