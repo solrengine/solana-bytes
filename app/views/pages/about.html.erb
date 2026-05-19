@@ -1,81 +1,84 @@
 <% content_for(:title, "About — Solana Bytes") %>
 
-<div class="max-w-3xl mx-auto">
+<div class="max-w-5xl mx-auto">
   <div class="text-center mb-10">
-    <%= pixel_logo(variant: :dark, size: 64, css_class: "mx-auto mb-5") %>
     <h1 class="text-white mb-2" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95">About</h1>
     <p class="text-purple-300" style="font-size:13px">
       A field guide to Solana accounts.
     </p>
   </div>
 
-  <%# What %>
-  <section class="pixel-card mb-6" style="padding:24px">
-    <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-      What it is
-    </h2>
-    <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
-      Solana Bytes is an interactive hex visualizer for Solana accounts paired
-      with a Byte Challenge game.
-    </p>
-    <p class="text-gray-400" style="font-size:11px;line-height:1.9">
-      Paste any account address to see decoded metadata and raw bytes with
-      hover tooltips for every field. Play the Challenge to test your knowledge
-      of Solana data structures &mdash; find specific fields in hex dumps, build
-      streaks, climb the leaderboard.
-    </p>
-  </section>
+  <%# 2×2 grid of content boxes: What | Why on top, Who | Tech on bottom.
+      Stacks single-column on mobile. %>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+    <%# What %>
+    <section class="pixel-card" style="padding:24px">
+      <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+        What it is
+      </h2>
+      <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
+        Solana Bytes is an interactive hex visualizer for Solana accounts paired
+        with a Byte Challenge game.
+      </p>
+      <p class="text-gray-400" style="font-size:11px;line-height:1.9">
+        Paste any account address to see decoded metadata and raw bytes with
+        hover tooltips for every field. Play the Challenge to test your knowledge
+        of Solana data structures &mdash; find specific fields in hex dumps, build
+        streaks, climb the leaderboard.
+      </p>
+    </section>
 
-  <%# Why %>
-  <section class="pixel-card mb-6" style="padding:24px">
-    <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-      Why it exists
-    </h2>
-    <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
-      Solana&rsquo;s existing explorers are great for transactions but
-      treat raw account data as an opaque blob. If you want to understand
-      what a Stake account, a Vote account, or a Metaplex Metadata account
-      actually <em>is</em> at the byte level, you read the source.
-    </p>
-    <p class="text-gray-400" style="font-size:11px;line-height:1.9">
-      Solana Bytes is the byte-level guide that we wanted when we were learning
-      &mdash; one place to inspect, decode, and practice on the layouts that
-      every Solana developer eventually touches.
-    </p>
-  </section>
+    <%# Why %>
+    <section class="pixel-card" style="padding:24px">
+      <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+        Why it exists
+      </h2>
+      <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
+        Solana&rsquo;s existing explorers are great for transactions but
+        treat raw account data as an opaque blob. If you want to understand
+        what a Stake account, a Vote account, or a Metaplex Metadata account
+        actually <em>is</em> at the byte level, you read the source.
+      </p>
+      <p class="text-gray-400" style="font-size:11px;line-height:1.9">
+        Solana Bytes is the byte-level guide that we wanted when we were learning
+        &mdash; one place to inspect, decode, and practice on the layouts that
+        every Solana developer eventually touches.
+      </p>
+    </section>
 
-  <%# Who %>
-  <section class="pixel-card mb-6" style="padding:24px">
-    <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-      Who built it
-    </h2>
-    <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
-      Built for the <strong class="text-purple-300">Colosseum Frontier Hackathon</strong>
-      by the team behind <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">SolRengine</a>
-      &mdash; an open-source Rails engine for Solana wallet auth, RPC, and account decoding.
-    </p>
-    <p class="text-gray-400" style="font-size:11px;line-height:1.9">
-      Solana Bytes is the reference application that demonstrates the engine
-      end-to-end: wallet sign-in, RPC fetching with retry, per-program account
-      decoding, and a real game loop on top.
-    </p>
-  </section>
+    <%# Who %>
+    <section class="pixel-card" style="padding:24px">
+      <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+        Who built it
+      </h2>
+      <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
+        Built for the <strong class="text-purple-300">Colosseum Frontier Hackathon</strong>
+        by the team behind <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">SolRengine</a>
+        &mdash; an open-source Rails engine for Solana wallet auth, RPC, and account decoding.
+      </p>
+      <p class="text-gray-400" style="font-size:11px;line-height:1.9">
+        Solana Bytes is the reference application that demonstrates the engine
+        end-to-end: wallet sign-in, RPC fetching with retry, per-program account
+        decoding, and a real game loop on top.
+      </p>
+    </section>
 
-  <%# Tech stack %>
-  <section class="pixel-card mb-6" style="padding:24px">
-    <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-      Tech stack
-    </h2>
-    <ul class="space-y-2 text-gray-300" style="font-size:10px;line-height:1.8">
-      <li><span class="text-purple-300">Rails 8.1</span> &middot; Hotwire (Turbo + Stimulus) &middot; Tailwind v4</li>
-      <li><span class="text-purple-300">SolRengine</span> &middot; wallet auth (SIWS) + RPC client + account decoders</li>
-      <li><span class="text-purple-300">SQLite</span> + Solid Queue / Cache / Cable</li>
-      <li><span class="text-purple-300">Press Start 2P</span> font &middot; inline SVG pixel sprites &middot; pixel-art everywhere</li>
-      <li><span class="text-purple-300">Fly.io</span> for hosting &middot; Kamal for deploys</li>
-    </ul>
-  </section>
+    <%# Tech stack %>
+    <section class="pixel-card" style="padding:24px">
+      <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+        Tech stack
+      </h2>
+      <ul class="space-y-2 text-gray-300" style="font-size:10px;line-height:1.8">
+        <li><span class="text-purple-300">Rails 8.1</span> &middot; Hotwire (Turbo + Stimulus) &middot; Tailwind v4</li>
+        <li><span class="text-purple-300">SolRengine</span> &middot; wallet auth (SIWS) + RPC client + account decoders</li>
+        <li><span class="text-purple-300">SQLite</span> + Solid Queue / Cache / Cable</li>
+        <li><span class="text-purple-300">Press Start 2P</span> font &middot; inline SVG pixel sprites &middot; pixel-art everywhere</li>
+        <li><span class="text-purple-300">Kamal</span> for deploys</li>
+      </ul>
+    </section>
+  </div>
 
-  <%# Links %>
+  <%# Links — full-width band at the bottom %>
   <section class="pixel-card" style="padding:24px">
     <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
       Links
