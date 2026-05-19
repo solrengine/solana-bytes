@@ -104,6 +104,16 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, "Inspect and understand raw Solana account bytes, structures, and on-chain data."
   end
 
+  test "homepage renders the two intro cards from U6" do
+    get "/"
+    assert_response :success
+    assert_includes response.body, "What is Solana Bytes?"
+    assert_includes response.body, "How it works"
+    assert_includes response.body, "Paste any Solana account address."
+    assert_includes response.body, "Explore the raw bytes and field decoding."
+    assert_includes response.body, "Take the Byte Challenge and test your eye."
+  end
+
   test "loading-spinner card matches the mockup treatment" do
     get "/"
     assert_response :success
