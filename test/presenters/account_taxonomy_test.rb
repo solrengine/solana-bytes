@@ -1,8 +1,12 @@
 require "test_helper"
 
 class AccountTaxonomyTest < ActiveSupport::TestCase
+  # The original six live entries shipped with U22. New live entries
+  # (TLV primer, Token-2022 base post-promotion, TransferFeeConfig, etc.)
+  # are covered by the dynamic invariant test below instead of being
+  # bolted onto this regression baseline.
   LIVE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
-  DRAFT_NAMES = [ "Multisig", "Token-2022 Mint/Account + Extensions", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
+  DRAFT_NAMES = [ "Multisig", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
 
   test "all six live entries have a slug, category, example_address" do
     LIVE_SLUGS.each do |slug|
@@ -83,5 +87,40 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
     assert_includes spl, "token-account"
     assert_includes spl, "multisig"
     assert_empty AccountTaxonomy.find_by_category("nonexistent")
+  end
+
+  # --- Dynamic invariants over every live entry ---
+  # These walk the live set instead of a hardcoded list, so newly
+  # promoted pages automatically inherit the "must have substantive
+  # body + Byte layout section" rule. The hardcoded LIVE_SLUGS tests
+  # above stay as a regression baseline for the original six.
+
+  test "every live entry has a substantive body with a Byte layout section" do
+    AccountTaxonomy.flat_entries.select(&:live?).each do |entry|
+      assert_not_nil entry.body, "#{entry.slug} is live but has no body"
+      word_count = entry.body.split.length
+      assert word_count >= 150, "#{entry.slug} body should be ≥150 words (was #{word_count})"
+      assert_includes entry.body, "## Byte layout",
+        "#{entry.slug} body should contain a '## Byte layout' section"
+    end
+  end
+
+  test "every live entry of kind: account has an example_address" do
+    AccountTaxonomy.flat_entries.select(&:live?).select { |e| e.kind == "account" }.each do |entry|
+      assert_not_nil entry.example_address,
+        "#{entry.slug} (kind: account) should carry an example_address for the live sample"
+    end
+  end
+
+  test "every entry has required frontmatter fields" do
+    AccountTaxonomy.flat_entries.each do |entry|
+      %i[name slug category kind status program_label].each do |field|
+        assert_not_nil entry.send(field), "#{entry.slug.inspect} is missing #{field}"
+      end
+      assert_includes %w[live draft planned], entry.status,
+        "#{entry.slug} has unknown status #{entry.status.inspect}"
+      assert_includes %w[account instruction concept], entry.kind,
+        "#{entry.slug} has unknown kind #{entry.kind.inspect}"
+    end
   end
 end
