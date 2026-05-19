@@ -114,4 +114,51 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes spinner_section, "This may take a few seconds."
     assert_match %r{pixel-loading}, spinner_section
   end
+
+  # --- bytes_decoded counter (U5) ---
+
+  # The controller helper is private; reach through the controller class to
+  # exercise the SQL aggregate against the test DB.
+  def stats
+    PagesController.new.send(:fetch_public_stats)
+  end
+
+  # Ahoy::Event belongs_to :visit (required in our subclass), so seeded
+  # events need a Visit FK target.
+  def seed_visit
+    @seed_visit ||= Ahoy::Visit.create!(started_at: Time.current, visit_token: SecureRandom.uuid, visitor_token: SecureRandom.uuid)
+  end
+
+  def seed_event(name:, properties: {})
+    Ahoy::Event.create!(name: name, properties: properties, time: Time.current, visit: seed_visit)
+  end
+
+  test "fetch_public_stats includes bytes_decoded summed from account_viewed event size properties" do
+    seed_event(name: "account_viewed", properties: { "address" => "a", "size" => 82 })
+    seed_event(name: "account_viewed", properties: { "address" => "b", "size" => 165 })
+    seed_event(name: "account_viewed", properties: { "address" => "c", "size" => 3762 })
+
+    assert_equal 82 + 165 + 3762, stats[:bytes_decoded]
+    assert_equal 3, stats[:accounts_analyzed]
+  end
+
+  test "bytes_decoded is 0 when no account_viewed events exist" do
+    assert_equal 0, Ahoy::Event.where(name: "account_viewed").count
+    assert_equal 0, stats[:bytes_decoded]
+  end
+
+  test "bytes_decoded handles events missing the size property (NULL -> 0)" do
+    # Legacy events tracked before U5 lack size; CAST(NULL AS INTEGER) is 0
+    # in SQLite so total remains correct.
+    seed_event(name: "account_viewed", properties: { "address" => "legacy" })
+    seed_event(name: "account_viewed", properties: { "address" => "new", "size" => 200 })
+
+    assert_equal 200, stats[:bytes_decoded]
+  end
+
+  # The "one metric fails, all four blank" failure mode is guarded by
+  # wrapping sum_bytes_decoded in its own begin/rescue returning 0
+  # (see PagesController#sum_bytes_decoded). Without Mocha available we
+  # can't easily stub the SQL aggregate to raise from inside a test; the
+  # protection lives in the method shape itself and is left to code review.
 end

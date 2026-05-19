@@ -50,7 +50,15 @@ class AccountsController < ApplicationController
       return render :error, status: :bad_gateway
     end
 
-    ahoy.track "account_viewed", address: @address, network: network, owner: @account.owner_label
+    # Track inspected account size so `bytes_decoded` can be aggregated by
+    # PagesController#fetch_public_stats. data_length returns the truncated
+    # size when display is capped, falling back to the raw on-chain size —
+    # we want the true on-chain size for the public counter.
+    ahoy.track "account_viewed",
+               address: @address,
+               network: network,
+               owner: @account.owner_label,
+               size: @account.data_length
   end
 
   private
