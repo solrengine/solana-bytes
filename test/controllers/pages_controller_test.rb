@@ -171,4 +171,68 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
   # (see PagesController#sum_bytes_decoded). Without Mocha available we
   # can't easily stub the SQL aggregate to raise from inside a test; the
   # protection lives in the method shape itself and is left to code review.
+
+  # --- Live stats card (U7) ---
+
+  # Covers AE1: zero-state hides the card. The early-return guard reads
+  # :accounts_analyzed (NOT :accounts_decoded — the symbol stayed the same
+  # in U5; only the user-visible label changed).
+  test "live stats card renders nothing on a fresh database (zero accounts analyzed)" do
+    assert_equal 0, Ahoy::Event.where(name: "account_viewed").count
+    get "/"
+    assert_response :success
+    refute_includes response.body, "LIVE FROM THE SITE"
+    refute_includes response.body, "accounts decoded"
+    refute_includes response.body, "bytes decoded"
+  end
+
+  # Covers AE2: with populated stats the card renders the four blended
+  # metrics in the specified order (accounts decoded → challenges played
+  # → bytes decoded → countries). bytes_decoded is humanized via
+  # number_to_human_size; the decorative hex-grid element is present.
+  test "live stats card renders four metrics in order with humanized bytes_decoded" do
+    seed_event(name: "account_viewed", properties: { "address" => "a", "size" => 82 })
+    seed_event(name: "account_viewed", properties: { "address" => "b", "size" => 165 })
+    seed_event(name: "account_viewed", properties: { "address" => "c", "size" => 16_240 })
+    seed_event(name: "challenge_started", properties: {})
+    seed_event(name: "challenge_started", properties: {})
+
+    get "/"
+    assert_response :success
+    assert_includes response.body, "LIVE FROM THE SITE"
+    assert_includes response.body, "accounts decoded"
+    assert_includes response.body, "challenges played"
+    assert_includes response.body, "bytes decoded"
+    assert_includes response.body, "countries"
+    # bytes_decoded is humanized — 82 + 165 + 16240 = 16487 bytes ≈ "16.1 KB"
+    # (Rails default number_to_human_size; exact format may include "KB").
+    assert_match %r{1[56]\.\d+ KB|16 KB|1[56]\.\d+\s*KB}, response.body,
+      "bytes_decoded should render via number_to_human_size, not raw integer"
+    # Decorative hex grid present
+    assert_includes response.body, "pixel-hex-grid"
+
+    # Order check: accounts decoded comes before bytes decoded which comes
+    # before countries.
+    body = response.body
+    accounts_idx = body.index("accounts decoded")
+    challenges_idx = body.index("challenges played")
+    bytes_idx = body.index("bytes decoded")
+    countries_idx = body.index("countries")
+    assert accounts_idx < challenges_idx, "accounts decoded should precede challenges played"
+    assert challenges_idx < bytes_idx, "challenges played should precede bytes decoded"
+    assert bytes_idx < countries_idx, "bytes decoded should precede countries"
+  end
+
+  # The stats hash retains :total_pageviews for /stats page consumption
+  # even though the homepage banner doesn't render it.
+  test "fetch_public_stats retains total_pageviews even though homepage drops it" do
+    seed_event(name: "account_viewed", properties: { "address" => "a", "size" => 82 })
+    seed_event(name: "pageview", properties: {})
+    seed_event(name: "pageview", properties: {})
+
+    assert_equal 2, stats[:total_pageviews]
+
+    get "/"
+    refute_includes response.body, "pageviews"
+  end
 end
