@@ -18,8 +18,12 @@ Rails.application.routes.draw do
   # Public stats
   get "stats", to: "stats#show"
 
-  # Account type taxonomy
-  get "types", to: "types#index", as: :types
+  # Learn hub (replaces /types — U15)
+  get "learn", to: "learn#index", as: :learn
+  get "learn/:slug", to: "learn#show", as: :learn_type, constraints: { slug: /[a-z][a-z0-9-]*/ }
+
+  # Legacy /types route: 301 redirect to /learn for SEO continuity.
+  get "types", to: redirect("/learn", status: 301), as: :types
 
   root "pages#home"
 end

@@ -34,11 +34,12 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert indices.none?(&:nil?), "All six expected card names should be present"
     assert_equal indices, indices.sort, "Cards should appear in mockup-specified order: #{expected_order.inspect}"
 
-    # Each card links to its example address (interim — U15 swaps to /learn/<slug>)
+    # U15 swapped link targets from interim /accounts/<addr> to /learn/<slug>
+    # now that the Learn pages exist.
     expected_order.each do |name|
       entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_includes response.body, "/accounts/#{entry.example_address}",
-        "Type grid card '#{name}' should link to /accounts/#{entry.example_address}"
+      assert_includes response.body, "/learn/#{entry.slug}",
+        "Type grid card '#{name}' should link to /learn/#{entry.slug}"
     end
 
     # Entries NOT in the mockup grid should NOT appear as card headings on home

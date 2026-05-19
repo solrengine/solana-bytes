@@ -70,8 +70,7 @@
           <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:10px" do %>
             <%= pixel_icon(:target, size: 14) %><span class="hidden sm:inline"> Challenge</span>
           <% end %>
-          <%# Learn link still points to /types in Phase 1; U15 swaps it to /learn. %>
-          <%= link_to "/types", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Learn<% end %>
+          <%= link_to "/learn", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Learn<% end %>
           <%= link_to "/stats", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Stats<% end %>
           <%# About link — added in U20 once /about exists. %>
           <%= link_to "/leaderboard", class: "hover:opacity-80", title: "Leaderboard" do %>
@@ -125,7 +124,7 @@
               /about link added in U20. %>
           <div class="flex flex-col gap-2 text-center md:text-left text-gray-400">
             <a href="/challenges" class="hover:text-purple-300" style="font-size:9px">Challenge</a>
-            <a href="/types" class="hover:text-purple-300" style="font-size:9px">Learn</a>
+            <a href="/learn" class="hover:text-purple-300" style="font-size:9px">Learn</a>
             <a href="/stats" class="hover:text-purple-300" style="font-size:9px">Stats</a>
             <a href="/leaderboard" class="hover:text-purple-300" style="font-size:9px">Leaderboard</a>
           </div>
