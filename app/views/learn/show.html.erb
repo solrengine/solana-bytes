@@ -98,7 +98,7 @@
   <% if @entry.explainer_text.present? %>
     <% cleaned_explainer = @entry.explainer_text.split(/\n{2,}/).map { |p| p.tr("\n", " ").squeeze(" ").strip }.join("\n\n") %>
     <div class="pixel-card mb-10" style="padding:24px">
-      <div class="text-gray-200" style="font-size:11px;line-height:1.9">
+      <div class="text-gray-200 [&>p]:mb-5 [&>p:last-child]:mb-0" style="font-size:11px;line-height:1.9">
         <%= simple_format(cleaned_explainer) %>
       </div>
     </div>
