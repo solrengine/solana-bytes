@@ -3,9 +3,21 @@ require "test_helper"
 class LearnControllerTest < ActionDispatch::IntegrationTest
   IN_SCOPE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
 
-  test "GET /learn returns 200" do
+  test "GET /learn returns 200 and lists slugged entries + Other section" do
     get "/learn"
     assert_response :success
+    # Top section: each slugged entry rendered as a card pointing at /learn/<slug>
+    IN_SCOPE_SLUGS.each do |slug|
+      assert_match %r{href="/learn/#{slug}"}, response.body,
+        "/learn index should link to /learn/#{slug}"
+    end
+    # Bottom section: "Other account types" with the unslugged entries
+    assert_includes response.body, "Other account types"
+    # The unslugged entries appear in the Other section by name
+    ["Multisig", "BPF Upgradeable Program"].each do |name|
+      assert_includes response.body, name,
+        "/learn index 'Other' section should list #{name.inspect}"
+    end
   end
 
   test "GET /learn/:slug returns 200 for each in-scope slug" do
