@@ -10,6 +10,8 @@ module AccountTaxonomy
     :fields,
     :example_address,
     :example_label,
+    :slug,            # URL-stable identifier for /learn/<slug>; nil for entries not in the Learn hub.
+    :explainer_text,  # Plain prose (no markdown) rendered via simple_format in U17. Filled in U21.
     keyword_init: true
   )
 
@@ -29,7 +31,8 @@ module AccountTaxonomy
             description: "Describes a token: its authority, total supply, decimals, and optional freeze authority. USDC, USDT, and wrapped SOL all have Mint accounts.",
             fields: [ "mint_authority", "supply", "decimals", "is_initialized", "freeze_authority" ],
             example_address: "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-            example_label: "USDC Mint"
+            example_label: "USDC Mint",
+            slug: "mint"
           ),
           Entry.new(
             name: "Token Account",
@@ -39,7 +42,8 @@ module AccountTaxonomy
             description: "Holds a balance of one specific token for one specific owner. Associated Token Accounts (ATAs) are the standard derivation of this account.",
             fields: [ "mint", "owner", "amount", "delegate", "state", "is_native", "delegated_amount", "close_authority" ],
             example_address: "ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU",
-            example_label: "Jupiter USDC"
+            example_label: "Jupiter USDC",
+            slug: "token-account"
           ),
           Entry.new(
             name: "Multisig",
@@ -81,7 +85,8 @@ module AccountTaxonomy
             description: "Delegates SOL to a validator's vote account. Tracks staker/withdrawer authorities, lockup, delegated amount, and activation/deactivation epochs.",
             fields: [ "state", "rent_exempt_reserve", "authorized_staker", "authorized_withdrawer", "lockup", "voter_pubkey", "stake_amount", "activation_epoch", "credits_observed" ],
             example_address: "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt",
-            example_label: "Stake Account"
+            example_label: "Stake Account",
+            slug: "stake-account"
           ),
           Entry.new(
             name: "Vote Account",
@@ -91,7 +96,8 @@ module AccountTaxonomy
             description: "A validator's on-chain identity. Records the node's voting authority, commission rate, and a rolling history of votes and epoch credits.",
             fields: [ "version", "node_pubkey", "authorized_voter", "authorized_withdrawer", "commission", "vote_history" ],
             example_address: "J2nUHEAgZFRyuJbFjdqPrAa9gyWDuc7hErtDQHPhsYRp",
-            example_label: "Vote Account"
+            example_label: "Vote Account",
+            slug: "vote-account"
           )
         ]
       ),
@@ -107,7 +113,8 @@ module AccountTaxonomy
             description: "MetadataV1 account: links a mint to its name, symbol, off-chain JSON URI, royalty percentage, creators array, mutability flags, token standard, and optional collection reference.",
             fields: [ "key (discriminator)", "update_authority", "mint", "name", "symbol", "uri", "seller_fee_basis_points", "creators", "primary_sale_happened", "is_mutable", "edition_nonce", "token_standard", "collection", "uses" ],
             example_address: "5nav91dPXh4B6tXsG8duVQnrmyEbgRQBfYgn2BGs3Ag9",
-            example_label: "Mad Lads #7266"
+            example_label: "Mad Lads #7266",
+            slug: "token-metadata"
           )
         ]
       ),
@@ -123,7 +130,8 @@ module AccountTaxonomy
             description: "Stores an array of pubkeys that v0 transactions reference by index. 56-byte fixed header (discriminator, deactivation slot, last-extended slot, start index, authority) followed by tightly-packed 32-byte addresses, up to 256 entries (8,248 bytes max).",
             fields: [ "discriminator", "deactivation_slot", "last_extended_slot", "last_extension_start_index", "authority", "addresses[]" ],
             example_address: "GbL3KvBBRXJArvft1KQPMUworMDormXNfo97hkbftsT5",
-            example_label: "Jupiter v6 LUT"
+            example_label: "Jupiter v6 LUT",
+            slug: "address-lookup-table"
           )
         ]
       ),
@@ -158,5 +166,15 @@ module AccountTaxonomy
 
   def flat_entries
     @flat_entries ||= all.flat_map(&:entries)
+  end
+
+  # Find an entry by URL-stable slug. Returns the Entry or nil. The five
+  # entries with slug: nil (Multisig, Token-2022 + Extensions, BPF
+  # Upgradeable, ELF Bytecode) are intentionally not Learn-addressable
+  # in this iteration — they remain discoverable on /learn's "Other
+  # account types" section linking to /accounts/<example_address>.
+  def find_by_slug(slug)
+    return nil if slug.blank?
+    flat_entries.find { |e| e.slug == slug }
   end
 end
