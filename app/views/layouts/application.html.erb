@@ -61,19 +61,25 @@
 
     <nav class="relative pixel-nav" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <%= link_to "/", class: "text-white hover:text-purple-400 shrink-0" do %>
-          <span style="font-size:12px;text-shadow:3px 3px 0 #4c1d95" class="sm:hidden">SB</span>
+        <%# Brand: pixel logo + wordmark. Literal "/" path — engine-isolation safe. %>
+        <%= link_to "/", class: "text-white hover:text-purple-400 shrink-0 flex items-center gap-2" do %>
+          <%= pixel_logo(variant: :dark, size: 24) %>
           <span style="font-size:14px;text-shadow:3px 3px 0 #4c1d95" class="hidden sm:inline">Solana Bytes</span>
         <% end %>
-        <div class="flex items-center gap-2 sm:gap-4">
+        <div class="flex items-center gap-3 sm:gap-4">
           <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:10px" do %>
             <%= pixel_icon(:target, size: 14) %><span class="hidden sm:inline"> Challenge</span>
           <% end %>
+          <%# Learn link still points to /types in Phase 1; U15 swaps it to /learn. %>
           <%= link_to "/types", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Learn<% end %>
-          <%= link_to "/leaderboard", class: "hover:opacity-80" do %>
+          <%= link_to "/stats", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Stats<% end %>
+          <%# About link — added in U20 once /about exists. %>
+          <%= link_to "/leaderboard", class: "hover:opacity-80", title: "Leaderboard" do %>
             <%= pixel_icon(:trophy, size: 14) %>
           <% end %>
-          <%= link_to "/stats", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Stats<% end %>
+          <%= link_to "https://github.com/solrengine/solana-bytes", class: "text-gray-500 hover:text-white", title: "GitHub", target: "_blank", rel: "noopener" do %>
+            <%= pixel_icon(:github, size: 14) %>
+          <% end %>
           <% if logged_in? %>
             <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1 hidden sm:inline" style="font-size:10px"><%= current_user.short_address %></span>
             <%= link_to "x", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white", style: "font-size:10px" %>

@@ -67,6 +67,25 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, 'data-loading-target="frame"'
   end
 
+  # Nav uses the new SB pixel logo (U2). Renders even when the landing hero
+  # state hides the nav from view — the markup is in the DOM regardless.
+  test "global nav renders the new pixel logo" do
+    get "/"
+    assert_response :success
+    assert_match %r{<img[^>]+src="[^"]*sb-logo-dark[^"]*"}, response.body
+    assert_match %r{alt="Solana Bytes"}, response.body
+  end
+
+  # Engine-isolation regression guard (U2): the shared application layout is
+  # also rendered inside the SolRengine Auth Engine at /auth/login, where the
+  # host app's named-route helpers are unreachable. This test catches any
+  # accidental use of `_path` helpers in the layout that would NoMethodError
+  # on the login page.
+  test "GET /auth/login renders the shared layout without engine-isolation errors" do
+    get "/auth/login"
+    assert_response :success
+  end
+
   # --- Live-decoded hero ---
 
   USDC_MINT_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
