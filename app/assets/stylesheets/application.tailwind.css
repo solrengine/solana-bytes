@@ -216,3 +216,28 @@
   background-repeat: no-repeat;
   image-rendering: pixelated;
 }
+
+/* ═══════════════════════════════════════════
+   PIXEL TAB (segmented control — used in Challenge tier selector)
+   ═══════════════════════════════════════════ */
+
+.pixel-tab {
+  border: 2px solid #4b5563;
+  background: #0a0a14;
+  color: #9ca3af;
+  padding: 8px 14px;
+  font-size: 10px;
+  box-shadow: inset -2px -2px 0 #000, inset 2px 2px 0 #1f2937;
+}
+
+.pixel-tab:hover {
+  border-color: #6b7280;
+  color: #e5e7eb;
+}
+
+.pixel-tab.pixel-tab-active {
+  border-color: #7c3aed;
+  background: #1a0a2e;
+  color: #c4b5fd;
+  box-shadow: inset -2px -2px 0 #4c1d95, inset 2px 2px 0 #a78bfa;
+}

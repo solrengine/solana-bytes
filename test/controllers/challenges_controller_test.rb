@@ -199,21 +199,20 @@ class ChallengesControllerTest < ActionDispatch::IntegrationTest
     get "/challenges"
     assert_response :success
     # First-time visitors land on Easy so the gentlest tier is the default play.
-    assert_match %r{border-purple-500[^"]*"[^>]*>\s*Easy}, response.body
+    # U9 restyle: active tier carries the pixel-tab-active marker class.
+    assert_match %r{pixel-tab-active[^"]*"[^>]*>\s*Easy}, response.body
   end
 
   test "GET /challenges?tier=easy marks easy button as active" do
     get "/challenges?tier=easy"
     assert_response :success
-    # Active buttons have purple border class
-    assert_match %r{border-purple-500[^"]*"[^>]*>\s*Easy}, response.body
+    assert_match %r{pixel-tab-active[^"]*"[^>]*>\s*Easy}, response.body
   end
 
   test "GET /challenges?tier=all marks the All button as active" do
     get "/challenges?tier=all"
     assert_response :success
-    # Explicit "all" choice highlights the All tab
-    assert_match %r{border-purple-500[^"]*"[^>]*>\s*All}, response.body
+    assert_match %r{pixel-tab-active[^"]*"[^>]*>\s*All}, response.body
   end
 
   # Regression: picking "All" on /challenges and clicking Play used to drop
