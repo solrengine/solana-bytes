@@ -26,4 +26,24 @@
     </div>
     <p data-address-form-target="error" class="text-red-400 mt-2" style="display:none;font-size:10px"></p>
   <% end %>
+
+  <%# Examples row — clickable chips for the four most representative
+      account types. Each chip links to /accounts/<example_address> via
+      Turbo Frame so the visualizer loads inline, same as form submission. %>
+  <div class="mt-4 flex flex-wrap items-center justify-center gap-2 text-gray-500" style="font-size:9px">
+    <span class="text-gray-500">Examples:</span>
+    <% [
+      ["EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", "USDC Mint"],
+      ["ALZv1FW3Bc5uRtci2UHnYS34DEWCmfkN5btEYDKms9yU", "Jupiter USDC"],
+      ["CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt", "Stake Account"],
+      ["GbL3KvBBRXJArvft1KQPMUworMDormXNfo97hkbftsT5", "Jupiter LUT"]
+    ].each do |addr, label| %>
+      <%= link_to "/accounts/#{addr}",
+            data: { turbo_frame: "account_result" },
+            class: "pixel-tab",
+            style: "padding:5px 10px;font-size:9px;text-decoration:none" do %>
+        <%= label %>
+      <% end %>
+    <% end %>
+  </div>
 </div>
