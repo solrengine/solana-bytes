@@ -20,37 +20,49 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes response.body, 'data-controller="address-form"'
   end
 
-  # The type-picker grid replaces the prior Learn tile. Every taxonomy entry
-  # gets its own card whose primary action links to the entry's example
-  # address (Turbo Frame inline decode), not to /types.
-  test "type-picker renders one card per AccountTaxonomy entry, linking to each example address" do
+  # U8 — the 6-card type grid renders exactly Mint, Token Account,
+  # Stake Account, Vote Account, Token Metadata, Address Lookup Table in
+  # mockup order. The five other AccountTaxonomy entries (Multisig,
+  # Token-2022, BPF Upgradeable, ELF, etc.) are intentionally NOT in this
+  # grid — they're discoverable via "Browse all account types →" → /learn.
+  test "type grid renders exactly the six mockup-fixed cards in order" do
     get "/"
     assert_response :success
-    AccountTaxonomy.flat_entries.each do |entry|
-      assert_includes response.body, entry.name,
-        "Type-picker should include a card for entry '#{entry.name}'"
+
+    expected_order = ["Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table"]
+    indices = expected_order.map { |name| response.body.index(">\n          #{name}\n") || response.body.index(name) }
+    assert indices.none?(&:nil?), "All six expected card names should be present"
+    assert_equal indices, indices.sort, "Cards should appear in mockup-specified order: #{expected_order.inspect}"
+
+    # Each card links to its example address (interim — U15 swaps to /learn/<slug>)
+    expected_order.each do |name|
+      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
       assert_includes response.body, "/accounts/#{entry.example_address}",
-        "Type-picker card for '#{entry.name}' should link to /accounts/#{entry.example_address}"
+        "Type grid card '#{name}' should link to /accounts/#{entry.example_address}"
     end
+
+    # Entries NOT in the mockup grid should NOT appear as card headings on home
+    refute_includes response.body, "Multisig"
+    refute_includes response.body, "BPF Upgradeable Program"
   end
 
-  # Secondary navigation under the type-picker: full taxonomy + challenge.
-  # The challenge CTA copy varies based on whether @public_stats has counts:
-  # falls back to a "Test your eye..." hook when stats are absent or zero,
-  # and surfaces "X challenges played..." as social proof when populated.
-  test "type-picker exposes secondary links to the taxonomy and challenge" do
+  # U8 — "Browse all account types →" link below the grid points to /learn
+  # (which will 404 until U15 ships the route). Preserves discoverability of
+  # the entries excluded from the 6-card grid.
+  test "type grid exposes a Browse-all link to /learn and the Challenge CTA" do
     get "/"
     assert_response :success
-    assert_match %r{href="/types"}, response.body
+    assert_match %r{href="/learn"}, response.body
+    assert_includes response.body, "Browse all account types"
     assert_match %r{href="/challenges"}, response.body
-    assert_includes response.body, "Browse the full taxonomy"
     assert_match %r{Test your eye|challenges played}, response.body,
       "Challenge CTA should render either the fallback hook or the live count"
   end
 
-  # The type-picker grid uses responsive Tailwind utilities so cards stack on
-  # mobile, sit 2-up on small screens, and 3-up on desktop.
-  test "type-picker uses responsive grid classes for mobile stacking" do
+  # The type grid uses the same responsive Tailwind utilities as before
+  # so cards stack on mobile, sit 2-up on small screens, and 3-up on
+  # desktop.
+  test "type grid uses responsive grid classes for mobile stacking" do
     get "/"
     assert_response :success
     assert_match %r{grid-cols-1}, response.body

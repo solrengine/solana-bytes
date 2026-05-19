@@ -1,14 +1,24 @@
-<%# Type-picker grid. Iterates AccountTaxonomy.flat_entries and renders
-    one pixel-card per account type. Each card links to its example
-    address (Turbo Frame inline decode). Replaces the prior Visualize +
-    Learn + Play bento. %>
+<%# Type grid (U8): the six mockup-fixed cards. Replaces _type_picker.html.erb
+    which iterated all 11 AccountTaxonomy entries. The five entries not in
+    this grid (Multisig, Token-2022 Mint/Account, BPF Upgradeable, ELF
+    Bytecode, plus any future entries) remain discoverable via the
+    "Browse all account types →" link below the grid → /learn (404 until
+    U15 ships the route).
+
+    Cards link to /accounts/<example_address> for now; U15 swaps them to
+    /learn/<slug> once the Learn pages exist. %>
+<% mockup_type_names = ["Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table"]
+   mockup_entries = mockup_type_names.map { |name| AccountTaxonomy.flat_entries.find { |e| e.name == name } }.compact %>
 <div class="mb-12">
-  <p class="text-center text-gray-500 mb-6" style="font-size:10px">
-    — or pick a type to decode —
+  <h2 class="text-center text-white mb-2" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+    Explore common account types
+  </h2>
+  <p class="text-center text-gray-500 mb-6" style="font-size:9px">
+    Hand-picked Solana account layouts, decoded byte by byte.
   </p>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-    <% AccountTaxonomy.flat_entries.each do |entry| %>
+    <% mockup_entries.each do |entry| %>
       <%= link_to "/accounts/#{entry.example_address}",
             data: { turbo_frame: "account_result" },
             class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
@@ -23,25 +33,26 @@
           <%= truncate(entry.description, length: 110) %>
         </p>
         <p class="mt-auto text-purple-400" style="font-size:10px">
-          Try <%= entry.example_label %> &rarr;
+          Explore <span aria-hidden="true">&rarr;</span>
         </p>
       <% end %>
     <% end %>
   </div>
 
-  <%# Secondary nav (taxonomy) + Byte Challenge CTA with live count.
-      The challenge gets its own line and pixel-btn-secondary styling so
-      it reads as an action, not just a footnote. The count pulls from
-      `stats` when available and falls back to a plain hook otherwise. %>
+  <%# Browse-all link: preserves discoverability of the five taxonomy
+      entries not surfaced in the 6-card grid. Targets /learn (404 until
+      U15 ships the route + redirect). %>
   <div class="text-center mt-8">
-    <%= link_to "/types",
+    <%= link_to "/learn",
           class: "text-gray-400 hover:text-purple-300 inline-flex items-center gap-2",
           style: "font-size:10px",
           data: { turbo: false } do %>
-      <%= pixel_icon(:lock, size: 12) %> Browse the full taxonomy &rarr;
+      <%= pixel_icon(:lock, size: 12) %> Browse all account types &rarr;
     <% end %>
   </div>
 
+  <%# Byte Challenge CTA — preserved from _type_picker.html.erb so the
+      live play-count social proof and game entry point both stay. %>
   <% challenges_count = local_assigns[:stats] && stats[:total_challenges].to_i %>
   <div class="text-center mt-4">
     <%= link_to "/challenges",
