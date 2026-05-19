@@ -30,20 +30,11 @@
     </div>
   </div>
 
-  <%# Explainer prose — plain prose rendered via simple_format. U21 wrote
-      the content; markdown intentionally NOT parsed (see U14). %>
-  <% if @entry.explainer_text.present? %>
-    <div class="pixel-card mb-10" style="padding:24px">
-      <div class="text-gray-200" style="font-size:11px;line-height:1.9">
-        <%= simple_format(@entry.explainer_text) %>
-      </div>
-    </div>
-  <% end %>
-
-  <%# Live sample section. Heading reads "Sample: <label>" with a cached-
-      hourly caption — honest framing per the brainstorm (Vote vote_history,
-      Stake epoch fields, ALT address count all mutate visibly within the
-      hour-long TTL). %>
+  <%# Live sample section. The sample comes BEFORE the explainer prose —
+      audience is Solana devs who already know the basics and want to see
+      bytes first, read the depth after. Heading is "Sample: <label>" with
+      a cached-hourly caption (honest framing — Vote vote_history, Stake
+      epoch fields, ALT address count all mutate within the hour-long TTL). %>
   <div class="mb-10">
     <div class="mb-4">
       <h2 class="text-white mb-1" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
@@ -78,7 +69,7 @@
       </div>
     <% else %>
       <%# Fallback: RPC fetch failed or decode raised. Page still teaches
-          via the explainer prose above; the sample card explains what's
+          via the explainer prose below; the sample card explains what's
           missing and points at the visualizer so the user can retry. %>
       <div class="pixel-card text-center" style="padding:24px;border-color:#78350f">
         <p class="text-yellow-400 mb-2" style="font-size:11px">
@@ -99,6 +90,19 @@
       </div>
     <% end %>
   </div>
+
+  <%# Explainer prose — plain prose rendered via simple_format. U21 wrote
+      the content as heredocs wrapped at ~75 chars for Ruby readability.
+      Single newlines within paragraphs are joined to spaces so the browser
+      handles wrapping; double-newlines stay as paragraph breaks. %>
+  <% if @entry.explainer_text.present? %>
+    <% cleaned_explainer = @entry.explainer_text.split(/\n{2,}/).map { |p| p.tr("\n", " ").squeeze(" ").strip }.join("\n\n") %>
+    <div class="pixel-card mb-10" style="padding:24px">
+      <div class="text-gray-200" style="font-size:11px;line-height:1.9">
+        <%= simple_format(cleaned_explainer) %>
+      </div>
+    </div>
+  <% end %>
 
   <%# Exit affordances: back to /learn + Challenge CTA. Removes the
       dead-end identified during plan review. %>
