@@ -25,5 +25,8 @@ Rails.application.routes.draw do
   # Legacy /types route: 301 redirect to /learn for SEO continuity.
   get "types", to: redirect("/learn", status: 301), as: :types
 
+  # About page (U19)
+  get "about", to: "pages#about", as: :about
+
   root "pages#home"
 end

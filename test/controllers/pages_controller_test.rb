@@ -236,6 +236,21 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert bytes_idx < countries_idx, "bytes decoded should precede countries"
   end
 
+  # --- About page (U19) ---
+
+  test "GET /about renders with What / Why / Who / Tech stack / Links sections" do
+    get "/about"
+    assert_response :success
+    assert_includes response.body, "About"
+    assert_includes response.body, "What it is"
+    assert_includes response.body, "Why it exists"
+    assert_includes response.body, "Who built it"
+    assert_includes response.body, "Tech stack"
+    assert_includes response.body, "Colosseum Frontier Hackathon"
+    assert_includes response.body, "SolRengine"
+    assert_includes response.body, "github.com/solrengine/solana-bytes"
+  end
+
   # The stats hash retains :total_pageviews for /stats page consumption
   # even though the homepage banner doesn't render it.
   test "fetch_public_stats retains total_pageviews even though homepage drops it" do

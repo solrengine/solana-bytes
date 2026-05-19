@@ -7,6 +7,12 @@ class PagesController < ApplicationController
     @public_stats = fetch_public_stats
   end
 
+  # Static About page — U19. Tells the project's story for hackathon
+  # judges, contributors, and curious visitors. No data; the view is the
+  # whole thing.
+  def about
+  end
+
   private
 
   # Public, homepage-safe subset of the metrics tracked in /stats.
