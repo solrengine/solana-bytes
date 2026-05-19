@@ -8,49 +8,66 @@
     </p>
     <p class="text-gray-400 mt-3 max-w-2xl mx-auto" style="font-size:11px;line-height:1.8">
       Each page walks you through what the account is, why it exists, and
-      what the on-chain bytes mean — paired with a real, cached mainnet
-      example.
+      what the on-chain bytes mean &mdash; paired with a real, cached
+      mainnet example.
     </p>
   </div>
 
-  <%# Top section: the six slugged in-scope types. %>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-    <% @entries.each do |entry| %>
-      <%= link_to "/learn/#{entry.slug}",
-            class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
-            style: "padding:18px;text-decoration:none" do %>
-        <h2 class="text-white mb-1" style="font-size:14px">
-          <%= entry.name %>
+  <%# Categories: one section per category with live entries.
+      Categories with zero live entries are skipped here and only appear
+      in the "Other types" rail below as drafts. %>
+  <% @categories.each do |cat| %>
+    <% live = cat.live_entries %>
+    <% next if live.empty? %>
+    <section class="mb-12">
+      <div class="mb-4">
+        <h2 class="text-white mb-1" style="font-size:16px;text-shadow:2px 2px 0 #4c1d95">
+          <%= cat.name %>
         </h2>
-        <p class="text-gray-500 mb-3" style="font-size:9px">
-          <%= entry.program_label %><% if entry.size %> &middot; <%= entry.size %> bytes<% end %>
+        <p class="text-gray-500" style="font-size:10px;line-height:1.7">
+          <%= cat.description %>
         </p>
-        <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.7;flex:1">
-          <%= entry.description %>
-        </p>
-        <p class="mt-auto text-purple-400" style="font-size:10px">
-          Explore <span aria-hidden="true">&rarr;</span>
-        </p>
-      <% end %>
-    <% end %>
-  </div>
+      </div>
 
-  <%# Bottom section: the entries without a dedicated Learn page yet.
-      Each links to its example address via the hex visualizer so the
-      content is still reachable. %>
-  <% if @others.any? %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% live.each do |entry| %>
+          <%= link_to entry.learn_path,
+                class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
+                style: "padding:18px;text-decoration:none" do %>
+            <h3 class="text-white mb-1" style="font-size:14px">
+              <%= entry.name %>
+            </h3>
+            <p class="text-gray-500 mb-3" style="font-size:9px">
+              <%= entry.program_label %><% if entry.size %> &middot; <%= entry.size %> bytes<% end %>
+            </p>
+            <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.7;flex:1">
+              <%= entry.summary %>
+            </p>
+            <p class="mt-auto text-purple-400" style="font-size:10px">
+              Explore <span aria-hidden="true">&rarr;</span>
+            </p>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <%# Other account types: drafts (frontmatter exists, body still being
+      written). Each links to its own /learn page where the draft banner
+      sets expectations; the example_address is still visualizable. %>
+  <% if @drafts.any? %>
     <div class="border-t-2 border-gray-800 pt-8">
       <h2 class="text-white mb-2" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
         Other account types
       </h2>
       <p class="text-gray-500 mb-6" style="font-size:10px">
-        No dedicated explainer yet — explore the raw bytes in the visualizer.
+        Listed but not yet fully explained &mdash; explore the raw bytes
+        in the visualizer.
       </p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <% @others.each do |entry| %>
-          <% next unless entry.example_address %>
-          <%= link_to "/accounts/#{entry.example_address}",
+        <% @drafts.each do |entry| %>
+          <%= link_to entry.example_address ? "/accounts/#{entry.example_address}" : entry.learn_path,
                 class: "pixel-card flex items-start gap-3 hover:border-purple-500 transition-colors",
                 style: "padding:14px;text-decoration:none" do %>
             <div class="flex-1">

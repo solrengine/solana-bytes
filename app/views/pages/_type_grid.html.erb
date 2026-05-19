@@ -7,6 +7,7 @@
 
     Cards link to /accounts/<example_address> for now; U15 swaps them to
     /learn/<slug> once the Learn pages exist. %>
+<%# U22: card links now go to /learn/<category>/<slug> via entry.learn_path. %>
 <% mockup_type_names = ["Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table"]
    mockup_entries = mockup_type_names.map { |name| AccountTaxonomy.flat_entries.find { |e| e.name == name } }.compact %>
 <div class="mb-20">
@@ -22,7 +23,7 @@
       <%# U15 swap: link target moves from /accounts/<addr> to /learn/<slug>
           now that the Learn pages exist. Turbo-frame attribute removed —
           /learn pages are standalone, not a Turbo Frame destination. %>
-      <%= link_to "/learn/#{entry.slug}",
+      <%= link_to entry.learn_path,
             class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
             style: "padding:14px;text-decoration:none" do %>
         <h3 class="text-white mb-1" style="font-size:13px">

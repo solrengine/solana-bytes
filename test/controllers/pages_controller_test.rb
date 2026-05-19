@@ -34,12 +34,14 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert indices.none?(&:nil?), "All six expected card names should be present"
     assert_equal indices, indices.sort, "Cards should appear in mockup-specified order: #{expected_order.inspect}"
 
-    # U15 swapped link targets from interim /accounts/<addr> to /learn/<slug>
-    # now that the Learn pages exist.
+    # U22 nested URL: cards link to /learn/<category>/<slug> via
+    # entry.learn_path. The flat /learn/<slug> URL still works (301
+    # redirect handled by LearnController#category) but the homepage
+    # emits the canonical URL directly.
     expected_order.each do |name|
       entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_includes response.body, "/learn/#{entry.slug}",
-        "Type grid card '#{name}' should link to /learn/#{entry.slug}"
+      assert_includes response.body, entry.learn_path,
+        "Type grid card '#{name}' should link to #{entry.learn_path}"
     end
 
     # Entries NOT in the mockup grid should NOT appear as card headings on home

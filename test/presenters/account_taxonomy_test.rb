@@ -1,23 +1,25 @@
 require "test_helper"
 
 class AccountTaxonomyTest < ActiveSupport::TestCase
-  IN_SCOPE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
-  OUT_OF_SCOPE_NAMES = [ "Multisig", "Token-2022 Mint/Account + Extensions", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
+  LIVE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
+  DRAFT_NAMES = [ "Multisig", "Token-2022 Mint/Account + Extensions", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
 
-  test "all six in-scope entries have a slug" do
-    IN_SCOPE_SLUGS.each do |slug|
+  test "all six live entries have a slug, category, example_address" do
+    LIVE_SLUGS.each do |slug|
       entry = AccountTaxonomy.find_by_slug(slug)
       assert_not_nil entry, "expected an AccountTaxonomy entry with slug=#{slug.inspect}"
       assert_equal slug, entry.slug
+      assert entry.live?, "#{slug} should have status: live"
+      assert_not_nil entry.category, "#{slug} should belong to a category"
       assert_not_nil entry.example_address, "#{slug} should carry an example_address for the Learn live sample"
     end
   end
 
-  test "out-of-scope entries have slug: nil so /learn does not list them" do
-    OUT_OF_SCOPE_NAMES.each do |name|
+  test "draft entries are present but flagged" do
+    DRAFT_NAMES.each do |name|
       entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
       assert_not_nil entry, "taxonomy should still contain #{name.inspect}"
-      assert_nil entry.slug, "#{name.inspect} should have slug: nil (not surfaced on /learn)"
+      assert entry.draft?, "#{name.inspect} should have status: draft (U22)"
     end
   end
 
@@ -32,32 +34,54 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
     assert_nil AccountTaxonomy.find_by_slug(nil)
   end
 
-  test "all six in-scope entries have substantive explainer_text (U21)" do
-    IN_SCOPE_SLUGS.each do |slug|
+  test "all live entries have a substantive markdown body (U22)" do
+    LIVE_SLUGS.each do |slug|
       entry = AccountTaxonomy.find_by_slug(slug)
-      assert_not_nil entry.explainer_text, "#{slug} should have explainer_text populated by U21"
-      word_count = entry.explainer_text.to_s.split.length
-      assert word_count >= 150, "#{slug} explainer_text should be at least 150 words (was #{word_count})"
-      # Markdown is NOT parsed in U17 (simple_format renders plain prose);
-      # raw markdown syntax in the prose would bleed through as visible
-      # asterisks / hashes / brackets. Guard against that here.
-      assert_no_match %r{\*\*|^#\s|\[[^\]]+\]\([^)]+\)}, entry.explainer_text,
-        "#{slug} explainer_text should not contain markdown syntax (rendered via simple_format)"
+      assert_not_nil entry.body, "#{slug} should have a body populated by U22"
+      word_count = entry.body.to_s.split.length
+      assert word_count >= 150, "#{slug} body should be at least 150 words (was #{word_count})"
+      # Every live page must include a Byte layout section.
+      assert_includes entry.body, "## Byte layout",
+        "#{slug} body should contain a '## Byte layout' section"
     end
   end
 
-  test "out-of-scope entries have nil explainer_text" do
-    OUT_OF_SCOPE_NAMES.each do |name|
+  test "draft entries have nil body" do
+    DRAFT_NAMES.each do |name|
       entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_nil entry.explainer_text, "#{name.inspect} is not Learn-addressable so explainer_text should be nil"
+      assert_nil entry.body, "#{name.inspect} is a draft so body should be nil"
+      # Backward-compat alias keeps returning nil too.
+      assert_nil entry.explainer_text
     end
   end
 
   test "every slug is a lowercase kebab-case identifier (URL-safe)" do
     AccountTaxonomy.flat_entries.each do |entry|
-      next unless entry.slug
       assert_match %r{\A[a-z][a-z0-9-]*\z}, entry.slug,
         "Entry #{entry.name.inspect} has malformed slug #{entry.slug.inspect}"
     end
+  end
+
+  test "learn_path returns the canonical /learn/<category>/<slug> URL" do
+    mint = AccountTaxonomy.find_by_slug("mint")
+    assert_equal "/learn/spl-token/mint", mint.learn_path
+
+    alt = AccountTaxonomy.find_by_slug("address-lookup-table")
+    assert_equal "/learn/transactions/address-lookup-table", alt.learn_path
+  end
+
+  test "categories are ordered and indexed" do
+    slugs = AccountTaxonomy.categories.map(&:slug)
+    assert_equal %w[spl-token token-2022 consensus metaplex transactions programs], slugs
+    assert_equal "SPL Token", AccountTaxonomy.find_category("spl-token").name
+    assert_nil AccountTaxonomy.find_category("nonexistent")
+  end
+
+  test "find_by_category returns entries scoped to that category" do
+    spl = AccountTaxonomy.find_by_category("spl-token").map(&:slug)
+    assert_includes spl, "mint"
+    assert_includes spl, "token-account"
+    assert_includes spl, "multisig"
+    assert_empty AccountTaxonomy.find_by_category("nonexistent")
   end
 end

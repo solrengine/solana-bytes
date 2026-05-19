@@ -1,23 +1,42 @@
 <% content_for(:title, "#{@entry.name} — Learn — Solana Bytes") %>
 
 <div class="max-w-4xl mx-auto">
-  <%# Breadcrumb-style back-link at the top so the page has an obvious
-      exit upward. The full back/forward CTAs at the bottom give a
-      secondary exit after reading. %>
-  <div class="mb-6">
-    <%= link_to "/learn", class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
+  <%# Breadcrumb: Learn / <Category>. Categories link back to their landing
+      page; that page links back to /learn. Keeps the upward navigation
+      shallow and explicit. %>
+  <nav class="mb-6 inline-flex items-center gap-2 text-gray-500" style="font-size:10px">
+    <%= link_to "/learn", class: "hover:text-purple-400 inline-flex items-center gap-1" do %>
       <span aria-hidden="true">&larr;</span> Learn
     <% end %>
-  </div>
+    <% if @category %>
+      <span aria-hidden="true">/</span>
+      <%= link_to @category.name, "/learn/#{@category.slug}", class: "hover:text-purple-400" %>
+    <% end %>
+  </nav>
 
-  <%# Header: title + description + program pill + byte size %>
+  <% if @entry.draft? %>
+    <%# Draft banner — entry is published as content but the body hasn't
+        been written yet. Direct-link reachable, not surfaced on /learn's
+        main directory. %>
+    <div class="pixel-card mb-6" style="padding:14px;border-color:#78350f;background:#1a0f06">
+      <p class="text-yellow-400" style="font-size:11px">
+        <strong>Draft</strong> &middot; This explainer is still being written.
+        The byte layout and example below are accurate; the prose will arrive
+        soon.
+      </p>
+    </div>
+  <% end %>
+
+  <%# Header: title + summary + program pill + size + kind chip %>
   <div class="mb-8">
     <h1 class="text-white mb-3" style="font-size:24px;text-shadow:3px 3px 0 #4c1d95">
       <%= @entry.name %>
     </h1>
-    <p class="text-gray-300 mb-4" style="font-size:12px;line-height:1.8">
-      <%= @entry.description %>
-    </p>
+    <% if @entry.summary.present? %>
+      <p class="text-gray-300 mb-4" style="font-size:12px;line-height:1.8">
+        <%= @entry.summary %>
+      </p>
+    <% end %>
     <div class="flex flex-wrap items-center gap-3" style="font-size:9px">
       <span class="text-purple-300 px-3 py-1 border-2 border-purple-700" style="background:#1a0a2e">
         <%= @entry.program_label %>
@@ -27,85 +46,140 @@
           <%= number_with_delimiter(@entry.size) %> bytes
         </span>
       <% end %>
+      <% if @entry.kind && @entry.kind != "account" %>
+        <span class="text-gray-400 uppercase">
+          <%= @entry.kind %>
+        </span>
+      <% end %>
     </div>
   </div>
 
-  <%# Live sample section. The sample comes BEFORE the explainer prose —
-      audience is Solana devs who already know the basics and want to see
-      bytes first, read the depth after. Heading is "Sample: <label>" with
-      a cached-hourly caption (honest framing — Vote vote_history, Stake
-      epoch fields, ALT address count all mutate within the hour-long TTL). %>
-  <div class="mb-10">
-    <div class="mb-4">
-      <h2 class="text-white mb-1" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        Sample: <%= @entry.example_label %>
-      </h2>
-      <p class="text-gray-500" style="font-size:9px">
-        (cached; refreshes hourly &middot; mainnet only)
-      </p>
-    </div>
-
-    <% if @presenter %>
-      <%# Overflow cap via CSS wrapper. Approach B from U17 in the plan —
-          keeps _hex_view.html.erb unchanged. ~320px ≈ 12 rows at the
-          hex grid's existing row line-height; covers Mint/Token/Stake/
-          Metadata in full and clips Vote/ALT with a fade-out so the
-          page flow stays clean. %>
-      <div class="relative" style="max-height:340px;overflow:hidden">
-        <%= render "accounts/hex_view", account: @presenter, compact: true %>
-        <%# Bottom fade gradient that only renders when the hex view
-            actually exceeds the cap — purely cosmetic. %>
-        <div class="absolute bottom-0 left-0 right-0 pointer-events-none" style="height:80px;background:linear-gradient(to bottom, rgba(10,10,20,0) 0%, rgba(10,10,20,0.95) 90%)"></div>
-      </div>
-      <div class="mt-4 text-center">
-        <%= link_to "/accounts/#{@entry.example_address}",
-              class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
-              style: "font-size:10px;padding:10px 18px",
-              data: { turbo: false } do %>
-          <%= pixel_icon(:magnifier, size: 12) %>
-          <span>View full hex</span>
-          <span aria-hidden="true">&rarr;</span>
-        <% end %>
-      </div>
-    <% else %>
-      <%# Fallback: RPC fetch failed or decode raised. Page still teaches
-          via the explainer prose below; the sample card explains what's
-          missing and points at the visualizer so the user can retry. %>
-      <div class="pixel-card text-center" style="padding:24px;border-color:#78350f">
-        <p class="text-yellow-400 mb-2" style="font-size:11px">
-          Sample temporarily unavailable
+  <%# Live sample — only renders for kind: account with an example_address.
+      Same fade-out clip pattern as before. %>
+  <% if @entry.kind == "account" && @entry.example_address.present? %>
+    <div class="mb-10">
+      <div class="mb-4">
+        <h2 class="text-white mb-1" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
+          Sample: <%= @entry.example_label %>
+        </h2>
+        <p class="text-gray-500" style="font-size:9px">
+          (cached; refreshes hourly &middot; mainnet only)
         </p>
-        <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.7">
-          We couldn&rsquo;t fetch the cached sample from mainnet right now.
-          The full hex view will try again live.
-        </p>
-        <%= link_to "/accounts/#{@entry.example_address}",
-              class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
-              style: "font-size:10px;padding:10px 18px",
-              data: { turbo: false } do %>
-          <%= pixel_icon(:magnifier, size: 12) %>
-          <span>Try the visualizer</span>
-          <span aria-hidden="true">&rarr;</span>
-        <% end %>
       </div>
-    <% end %>
-  </div>
 
-  <%# Explainer prose — plain prose rendered via simple_format. U21 wrote
-      the content as heredocs wrapped at ~75 chars for Ruby readability.
-      Single newlines within paragraphs are joined to spaces so the browser
-      handles wrapping; double-newlines stay as paragraph breaks. %>
-  <% if @entry.explainer_text.present? %>
-    <% cleaned_explainer = @entry.explainer_text.split(/\n{2,}/).map { |p| p.tr("\n", " ").squeeze(" ").strip }.join("\n\n") %>
-    <div class="pixel-card mb-10" style="padding:24px">
-      <div class="text-gray-200 [&>p]:mb-5 [&>p:last-child]:mb-0" style="font-size:11px;line-height:1.9">
-        <%= simple_format(cleaned_explainer) %>
-      </div>
+      <% if @presenter %>
+        <div class="relative" style="max-height:340px;overflow:hidden">
+          <%= render "accounts/hex_view", account: @presenter, compact: true %>
+          <div class="absolute bottom-0 left-0 right-0 pointer-events-none" style="height:80px;background:linear-gradient(to bottom, rgba(10,10,20,0) 0%, rgba(10,10,20,0.95) 90%)"></div>
+        </div>
+        <div class="mt-4 text-center">
+          <%= link_to "/accounts/#{@entry.example_address}",
+                class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+                style: "font-size:10px;padding:10px 18px",
+                data: { turbo: false } do %>
+            <%= pixel_icon(:magnifier, size: 12) %>
+            <span>View full hex</span>
+            <span aria-hidden="true">&rarr;</span>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="pixel-card text-center" style="padding:24px;border-color:#78350f">
+          <p class="text-yellow-400 mb-2" style="font-size:11px">
+            Sample temporarily unavailable
+          </p>
+          <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.7">
+            We couldn&rsquo;t fetch the cached sample from mainnet right now.
+            The full hex view will try again live.
+          </p>
+          <%= link_to "/accounts/#{@entry.example_address}",
+                class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
+                style: "font-size:10px;padding:10px 18px",
+                data: { turbo: false } do %>
+            <%= pixel_icon(:magnifier, size: 12) %>
+            <span>Try the visualizer</span>
+            <span aria-hidden="true">&rarr;</span>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   <% end %>
 
-  <%# Exit affordances: back to /learn + Challenge CTA. Removes the
-      dead-end identified during plan review. %>
+  <%# Markdown body — rendered via kramdown (GFM mode → tables, fenced
+      code, autolinks). Arbitrary-variant Tailwind selectors style the
+      emitted semantic HTML inline so we don't need a new stylesheet
+      class. Order matters: more specific selectors come last. %>
+  <% if @entry.body.present? %>
+    <div class="pixel-card mb-10
+                text-gray-200
+                [&_h2]:text-white [&_h2]:mt-8 [&_h2]:first:mt-0 [&_h2]:mb-4
+                [&_h3]:text-white [&_h3]:mt-6 [&_h3]:mb-3
+                [&_p]:mb-5 [&_p:last-child]:mb-0
+                [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5
+                [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5
+                [&_li]:mb-2 [&_li]:leading-relaxed
+                [&_code]:text-purple-300 [&_code]:bg-purple-950/40 [&_code]:px-1.5 [&_code]:py-0.5
+                [&_a]:text-purple-400 [&_a]:underline hover:[&_a]:text-purple-300
+                [&_strong]:text-white
+                [&_table]:w-full [&_table]:my-6 [&_table]:border-2 [&_table]:border-gray-800 [&_table]:border-collapse
+                [&_th]:bg-purple-950/40 [&_th]:text-purple-300 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:border-b-2 [&_th]:border-gray-800
+                [&_td]:px-3 [&_td]:py-2 [&_td]:border-t [&_td]:border-gray-800 [&_td]:align-top"
+         style="padding:24px;font-size:11px;line-height:1.85"
+         id="learn-body">
+      <%= render_learn_markdown(@entry.body) %>
+    </div>
+  <% end %>
+
+  <%# Sources + See also footer — frontmatter-driven, only rendered when
+      content exists. %>
+  <% if @entry.sources.any? || @entry.see_also.any? %>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+      <% if @entry.sources.any? %>
+        <div class="pixel-card" style="padding:18px">
+          <h3 class="text-white mb-3" style="font-size:11px;text-shadow:1px 1px 0 #4c1d95">
+            Sources
+          </h3>
+          <ul class="space-y-2">
+            <% @entry.sources.each do |src| %>
+              <li style="font-size:10px;line-height:1.7">
+                <%= link_to src["label"], src["url"],
+                      target: "_blank", rel: "noopener noreferrer",
+                      class: "text-purple-400 hover:text-purple-300 underline break-words" %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <% if @entry.see_also.any? %>
+        <div class="pixel-card" style="padding:18px">
+          <h3 class="text-white mb-3" style="font-size:11px;text-shadow:1px 1px 0 #4c1d95">
+            See also
+          </h3>
+          <ul class="space-y-2">
+            <% @entry.see_also.each do |related_slug| %>
+              <% related = AccountTaxonomy.find_by_slug(related_slug) %>
+              <% next unless related %>
+              <li style="font-size:10px;line-height:1.7">
+                <%= link_to related.name, related.learn_path,
+                      class: "text-purple-400 hover:text-purple-300 underline" %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%# Last verified stamp — reader knows when the byte layout was last
+      cross-checked against the program source. Lives outside the prose
+      card so it doesn't compete with content. %>
+  <% if @entry.last_verified.present? %>
+    <p class="text-gray-600 text-center mb-8" style="font-size:9px">
+      Last verified: <%= @entry.last_verified %>
+    </p>
+  <% end %>
+
+  <%# Exit affordances: back to /learn + Challenge CTA. %>
   <div class="border-t-2 border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
     <%= link_to "/learn", class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
       <span aria-hidden="true">&larr;</span> Back to Learn
