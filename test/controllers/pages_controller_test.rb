@@ -236,6 +236,23 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     assert bytes_idx < countries_idx, "bytes decoded should precede countries"
   end
 
+  # --- About link in nav + footer (U20) ---
+
+  test "nav exposes the About link" do
+    get "/"
+    assert_response :success
+    # Both nav and footer have an /about link; assert at least one.
+    assert_match %r{href="/about"[^>]*>About</a>}, response.body
+  end
+
+  test "footer exposes the About link" do
+    get "/"
+    assert_response :success
+    # Footer About link should be present alongside the other centre-column links.
+    footer = response.body.match(/<footer.*?<\/footer>/m).to_s
+    assert_match %r{href="/about"}, footer, "footer should link to /about"
+  end
+
   # --- About page (U19) ---
 
   test "GET /about renders with What / Why / Who / Tech stack / Links sections" do
