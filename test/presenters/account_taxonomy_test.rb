@@ -32,11 +32,25 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
     assert_nil AccountTaxonomy.find_by_slug(nil)
   end
 
-  test "explainer_text field exists on Entry (U21 will populate it)" do
-    mint = AccountTaxonomy.find_by_slug("mint")
-    # explainer_text is empty for now; U21 fills it. The test guards that
-    # the struct field exists so U21 doesn't have to re-extend the struct.
-    assert_respond_to mint, :explainer_text
+  test "all six in-scope entries have substantive explainer_text (U21)" do
+    IN_SCOPE_SLUGS.each do |slug|
+      entry = AccountTaxonomy.find_by_slug(slug)
+      assert_not_nil entry.explainer_text, "#{slug} should have explainer_text populated by U21"
+      word_count = entry.explainer_text.to_s.split.length
+      assert word_count >= 150, "#{slug} explainer_text should be at least 150 words (was #{word_count})"
+      # Markdown is NOT parsed in U17 (simple_format renders plain prose);
+      # raw markdown syntax in the prose would bleed through as visible
+      # asterisks / hashes / brackets. Guard against that here.
+      assert_no_match %r{\*\*|^#\s|\[[^\]]+\]\([^)]+\)}, entry.explainer_text,
+        "#{slug} explainer_text should not contain markdown syntax (rendered via simple_format)"
+    end
+  end
+
+  test "out-of-scope entries have nil explainer_text" do
+    OUT_OF_SCOPE_NAMES.each do |name|
+      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
+      assert_nil entry.explainer_text, "#{name.inspect} is not Learn-addressable so explainer_text should be nil"
+    end
   end
 
   test "every slug is a lowercase kebab-case identifier (URL-safe)" do
