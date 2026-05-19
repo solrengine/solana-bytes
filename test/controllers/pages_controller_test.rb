@@ -29,7 +29,7 @@ class PagesControllerTest < ActionDispatch::IntegrationTest
     get "/"
     assert_response :success
 
-    expected_order = ["Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table"]
+    expected_order = [ "Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table" ]
     indices = expected_order.map { |name| response.body.index(">\n          #{name}\n") || response.body.index(name) }
     assert indices.none?(&:nil?), "All six expected card names should be present"
     assert_equal indices, indices.sort, "Cards should appear in mockup-specified order: #{expected_order.inspect}"

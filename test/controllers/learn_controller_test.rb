@@ -14,7 +14,7 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
     # Bottom section: "Other account types" with the unslugged entries
     assert_includes response.body, "Other account types"
     # The unslugged entries appear in the Other section by name
-    ["Multisig", "BPF Upgradeable Program"].each do |name|
+    [ "Multisig", "BPF Upgradeable Program" ].each do |name|
       assert_includes response.body, name,
         "/learn index 'Other' section should list #{name.inspect}"
     end
@@ -65,7 +65,7 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
         "lamports" => 5_000_000_000, "owner" => "Stake11111111111111111111111111111111111111",
         "executable" => false, "rentEpoch" => 0, "space" => 200,
         "data" => [ Base64.strict_encode64(bytes.pack("C*")), "base64" ]
-      }}
+      } }
     }
     get "/learn/stake-account"
     assert_response :success
@@ -100,7 +100,7 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
         "lamports" => 100_000_000, "owner" => "AddressLookupTab1e1111111111111111111111111",
         "executable" => false, "rentEpoch" => 0, "space" => 8000,
         "data" => [ Base64.strict_encode64(bytes.pack("C*")), "base64" ]
-      }}
+      } }
     }
     get "/learn/address-lookup-table"
     assert_response :success

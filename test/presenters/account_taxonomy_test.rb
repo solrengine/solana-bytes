@@ -2,7 +2,7 @@ require "test_helper"
 
 class AccountTaxonomyTest < ActiveSupport::TestCase
   IN_SCOPE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
-  OUT_OF_SCOPE_NAMES = ["Multisig", "Token-2022 Mint/Account + Extensions", "BPF Upgradeable Program", "ELF Bytecode"].freeze
+  OUT_OF_SCOPE_NAMES = [ "Multisig", "Token-2022 Mint/Account + Extensions", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
 
   test "all six in-scope entries have a slug" do
     IN_SCOPE_SLUGS.each do |slug|
