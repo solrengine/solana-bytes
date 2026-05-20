@@ -18,12 +18,15 @@
   </div>
 
   <% if @live.any? %>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+    <%# Two columns max: Token-2022 entry names are long single tokens
+        (e.g. ConfidentialTransferMint) that overflow a 3-up card in the
+        wide pixel font. break-words lets the longest ones wrap. %>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
       <% @live.each do |entry| %>
         <%= link_to entry.learn_path,
               class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
               style: "padding:18px;text-decoration:none" do %>
-          <h2 class="text-white mb-1" style="font-size:14px">
+          <h2 class="text-white mb-1 break-words" style="font-size:14px;line-height:1.4">
             <%= entry.name %>
           </h2>
           <p class="text-gray-500 mb-3" style="font-size:9px">

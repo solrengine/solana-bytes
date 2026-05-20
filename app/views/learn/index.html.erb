@@ -29,12 +29,14 @@
         </p>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <%# Two columns max so long Token-2022 entry names don't overflow
+          the card; break-words wraps the longest single-token names. %>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <% live.each do |entry| %>
           <%= link_to entry.learn_path,
                 class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
                 style: "padding:18px;text-decoration:none" do %>
-            <h3 class="text-white mb-1" style="font-size:14px">
+            <h3 class="text-white mb-1 break-words" style="font-size:14px;line-height:1.4">
               <%= entry.name %>
             </h3>
             <p class="text-gray-500 mb-3" style="font-size:9px">
