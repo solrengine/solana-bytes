@@ -49,6 +49,9 @@ en:
     stat_countries: countries
     endorsements_label: FROM THE SOLANA ECOSYSTEM
     endorsements_caption: What people are saying.
+    quote_chase: Could be a useful learning tool for students.
+    quote_mike: Would love this on Explorer.
+    quote_jonas: Cool. Explorer is open source. Happy to review it.
     type_grid_title: Explore common account types
     type_grid_caption: Hand-picked Solana account layouts, decoded byte by byte.
     explore: Explore
