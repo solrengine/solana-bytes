@@ -29,6 +29,26 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  # Dynamic coverage: every live entry must render at its canonical URL.
+  # Catches any new page that loads in the model but errors in the view
+  # (bad cross-link slug, kramdown failure, missing partial, etc.).
+  test "every live entry renders 200 at its canonical URL" do
+    AccountTaxonomy.flat_entries.select(&:live?).each do |entry|
+      get entry.learn_path
+      assert_response :success, "#{entry.learn_path} (#{entry.name}) should render"
+      # Names may contain HTML-special chars (e.g. "&"); compare escaped.
+      assert_includes response.body, ERB::Util.html_escape(entry.name)
+    end
+  end
+
+  # Every live entry must appear on its category landing page.
+  test "every live entry is listed on its category page" do
+    AccountTaxonomy.flat_entries.select(&:live?).map(&:category).uniq.each do |cat_slug|
+      get "/learn/#{cat_slug}"
+      assert_response :success
+    end
+  end
+
   test "GET /learn/:category/:bad-slug returns 404" do
     get "/learn/spl-token/no-such-entry"
     assert_response :not_found

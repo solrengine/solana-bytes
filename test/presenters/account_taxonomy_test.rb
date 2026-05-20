@@ -76,9 +76,20 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
 
   test "categories are ordered and indexed" do
     slugs = AccountTaxonomy.categories.map(&:slug)
-    assert_equal %w[spl-token token-2022 consensus metaplex transactions programs], slugs
+    assert_equal %w[spl-token token-2022 consensus metaplex bubblegum transactions native programs anchor addressing encoding], slugs
+    # order field is strictly ascending and unique
+    orders = AccountTaxonomy.categories.map(&:order)
+    assert_equal orders.sort, orders
+    assert_equal orders.uniq, orders
     assert_equal "SPL Token", AccountTaxonomy.find_category("spl-token").name
     assert_nil AccountTaxonomy.find_category("nonexistent")
+  end
+
+  test "every entry's category resolves to a defined category" do
+    AccountTaxonomy.flat_entries.each do |entry|
+      assert_not_nil AccountTaxonomy.find_category(entry.category),
+        "#{entry.slug} references undefined category #{entry.category.inspect}"
+    end
   end
 
   test "find_by_category returns entries scoped to that category" do

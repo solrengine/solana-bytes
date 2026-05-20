@@ -47,8 +47,13 @@ module AccountTaxonomy
     Category.new(slug: "token-2022",   name: "Token-2022 Extensions",  description: "Token-2022 extends SPL Token with post-base TLV blocks for fees, interest, confidential transfers, metadata, and more.",                                  order: 2),
     Category.new(slug: "consensus",    name: "Staking & Voting",       description: "Core accounts for Solana's proof-of-stake consensus. Every validator has a Vote account; every delegator has a Stake account.",                          order: 3),
     Category.new(slug: "metaplex",     name: "Metaplex (NFTs)",        description: "The Metaplex Token Metadata program attaches rich metadata to SPL mints — the foundation of every Solana NFT.",                                            order: 4),
-    Category.new(slug: "transactions", name: "Versioned Transactions", description: "How modern Solana transactions reference accounts via lookup tables instead of inlining each 32-byte pubkey, lifting the ~35-account ceiling.",          order: 5),
-    Category.new(slug: "programs",     name: "Programs (Executable)",  description: "On-chain programs are ELF shared objects loaded by one of Solana's BPF loaders.",                                                                          order: 6)
+    Category.new(slug: "bubblegum",    name: "Compressed NFTs",        description: "Bubblegum stores NFTs in a Merkle tree instead of individual accounts — millions of NFTs for the cost of a few accounts.",                              order: 5),
+    Category.new(slug: "transactions", name: "Transactions",           description: "How Solana transactions are encoded on the wire — signatures, message header, account ordering, instructions, and versioned lookup tables.",            order: 6),
+    Category.new(slug: "native",       name: "Native Program Instructions", description: "Instruction data layouts for Solana's built-in programs — System, Stake, Vote, Compute Budget.",                                                       order: 7),
+    Category.new(slug: "programs",     name: "Programs (Executable)",  description: "On-chain programs are ELF shared objects loaded by one of Solana's BPF loaders.",                                                                          order: 8),
+    Category.new(slug: "anchor",       name: "Anchor",                 description: "Conventions the Anchor framework layers on top of raw accounts and instructions — discriminators, space, and rent.",                                     order: 9),
+    Category.new(slug: "addressing",   name: "Addresses & PDAs",       description: "How Solana derives program-controlled addresses and associated token accounts from seeds.",                                                              order: 10),
+    Category.new(slug: "encoding",     name: "Encoding & Layout",      description: "Cross-cutting serialization rules — optional types, Borsh vs bincode, and how rent ties to account size.",                                              order: 11)
   ].freeze
 
   CONTENT_DIR = Rails.root.join("content", "learn")
