@@ -18,3 +18,31 @@ en:
     sources: Sources
     see_also: See also
     last_verified: "Last verified: %{date}"
+  home:
+    tagline: A field guide to Solana accounts.
+    subtitle: Inspect and understand raw Solana account bytes, structures, and on-chain data.
+    fetching: Fetching account from Solana
+    fetching_caption: This may take a few seconds.
+    paste_placeholder: Paste a Solana account address...
+    visualize: Visualize
+    what_title: What is Solana Bytes?
+    what_body: Solana Bytes is an interactive explorer that helps you understand Solana account data by inspecting raw bytes, structures, and on-chain programs.
+    learn_more: Learn more
+    how_title: How it works
+    how_step1: Paste any Solana account address.
+    how_step2: Explore the raw bytes and field decoding.
+    how_step3: Take the Byte Challenge and test your eye.
+    live_label: LIVE FROM THE SITE
+    live_caption: Refreshed every 5 minutes.
+    stat_accounts: accounts decoded
+    stat_challenges: challenges played
+    stat_bytes: bytes decoded
+    stat_countries: countries
+    endorsements_label: FROM THE SOLANA ECOSYSTEM
+    endorsements_caption: What people are saying.
+    type_grid_title: Explore common account types
+    type_grid_caption: Hand-picked Solana account layouts, decoded byte by byte.
+    explore: Explore
+    browse_all: Browse all account types
+    challenge_cta_count: "%{count} challenges played — can you beat them?"
+    challenge_cta_default: Test your eye — find the mint authority in 165 bytes

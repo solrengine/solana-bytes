@@ -52,3 +52,31 @@ es:
       encoding:
         name: Codificación y Diseño
         description: Reglas de serialización transversales — tipos opcionales, Borsh frente a bincode, y cómo el rent se relaciona con el tamaño de la cuenta.
+  home:
+    tagline: Una guía de campo de las cuentas de Solana.
+    subtitle: Inspecciona y comprende los bytes en bruto, las estructuras y los datos on-chain de las cuentas de Solana.
+    fetching: Obteniendo la cuenta desde Solana
+    fetching_caption: Esto puede tardar unos segundos.
+    paste_placeholder: Pega una dirección de cuenta de Solana...
+    visualize: Visualizar
+    what_title: ¿Qué es Solana Bytes?
+    what_body: Solana Bytes es un explorador interactivo que te ayuda a comprender los datos de las cuentas de Solana inspeccionando bytes en bruto, estructuras y programas on-chain.
+    learn_more: Saber más
+    how_title: Cómo funciona
+    how_step1: Pega cualquier dirección de cuenta de Solana.
+    how_step2: Explora los bytes en bruto y la decodificación de campos.
+    how_step3: Acepta el Byte Challenge y pon a prueba tu ojo.
+    live_label: EN VIVO DESDE EL SITIO
+    live_caption: Actualizado cada 5 minutos.
+    stat_accounts: cuentas decodificadas
+    stat_challenges: retos jugados
+    stat_bytes: bytes decodificados
+    stat_countries: países
+    endorsements_label: DESDE EL ECOSISTEMA SOLANA
+    endorsements_caption: Lo que dice la gente.
+    type_grid_title: Explora tipos de cuenta comunes
+    type_grid_caption: Diseños de cuentas de Solana escogidos a mano, decodificados byte a byte.
+    explore: Explorar
+    browse_all: Ver todos los tipos de cuenta
+    challenge_cta_count: "%{count} retos jugados — ¿puedes superarlos?"
+    challenge_cta_default: Pon a prueba tu ojo — encuentra la autoridad de emisión en 165 bytes
