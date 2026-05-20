@@ -13,7 +13,7 @@
     <% end %>
     <% if @category %>
       <span aria-hidden="true">/</span>
-      <%= link_to @category.name, loc("/learn/#{@category.slug}"), class: "hover:text-purple-400" %>
+      <%= link_to category_name(@category), loc("/learn/#{@category.slug}"), class: "hover:text-purple-400" %>
     <% end %>
   </nav>
 

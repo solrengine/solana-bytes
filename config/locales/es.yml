@@ -18,3 +18,37 @@ es:
     sources: Fuentes
     see_also: Ver también
     last_verified: "Última verificación: %{date}"
+    categories:
+      spl-token:
+        name: SPL Token
+        description: El programa de tokens fungibles canónico. Cada token SPL en Solana usa este diseño.
+      token-2022:
+        name: Extensiones de Token-2022
+        description: Token-2022 amplía SPL Token con bloques TLV posteriores a la base para comisiones, intereses, transferencias confidenciales, metadatos y más.
+      consensus:
+        name: Staking y Votación
+        description: Cuentas centrales del consenso proof-of-stake de Solana. Cada validador tiene una cuenta Vote; cada delegador, una cuenta Stake.
+      metaplex:
+        name: Metaplex (NFTs)
+        description: El programa Token Metadata de Metaplex añade metadatos enriquecidos a las mints SPL — la base de cada NFT de Solana.
+      bubblegum:
+        name: NFTs Comprimidos
+        description: Bubblegum almacena NFTs en un árbol de Merkle en lugar de cuentas individuales — millones de NFTs por el coste de unas pocas cuentas.
+      transactions:
+        name: Transacciones
+        description: Cómo se codifican las transacciones de Solana — firmas, cabecera del mensaje, orden de cuentas, instrucciones y tablas de búsqueda versionadas.
+      native:
+        name: Instrucciones de Programas Nativos
+        description: Diseños de datos de instrucción para los programas integrados de Solana — System, Stake, Vote, Compute Budget.
+      programs:
+        name: Programas (Ejecutables)
+        description: Los programas on-chain son objetos compartidos ELF cargados por uno de los loaders BPF de Solana.
+      anchor:
+        name: Anchor
+        description: Convenciones que el framework Anchor añade sobre cuentas e instrucciones en bruto — discriminadores, espacio y rent.
+      addressing:
+        name: Direcciones y PDAs
+        description: Cómo Solana deriva direcciones controladas por programas y cuentas de token asociadas a partir de semillas.
+      encoding:
+        name: Codificación y Diseño
+        description: Reglas de serialización transversales — tipos opcionales, Borsh frente a bincode, y cómo el rent se relaciona con el tamaño de la cuenta.

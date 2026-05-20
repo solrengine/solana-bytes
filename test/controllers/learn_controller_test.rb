@@ -182,12 +182,22 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "untranslated page under /es falls back to English content but localized chrome" do
-    get "/es/learn/spl-token/token-account"
+    # Pick any live page that has no Spanish overlay yet, so this stays
+    # correct as more pages get translated. entry.summary is loaded under
+    # the test's default :en locale, so it's the English text that should
+    # appear via fallback on the es page.
+    base = Rails.root.join("content/learn")
+    entry = AccountTaxonomy.flat_entries.select(&:live?).find do |e|
+      !File.exist?(base.join(e.category, "#{e.slug}.es.md"))
+    end
+    skip "all pages have Spanish translations" unless entry
+
+    get "/es#{entry.learn_path}"
     assert_response :success
-    # No es overlay for token-account → English body
-    assert_includes response.body, "Holds a balance of one specific"
-    # Chrome is still localized
+    # Chrome is localized…
     assert_includes response.body, "Volver a Aprende"
+    # …but the body falls back to the English summary (no overlay).
+    assert_includes response.body, ERB::Util.html_escape(entry.summary)
   end
 
   test "language switcher links to the same page in the other locale" do

@@ -40,10 +40,21 @@
         user navigates home (so the hero reads cleanly again). %>
     <style>
       body.landing-hero-active nav.pixel-nav { display: none; }
+      /* The nav (and its language switcher) is hidden on the landing
+         hero, so surface a standalone switcher that shows only then. */
+      .landing-lang-switch { display: none; }
+      body.landing-hero-active .landing-lang-switch { display: inline-flex; }
     </style>
   </head>
 
   <body class="min-h-screen bg-gray-950 text-gray-100<%= ' landing-hero-active' if content_for?(:hide_navbar) %>">
+    <%# Landing-only language switcher — visible when the navbar is hidden
+        on the hero. Fixed top-right so it never collides with the hero. %>
+    <%= link_to locale_switch_path(other_locale),
+          class: "landing-lang-switch fixed top-4 right-4 text-gray-400 hover:text-white border-2 border-gray-700 hover:border-purple-500 px-2 py-1",
+          style: "z-index:20;font-size:10px;background:#0a0a14",
+          rel: "alternate", hreflang: other_locale.to_s do %><%= other_locale.to_s.upcase %><% end %>
+
     <%# Loading overlay — shown during challenge navigation %>
     <div id="game-loading" class="hidden fixed inset-0 flex items-center justify-center bg-black/80" style="z-index:200">
       <div class="text-center">
