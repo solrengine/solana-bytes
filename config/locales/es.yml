@@ -80,3 +80,82 @@ es:
     browse_all: Ver todos los tipos de cuenta
     challenge_cta_count: "%{count} retos jugados — ¿puedes superarlos?"
     challenge_cta_default: Pon a prueba tu ojo — encuentra la autoridad de emisión en 165 bytes
+  common:
+    view_all: Ver todo
+    play: Jugar
+    no_scores: Aún no hay puntuaciones — ¡sé el primero!
+  about:
+    title: Acerca de
+    what_title: Qué es
+    what_p1: Solana Bytes es un visualizador hex interactivo de cuentas de Solana combinado con un juego, el Byte Challenge.
+    what_p2: Pega cualquier dirección de cuenta para ver los metadatos decodificados y los bytes en bruto con tooltips al pasar el ratón sobre cada campo. Juega al Challenge para poner a prueba tu conocimiento de las estructuras de datos de Solana — encuentra campos concretos en volcados hex, encadena rachas, sube en la clasificación.
+    why_title: Por qué existe
+    why_p1_html: Los exploradores actuales de Solana son geniales para las transacciones pero tratan los datos de cuenta en bruto como un blob opaco. Si quieres entender qué <em>es</em> realmente una cuenta Stake, una cuenta Vote o una cuenta Metadata de Metaplex a nivel de byte, te toca leer el código fuente.
+    why_p2: Solana Bytes es la guía a nivel de byte que nos hubiera gustado tener al aprender — un único lugar para inspeccionar, decodificar y practicar con los diseños que todo desarrollador de Solana acaba tocando.
+    who_title: Quién lo construyó
+    who_p1_html: 'Creado para el <strong class="text-purple-300">Colosseum Frontier Hackathon</strong> por <a href="https://moviendo.me" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Jose Ferrer</a>, creador de <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">SolRengine</a> — un motor de Rails de código abierto para auth de billetera, RPC y decodificación de cuentas de Solana.'
+    who_p2: 'Solana Bytes es la aplicación de referencia que demuestra el motor de principio a fin: inicio de sesión con billetera, obtención por RPC con reintentos, decodificación de cuentas por programa y un bucle de juego real encima.'
+    who_p3_html: 'Inspirado en la serie de YouTube <a href="https://www.youtube.com/solandy" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Learn Solana in 2026</a> de <a href="https://x.com/HeyAndyS" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Solandy</a> — el recorrido a nivel de byte que hizo que los diseños de cuentas de Solana parecieran accesibles.'
+    tech_title: Stack tecnológico
+    links_title: Enlaces
+    github_repo: Repo de GitHub
+  challenge:
+    title: Byte Challenge
+    subtitle: ¿Puedes encontrar los bytes correctos en una cuenta de Solana?
+    intro: Haz clic en el volcado hex para encontrar un campo concreto. Encadena rachas, gana estrellas, sube en la clasificación.
+    difficulty: Dificultad
+    tier_all: Todos
+    tier_all_desc: Todos los tipos de cuenta
+    play: Jugar al Challenge
+    start_playing: Empezar a jugar
+    playing_as_html: "Jugando como <span class=\"text-purple-400\">%{address}</span> — resultados guardados"
+    no_login: No hace falta iniciar sesión — empieza a jugar ya.
+    want_streaks: ¿Quieres rachas en la clasificación?
+    connect_wallet: Conecta una billetera →
+    best_streak: Mejor racha
+    games: Partidas
+    stars: Estrellas
+    how_find: Encuentra el campo<br>en el volcado hex
+    how_streaks: Encadena rachas<br>3 fallos = fin del juego
+    how_stars: Gana estrellas<br>0 fallos = 3 estrellas
+    top_streaks: Mejores rachas
+  leaderboard:
+    title: Clasificación
+    top_streaks: Mejores rachas
+    recent_games: Partidas recientes
+    col_player: Jugador
+    col_streak: Racha
+    col_stars: Estrellas
+    col_date: Fecha
+    none_completed: Aún no se han completado retos
+    be_first: ¡Sé el primero!
+    found: encontró
+    ago: "hace %{time}"
+    no_games: Aún no hay partidas
+  stats:
+    title: Estadísticas
+    visitors: Visitantes
+    pageviews: Vistas de página
+    accounts_analyzed: Cuentas analizadas
+    unique: "%{count} únicas"
+    today: Hoy
+    this_week: Esta semana
+    challenge_stats: Estadísticas del Challenge
+    challenges_played: Retos jugados
+    practice_ranked: "%{practice} práctica / %{ranked} clasificatorias"
+    best_streak: Mejor racha
+    stars_earned: Estrellas ganadas
+    top_players: Mejores jugadores
+    games_count: "%{count} partidas"
+    most_challenged_fields: Campos más retados
+    no_data: Aún no hay datos
+    activity: Actividad
+    games_today: Partidas hoy
+    games_week: Partidas esta semana
+    avg_streak: Racha media
+    pageviews_today: Vistas de página hoy
+    pageviews_week: Vistas de página esta semana
+    top_pages: Páginas más vistas
+    top_countries: Países principales
+    no_games: Aún no hay partidas
+    powered_by_ahoy: Con la tecnología de Ahoy — conforme al RGPD, sin cookies

@@ -46,3 +46,82 @@ en:
     browse_all: Browse all account types
     challenge_cta_count: "%{count} challenges played — can you beat them?"
     challenge_cta_default: Test your eye — find the mint authority in 165 bytes
+  common:
+    view_all: View all
+    play: Play
+    no_scores: No scores yet — be the first!
+  about:
+    title: About
+    what_title: What it is
+    what_p1: Solana Bytes is an interactive hex visualizer for Solana accounts paired with a Byte Challenge game.
+    what_p2: Paste any account address to see decoded metadata and raw bytes with hover tooltips for every field. Play the Challenge to test your knowledge of Solana data structures — find specific fields in hex dumps, build streaks, climb the leaderboard.
+    why_title: Why it exists
+    why_p1_html: Solana’s existing explorers are great for transactions but treat raw account data as an opaque blob. If you want to understand what a Stake account, a Vote account, or a Metaplex Metadata account actually <em>is</em> at the byte level, you read the source.
+    why_p2: Solana Bytes is the byte-level guide that we wanted when we were learning — one place to inspect, decode, and practice on the layouts that every Solana developer eventually touches.
+    who_title: Who built it
+    who_p1_html: 'Built for the <strong class="text-purple-300">Colosseum Frontier Hackathon</strong> by <a href="https://moviendo.me" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Jose Ferrer</a>, creator of <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">SolRengine</a> — an open-source Rails engine for Solana wallet auth, RPC, and account decoding.'
+    who_p2: 'Solana Bytes is the reference application that demonstrates the engine end-to-end: wallet sign-in, RPC fetching with retry, per-program account decoding, and a real game loop on top.'
+    who_p3_html: 'Inspired by <a href="https://x.com/HeyAndyS" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Solandy</a>’s <a href="https://www.youtube.com/solandy" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Learn Solana in 2026</a> YouTube series — the byte-level walkthrough that made Solana account layouts feel approachable.'
+    tech_title: Tech stack
+    links_title: Links
+    github_repo: GitHub repo
+  challenge:
+    title: Byte Challenge
+    subtitle: Can you find the right bytes in a Solana account?
+    intro: Click on the hex dump to find a specific field. Build streaks, earn stars, climb the leaderboard.
+    difficulty: Difficulty
+    tier_all: All
+    tier_all_desc: Every account type
+    play: Play Challenge
+    start_playing: Start Playing
+    playing_as_html: "Playing as <span class=\"text-purple-400\">%{address}</span> — results saved"
+    no_login: No login needed — start playing now.
+    want_streaks: Want streaks on the leaderboard?
+    connect_wallet: Connect a wallet →
+    best_streak: Best Streak
+    games: Games
+    stars: Stars
+    how_find: Find the field<br>in the hex dump
+    how_streaks: Build streaks<br>3 wrong = game over
+    how_stars: Earn stars<br>0 mistakes = 3 stars
+    top_streaks: Top Streaks
+  leaderboard:
+    title: Leaderboard
+    top_streaks: Top Streaks
+    recent_games: Recent Games
+    col_player: Player
+    col_streak: Streak
+    col_stars: Stars
+    col_date: Date
+    none_completed: No challenges completed yet
+    be_first: Be the first!
+    found: found
+    ago: "%{time} ago"
+    no_games: No games yet
+  stats:
+    title: Stats
+    visitors: Visitors
+    pageviews: Pageviews
+    accounts_analyzed: Accounts Analyzed
+    unique: "%{count} unique"
+    today: Today
+    this_week: This Week
+    challenge_stats: Challenge Stats
+    challenges_played: Challenges Played
+    practice_ranked: "%{practice} practice / %{ranked} ranked"
+    best_streak: Best Streak
+    stars_earned: Stars Earned
+    top_players: Top Players
+    games_count: "%{count} games"
+    most_challenged_fields: Most Challenged Fields
+    no_data: No data yet
+    activity: Activity
+    games_today: Games today
+    games_week: Games this week
+    avg_streak: Avg streak
+    pageviews_today: Pageviews today
+    pageviews_week: Pageviews this week
+    top_pages: Top Pages
+    top_countries: Top Countries
+    no_games: No games yet
+    powered_by_ahoy: Powered by Ahoy — GDPR compliant, no cookies

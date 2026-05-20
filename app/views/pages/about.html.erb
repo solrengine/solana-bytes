@@ -1,10 +1,10 @@
-<% content_for(:title, "About — Solana Bytes") %>
+<% content_for(:title, "#{t('about.title')} — Solana Bytes") %>
 
 <div class="max-w-5xl mx-auto">
   <div class="text-center mb-10">
-    <h1 class="text-white mb-2" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95">About</h1>
+    <h1 class="text-white mb-2" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95"><%= t("about.title") %></h1>
     <p class="text-purple-300" style="font-size:13px">
-      A field guide to Solana accounts.
+      <%= t("home.tagline") %>
     </p>
   </div>
 
@@ -14,65 +14,49 @@
     <%# What %>
     <section class="pixel-card" style="padding:24px">
       <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        What it is
+        <%= t("about.what_title") %>
       </h2>
       <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
-        Solana Bytes is an interactive hex visualizer for Solana accounts paired
-        with a Byte Challenge game.
+        <%= t("about.what_p1") %>
       </p>
       <p class="text-gray-400" style="font-size:11px;line-height:1.9">
-        Paste any account address to see decoded metadata and raw bytes with
-        hover tooltips for every field. Play the Challenge to test your knowledge
-        of Solana data structures &mdash; find specific fields in hex dumps, build
-        streaks, climb the leaderboard.
+        <%= t("about.what_p2") %>
       </p>
     </section>
 
     <%# Why %>
     <section class="pixel-card" style="padding:24px">
       <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        Why it exists
+        <%= t("about.why_title") %>
       </h2>
       <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
-        Solana&rsquo;s existing explorers are great for transactions but
-        treat raw account data as an opaque blob. If you want to understand
-        what a Stake account, a Vote account, or a Metaplex Metadata account
-        actually <em>is</em> at the byte level, you read the source.
+        <%= t("about.why_p1_html") %>
       </p>
       <p class="text-gray-400" style="font-size:11px;line-height:1.9">
-        Solana Bytes is the byte-level guide that we wanted when we were learning
-        &mdash; one place to inspect, decode, and practice on the layouts that
-        every Solana developer eventually touches.
+        <%= t("about.why_p2") %>
       </p>
     </section>
 
     <%# Who %>
     <section class="pixel-card" style="padding:24px">
       <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        Who built it
+        <%= t("about.who_title") %>
       </h2>
       <p class="text-gray-300 mb-3" style="font-size:11px;line-height:1.9">
-        Built for the <strong class="text-purple-300">Colosseum Frontier Hackathon</strong>
-        by <a href="https://moviendo.me" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Jose Ferrer</a>,
-        creator of <a href="https://solrengine.org" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">SolRengine</a>
-        &mdash; an open-source Rails engine for Solana wallet auth, RPC, and account decoding.
+        <%= t("about.who_p1_html") %>
       </p>
       <p class="text-gray-400 mb-3" style="font-size:11px;line-height:1.9">
-        Solana Bytes is the reference application that demonstrates the engine
-        end-to-end: wallet sign-in, RPC fetching with retry, per-program account
-        decoding, and a real game loop on top.
+        <%= t("about.who_p2") %>
       </p>
       <p class="text-gray-400" style="font-size:11px;line-height:1.9">
-        Inspired by <a href="https://x.com/HeyAndyS" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Solandy</a>&rsquo;s
-        <a href="https://www.youtube.com/solandy" class="text-purple-400 hover:text-purple-300" target="_blank" rel="noopener">Learn Solana in 2026</a>
-        YouTube series &mdash; the byte-level walkthrough that made Solana account layouts feel approachable.
+        <%= t("about.who_p3_html") %>
       </p>
     </section>
 
     <%# Tech stack %>
     <section class="pixel-card" style="padding:24px">
       <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        Tech stack
+        <%= t("about.tech_title") %>
       </h2>
       <ul class="space-y-2 text-gray-300" style="font-size:10px;line-height:1.8">
         <li><span class="text-purple-300">Rails 8.1</span> &middot; Hotwire (Turbo + Stimulus) &middot; Tailwind v4</li>
@@ -87,13 +71,13 @@
   <%# Links — full-width band at the bottom %>
   <section class="pixel-card" style="padding:24px">
     <h2 class="text-white mb-3" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-      Links
+      <%= t("about.links_title") %>
     </h2>
     <div class="flex flex-wrap items-center gap-4">
       <a href="https://github.com/solrengine/solana-bytes" target="_blank" rel="noopener"
          class="text-purple-400 hover:text-purple-300 inline-flex items-center gap-2" style="font-size:11px">
         <%= pixel_icon(:github, size: 14) %>
-        GitHub repo
+        <%= t("about.github_repo") %>
       </a>
       <a href="https://solrengine.org" target="_blank" rel="noopener"
          class="text-purple-400 hover:text-purple-300" style="font-size:11px">

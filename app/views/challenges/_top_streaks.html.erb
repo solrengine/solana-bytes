@@ -3,8 +3,8 @@
     Locals: top_streaks — enumerable of ChallengeResult records ordered by streak desc. %>
 <div class="pixel-card text-left max-w-md mx-auto" style="padding:0">
   <div class="px-5 py-3 border-b-2 border-gray-700 flex items-center justify-between">
-    <h2 class="text-white flex items-center gap-2" style="font-size:14px"><%= pixel_icon(:trophy, size: 16) %> Top Streaks</h2>
-    <%= link_to "View all", "/leaderboard", class: "text-purple-400 hover:text-purple-300", style: "font-size:10px" %>
+    <h2 class="text-white flex items-center gap-2" style="font-size:14px"><%= pixel_icon(:trophy, size: 16) %> <%= t("challenge.top_streaks") %></h2>
+    <%= link_to t("common.view_all"), loc("/leaderboard"), class: "text-purple-400 hover:text-purple-300", style: "font-size:10px" %>
   </div>
 
   <% if top_streaks.any? %>
@@ -31,7 +31,7 @@
     </div>
   <% else %>
     <div class="px-5 py-8 text-center">
-      <p class="text-gray-500" style="font-size:10px">No scores yet — be the first!</p>
+      <p class="text-gray-500" style="font-size:10px"><%= t("common.no_scores") %></p>
     </div>
   <% end %>
 </div>
