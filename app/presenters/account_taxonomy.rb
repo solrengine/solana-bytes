@@ -59,7 +59,7 @@ module AccountTaxonomy
   CONTENT_DIR = Rails.root.join("content", "learn")
 
   def all
-    @entries ||= load_all
+    (@by_locale ||= {})[I18n.locale] ||= load_all(I18n.locale)
   end
 
   alias_method :flat_entries, :all
@@ -84,32 +84,58 @@ module AccountTaxonomy
   # Test/dev hook: drop the memoized entries so a subsequent .all reloads
   # from disk. Used when content/learn/*.md is edited in a running process.
   def reset!
-    @entries = nil
+    @by_locale = nil
   end
 
   private
 
   FRONTMATTER_RE = /\A---\s*\n(.*?\n)---\s*\n?(.*)\z/m
+  # Matches a locale-variant filename like "mint.es.md" so the base loader
+  # can skip translation overlays when enumerating canonical entries.
+  LOCALE_SUFFIX_RE = /\.[a-z]{2}\.md\z/
 
-  def load_all
+  def load_all(locale)
     raise "content/learn/ directory missing at #{CONTENT_DIR}" unless CONTENT_DIR.exist?
 
-    paths = Dir.glob(CONTENT_DIR.join("**", "*.md"))
-    raise "content/learn/ is empty — no Learn entries found" if paths.empty?
+    base_paths = Dir.glob(CONTENT_DIR.join("**", "*.md")).reject { |p| p.match?(LOCALE_SUFFIX_RE) }
+    raise "content/learn/ is empty — no Learn entries found" if base_paths.empty?
 
-    paths.map { |path| parse_entry(path) }
-         .sort_by { |e| [category_order(e.category), e.slug.to_s] }
+    base_paths.map { |path| build_entry(path, locale) }
+              .sort_by { |e| [ category_order(e.category), e.slug.to_s ] }
   end
 
-  def parse_entry(path)
+  # Builds an Entry from its canonical (default-locale) file. When the
+  # requested locale isn't the default and a sibling <slug>.<locale>.md
+  # exists, its name/summary/body overlay the base values. Structural
+  # frontmatter (offsets, sizes, program_id, sources, slug, category) is
+  # never translated — it lives only in the base file, so byte-level facts
+  # can't drift between languages. Missing translation → English fallback.
+  def build_entry(base_path, locale)
+    meta, body = parse_file(base_path)
+    entry = entry_from(meta, body)
+    return entry if locale.to_s == I18n.default_locale.to_s
+
+    overlay_path = base_path.sub(/\.md\z/, ".#{locale}.md")
+    return entry unless File.exist?(overlay_path)
+
+    t_meta, t_body = parse_file(overlay_path)
+    entry.name    = t_meta["name"].presence    || entry.name
+    entry.summary = t_meta["summary"].presence || entry.summary
+    entry.body    = t_body.presence            || entry.body
+    entry
+  end
+
+  def parse_file(path)
     raw = File.read(path)
     unless (match = FRONTMATTER_RE.match(raw))
       raise "Missing or malformed YAML frontmatter in #{path}"
     end
-
-    meta = YAML.safe_load(match[1], permitted_classes: [ Date ])
+    meta = YAML.safe_load(match[1], permitted_classes: [ Date ]) || {}
     body = match[2].to_s.strip.presence
+    [ meta, body ]
+  end
 
+  def entry_from(meta, body)
     Entry.new(
       name:            meta["name"],
       slug:            meta["slug"],

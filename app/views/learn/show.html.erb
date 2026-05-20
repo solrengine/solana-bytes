@@ -8,12 +8,12 @@
       page; that page links back to /learn. Keeps the upward navigation
       shallow and explicit. %>
   <nav class="mb-6 inline-flex items-center gap-2 text-gray-500" style="font-size:10px">
-    <%= link_to "/learn", class: "hover:text-purple-400 inline-flex items-center gap-1" do %>
-      <span aria-hidden="true">&larr;</span> Learn
+    <%= link_to loc("/learn"), class: "hover:text-purple-400 inline-flex items-center gap-1" do %>
+      <span aria-hidden="true">&larr;</span> <%= t("learn.breadcrumb_root") %>
     <% end %>
     <% if @category %>
       <span aria-hidden="true">/</span>
-      <%= link_to @category.name, "/learn/#{@category.slug}", class: "hover:text-purple-400" %>
+      <%= link_to @category.name, loc("/learn/#{@category.slug}"), class: "hover:text-purple-400" %>
     <% end %>
   </nav>
 
@@ -23,9 +23,7 @@
         main directory. %>
     <div class="pixel-card mb-6" style="padding:14px;border-color:#78350f;background:#1a0f06">
       <p class="text-yellow-400" style="font-size:11px">
-        <strong>Draft</strong> &middot; This explainer is still being written.
-        The byte layout and example below are accurate; the prose will arrive
-        soon.
+        <strong><%= t("learn.draft_label") %></strong> &middot; <%= t("learn.draft_body") %>
       </p>
     </div>
   <% end %>
@@ -63,10 +61,10 @@
     <div class="mb-10">
       <div class="mb-4">
         <h2 class="text-white mb-1" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-          Sample: <%= @entry.example_label %>
+          <%= t("learn.sample_heading", label: @entry.example_label) %>
         </h2>
         <p class="text-gray-500" style="font-size:9px">
-          (cached; refreshes hourly &middot; mainnet only)
+          <%= t("learn.sample_caption") %>
         </p>
       </div>
 
@@ -76,30 +74,29 @@
           <div class="absolute bottom-0 left-0 right-0 pointer-events-none" style="height:80px;background:linear-gradient(to bottom, rgba(10,10,20,0) 0%, rgba(10,10,20,0.95) 90%)"></div>
         </div>
         <div class="mt-4 text-center">
-          <%= link_to "/accounts/#{@entry.example_address}",
+          <%= link_to loc("/accounts/#{@entry.example_address}"),
                 class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
                 style: "font-size:10px;padding:10px 18px",
                 data: { turbo: false } do %>
             <%= pixel_icon(:magnifier, size: 12) %>
-            <span>View full hex</span>
+            <span><%= t("learn.view_full_hex") %></span>
             <span aria-hidden="true">&rarr;</span>
           <% end %>
         </div>
       <% else %>
         <div class="pixel-card text-center" style="padding:24px;border-color:#78350f">
           <p class="text-yellow-400 mb-2" style="font-size:11px">
-            Sample temporarily unavailable
+            <%= t("learn.sample_unavailable_title") %>
           </p>
           <p class="text-gray-400 mb-4" style="font-size:10px;line-height:1.7">
-            We couldn&rsquo;t fetch the cached sample from mainnet right now.
-            The full hex view will try again live.
+            <%= t("learn.sample_unavailable_body") %>
           </p>
-          <%= link_to "/accounts/#{@entry.example_address}",
+          <%= link_to loc("/accounts/#{@entry.example_address}"),
                 class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
                 style: "font-size:10px;padding:10px 18px",
                 data: { turbo: false } do %>
             <%= pixel_icon(:magnifier, size: 12) %>
-            <span>Try the visualizer</span>
+            <span><%= t("learn.try_visualizer") %></span>
             <span aria-hidden="true">&rarr;</span>
           <% end %>
         </div>
@@ -139,7 +136,7 @@
       <% if @entry.sources.any? %>
         <div class="pixel-card" style="padding:18px">
           <h3 class="text-white mb-3" style="font-size:11px;text-shadow:1px 1px 0 #4c1d95">
-            Sources
+            <%= t("learn.sources") %>
           </h3>
           <ul class="space-y-2">
             <% @entry.sources.each do |src| %>
@@ -156,14 +153,14 @@
       <% if @entry.see_also.any? %>
         <div class="pixel-card" style="padding:18px">
           <h3 class="text-white mb-3" style="font-size:11px;text-shadow:1px 1px 0 #4c1d95">
-            See also
+            <%= t("learn.see_also") %>
           </h3>
           <ul class="space-y-2">
             <% @entry.see_also.each do |related_slug| %>
               <% related = AccountTaxonomy.find_by_slug(related_slug) %>
               <% next unless related %>
               <li style="font-size:10px;line-height:1.7">
-                <%= link_to related.name, related.learn_path,
+                <%= link_to related.name, loc(related.learn_path),
                       class: "text-purple-400 hover:text-purple-300 underline" %>
               </li>
             <% end %>
@@ -178,20 +175,20 @@
       card so it doesn't compete with content. %>
   <% if @entry.last_verified.present? %>
     <p class="text-gray-600 text-center mb-8" style="font-size:9px">
-      Last verified: <%= @entry.last_verified %>
+      <%= t("learn.last_verified", date: @entry.last_verified) %>
     </p>
   <% end %>
 
   <%# Exit affordances: back to /learn + Challenge CTA. %>
   <div class="border-t-2 border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-    <%= link_to "/learn", class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
-      <span aria-hidden="true">&larr;</span> Back to Learn
+    <%= link_to loc("/learn"), class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
+      <span aria-hidden="true">&larr;</span> <%= t("learn.back") %>
     <% end %>
-    <%= link_to "/challenges",
+    <%= link_to loc("/challenges"),
           class: "pixel-btn inline-flex items-center gap-2",
           style: "font-size:11px;padding:10px 18px" do %>
       <%= pixel_icon(:target, size: 14) %>
-      <span>Try the Byte Challenge</span>
+      <span><%= t("learn.try_challenge") %></span>
       <span aria-hidden="true">&rarr;</span>
     <% end %>
   </div>

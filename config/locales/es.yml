@@ -1,0 +1,20 @@
+es:
+  nav:
+    about: Acerca de
+    learn: Aprende
+    challenge: Reto
+  learn:
+    breadcrumb_root: Aprende
+    back: Volver a Aprende
+    try_challenge: Prueba el Byte Challenge
+    draft_label: Borrador
+    draft_body: Esta explicación todavía se está redactando. El diseño de bytes y el ejemplo de abajo son correctos; el texto llegará pronto.
+    sample_heading: "Ejemplo: %{label}"
+    sample_caption: "(en caché; se actualiza cada hora · solo mainnet)"
+    view_full_hex: Ver hex completo
+    sample_unavailable_title: Ejemplo no disponible temporalmente
+    sample_unavailable_body: No pudimos obtener el ejemplo en caché desde mainnet en este momento. La vista hex completa lo intentará en vivo.
+    try_visualizer: Prueba el visualizador
+    sources: Fuentes
+    see_also: Ver también
+    last_verified: "Última verificación: %{date}"

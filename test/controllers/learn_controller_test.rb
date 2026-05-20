@@ -157,4 +157,50 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
       response.body,
       "Mint body should render the Byte layout as an HTML <table>"
   end
+
+  # --- i18n (es) ---
+
+  test "bare path renders English" do
+    get "/learn/spl-token/mint"
+    assert_response :success
+    assert_includes response.body, "An SPL Mint account defines"
+    assert_includes response.body, "Back to Learn"
+  end
+
+  test "GET /es/learn/:category/:slug renders the translated page (chrome + content)" do
+    get "/es/learn/spl-token/mint"
+    assert_response :success
+    # Translated body
+    assert_includes response.body, "Una cuenta Mint de SPL"
+    # Translated chrome
+    assert_includes response.body, "Volver a Aprende"
+    assert_includes response.body, "Fuentes"
+    # Structural facts are locale-invariant and still render in the es page:
+    # the byte size and the (untranslated) field names from the layout table.
+    assert_includes response.body, "82 bytes"
+    assert_includes response.body, "mint_authority"
+  end
+
+  test "untranslated page under /es falls back to English content but localized chrome" do
+    get "/es/learn/spl-token/token-account"
+    assert_response :success
+    # No es overlay for token-account → English body
+    assert_includes response.body, "Holds a balance of one specific"
+    # Chrome is still localized
+    assert_includes response.body, "Volver a Aprende"
+  end
+
+  test "language switcher links to the same page in the other locale" do
+    get "/learn/spl-token/mint"
+    assert_match %r{href="/es/learn/spl-token/mint"}, response.body
+    get "/es/learn/spl-token/mint"
+    assert_match %r{href="/learn/spl-token/mint"}, response.body
+  end
+
+  test "invalid locale segment is not treated as a locale" do
+    # /fr is not an available locale, so the constraint rejects the /:locale
+    # match and "fr" can't stand in for a category/slug → 404.
+    get "/fr/learn/spl-token/mint"
+    assert_response :not_found
+  end
 end
