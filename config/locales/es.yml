@@ -18,6 +18,15 @@ es:
     sources: Fuentes
     see_also: Ver también
     last_verified: "Última verificación: %{date}"
+    index_subtitle: Las cuentas de Solana decodificadas, byte a byte.
+    index_intro: Cada página te explica qué es la cuenta, por qué existe y qué significan los bytes on-chain — junto con un ejemplo real de mainnet en caché.
+    explore: Explorar
+    other_types: Otros tipos de cuenta
+    other_types_caption: Listados pero aún sin explicar del todo — explora los bytes en bruto en el visualizador.
+    see_example: Ver ejemplo
+    draft_entries: Entradas en borrador
+    draft_entries_caption: Estas páginas tienen diseños de bytes y ejemplos; el texto todavía se está redactando.
+    empty_category: Aún no hay entradas en esta categoría.
     categories:
       spl-token:
         name: SPL Token

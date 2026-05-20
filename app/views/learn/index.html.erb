@@ -1,15 +1,13 @@
-<% content_for(:title, "Learn — Solana Bytes") %>
+<% content_for(:title, "#{t('learn.breadcrumb_root')} — Solana Bytes") %>
 
 <div class="max-w-5xl mx-auto">
   <div class="text-center mb-10">
-    <h1 class="text-white mb-3" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95">Learn</h1>
+    <h1 class="text-white mb-3" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95"><%= t("learn.breadcrumb_root") %></h1>
     <p class="text-purple-300" style="font-size:13px">
-      Solana accounts decoded, byte by byte.
+      <%= t("learn.index_subtitle") %>
     </p>
     <p class="text-gray-400 mt-3 max-w-2xl mx-auto" style="font-size:11px;line-height:1.8">
-      Each page walks you through what the account is, why it exists, and
-      what the on-chain bytes mean &mdash; paired with a real, cached
-      mainnet example.
+      <%= t("learn.index_intro") %>
     </p>
   </div>
 
@@ -33,7 +31,7 @@
           the card; break-words wraps the longest single-token names. %>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <% live.each do |entry| %>
-          <%= link_to entry.learn_path,
+          <%= link_to loc(entry.learn_path),
                 class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
                 style: "padding:18px;text-decoration:none" do %>
             <h3 class="text-white mb-1 break-words" style="font-size:14px;line-height:1.4">
@@ -46,7 +44,7 @@
               <%= entry.summary %>
             </p>
             <p class="mt-auto text-purple-400" style="font-size:10px">
-              Explore <span aria-hidden="true">&rarr;</span>
+              <%= t("learn.explore") %> <span aria-hidden="true">&rarr;</span>
             </p>
           <% end %>
         <% end %>
@@ -60,23 +58,22 @@
   <% if @drafts.any? %>
     <div class="border-t-2 border-gray-800 pt-8">
       <h2 class="text-white mb-2" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        Other account types
+        <%= t("learn.other_types") %>
       </h2>
       <p class="text-gray-500 mb-6" style="font-size:10px">
-        Listed but not yet fully explained &mdash; explore the raw bytes
-        in the visualizer.
+        <%= t("learn.other_types_caption") %>
       </p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <% @drafts.each do |entry| %>
-          <%= link_to entry.example_address ? "/accounts/#{entry.example_address}" : entry.learn_path,
+          <%= link_to loc(entry.example_address ? "/accounts/#{entry.example_address}" : entry.learn_path),
                 class: "pixel-card flex items-start gap-3 hover:border-purple-500 transition-colors",
                 style: "padding:14px;text-decoration:none" do %>
             <div class="flex-1">
               <p class="text-white" style="font-size:11px"><%= entry.name %></p>
               <p class="text-gray-500 mt-1" style="font-size:9px"><%= entry.program_label %></p>
             </div>
-            <span class="text-purple-400 shrink-0" style="font-size:10px">See example &rarr;</span>
+            <span class="text-purple-400 shrink-0" style="font-size:10px"><%= t("learn.see_example") %> &rarr;</span>
           <% end %>
         <% end %>
       </div>

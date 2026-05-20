@@ -1,10 +1,10 @@
-<% content_for(:title, "#{@category.name} — Learn — Solana Bytes") %>
+<% content_for(:title, "#{category_name(@category)} — #{t('learn.breadcrumb_root')} — Solana Bytes") %>
 
 <div class="max-w-5xl mx-auto">
   <%# Breadcrumb back to Learn directory %>
   <nav class="mb-6">
-    <%= link_to "/learn", class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
-      <span aria-hidden="true">&larr;</span> Learn
+    <%= link_to loc("/learn"), class: "text-gray-500 hover:text-purple-400 inline-flex items-center gap-2", style: "font-size:10px" do %>
+      <span aria-hidden="true">&larr;</span> <%= t("learn.breadcrumb_root") %>
     <% end %>
   </nav>
 
@@ -23,7 +23,7 @@
         wide pixel font. break-words lets the longest ones wrap. %>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
       <% @live.each do |entry| %>
-        <%= link_to entry.learn_path,
+        <%= link_to loc(entry.learn_path),
               class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
               style: "padding:18px;text-decoration:none" do %>
           <h2 class="text-white mb-1 break-words" style="font-size:14px;line-height:1.4">
@@ -36,7 +36,7 @@
             <%= entry.summary %>
           </p>
           <p class="mt-auto text-purple-400" style="font-size:10px">
-            Explore <span aria-hidden="true">&rarr;</span>
+            <%= t("learn.explore") %> <span aria-hidden="true">&rarr;</span>
           </p>
         <% end %>
       <% end %>
@@ -46,16 +46,15 @@
   <% if @drafts.any? %>
     <div class="border-t-2 border-gray-800 pt-8">
       <h2 class="text-white mb-2" style="font-size:14px;text-shadow:2px 2px 0 #4c1d95">
-        Draft entries
+        <%= t("learn.draft_entries") %>
       </h2>
       <p class="text-gray-500 mb-6" style="font-size:10px">
-        These pages have byte layouts and examples; the prose is still
-        being written.
+        <%= t("learn.draft_entries_caption") %>
       </p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <% @drafts.each do |entry| %>
-          <%= link_to entry.learn_path,
+          <%= link_to loc(entry.learn_path),
                 class: "pixel-card flex items-start gap-3 hover:border-purple-500 transition-colors",
                 style: "padding:14px;text-decoration:none" do %>
             <div class="flex-1">
@@ -64,7 +63,7 @@
                 <%= entry.program_label %><% if entry.size %> &middot; <%= entry.size %> bytes<% end %>
               </p>
             </div>
-            <span class="text-purple-400 shrink-0" style="font-size:10px">Draft &rarr;</span>
+            <span class="text-purple-400 shrink-0" style="font-size:10px"><%= t("learn.draft_label") %> &rarr;</span>
           <% end %>
         <% end %>
       </div>
@@ -74,7 +73,7 @@
   <% if @live.empty? && @drafts.empty? %>
     <div class="pixel-card text-center" style="padding:24px">
       <p class="text-gray-400" style="font-size:11px">
-        No entries in this category yet.
+        <%= t("learn.empty_category") %>
       </p>
     </div>
   <% end %>

@@ -18,6 +18,15 @@ en:
     sources: Sources
     see_also: See also
     last_verified: "Last verified: %{date}"
+    index_subtitle: Solana accounts decoded, byte by byte.
+    index_intro: Each page walks you through what the account is, why it exists, and what the on-chain bytes mean — paired with a real, cached mainnet example.
+    explore: Explore
+    other_types: Other account types
+    other_types_caption: Listed but not yet fully explained — explore the raw bytes in the visualizer.
+    see_example: See example
+    draft_entries: Draft entries
+    draft_entries_caption: These pages have byte layouts and examples; the prose is still being written.
+    empty_category: No entries in this category yet.
   home:
     tagline: A field guide to Solana accounts.
     subtitle: Inspect and understand raw Solana account bytes, structures, and on-chain data.
