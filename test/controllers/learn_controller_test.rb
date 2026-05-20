@@ -13,12 +13,6 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
       assert_match %r{href="#{Regexp.escape(entry.learn_path)}"}, response.body,
         "/learn index should link to #{entry.learn_path}"
     end
-    # The "Other account types" section lists drafts.
-    assert_includes response.body, "Other account types"
-    [ "Multisig", "BPF Upgradeable Program" ].each do |name|
-      assert_includes response.body, name,
-        "/learn index 'Other' section should list #{name.inspect}"
-    end
   end
 
   test "GET /learn/:category/:slug returns 200 for each live entry" do
@@ -142,12 +136,15 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
       "ALT sample should not be truncated at max_data: 10_240"
   end
 
-  test "GET /learn/:category/:slug for a draft renders the body-pending banner" do
-    get "/learn/spl-token/multisig"
+  # The reference is fully built out — no drafts remain. The draft-banner
+  # render path still exists in show.html.erb for future drafts; this test
+  # exercises it only when a draft is actually present.
+  test "draft pages (if any) render the body-pending banner" do
+    draft = AccountTaxonomy.flat_entries.find(&:draft?)
+    skip "no draft entries currently" unless draft
+    get draft.learn_path
     assert_response :success
-    # Draft banner copy.
     assert_includes response.body, "still being written"
-    # Multisig has no body so the markdown card should be absent.
     refute_includes response.body, 'id="learn-body"'
   end
 

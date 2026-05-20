@@ -1,12 +1,10 @@
 require "test_helper"
 
 class AccountTaxonomyTest < ActiveSupport::TestCase
-  # The original six live entries shipped with U22. New live entries
-  # (TLV primer, Token-2022 base post-promotion, TransferFeeConfig, etc.)
-  # are covered by the dynamic invariant test below instead of being
-  # bolted onto this regression baseline.
+  # The original six live entries shipped with U22. New live entries are
+  # covered by the dynamic invariant tests below instead of being bolted
+  # onto this regression baseline.
   LIVE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
-  DRAFT_NAMES = [ "Multisig", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
 
   test "all six live entries have a slug, category, example_address" do
     LIVE_SLUGS.each do |slug|
@@ -19,11 +17,13 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
     end
   end
 
-  test "draft entries are present but flagged" do
-    DRAFT_NAMES.each do |name|
-      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_not_nil entry, "taxonomy should still contain #{name.inspect}"
-      assert entry.draft?, "#{name.inspect} should have status: draft (U22)"
+  # Drafts may exist transiently while a page is being written. When they
+  # do, they must be flagged and body-less. With the reference fully built
+  # out this is currently vacuous, but it guards future drafts.
+  test "draft entries (if any) are flagged and body-less" do
+    AccountTaxonomy.flat_entries.select(&:draft?).each do |entry|
+      assert entry.draft?, "#{entry.slug} should report draft?"
+      assert_nil entry.body, "#{entry.slug} is draft so body should be nil"
     end
   end
 
@@ -50,14 +50,6 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
     end
   end
 
-  test "draft entries have nil body" do
-    DRAFT_NAMES.each do |name|
-      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_nil entry.body, "#{name.inspect} is a draft so body should be nil"
-      # Backward-compat alias keeps returning nil too.
-      assert_nil entry.explainer_text
-    end
-  end
 
   test "every slug is a lowercase kebab-case identifier (URL-safe)" do
     AccountTaxonomy.flat_entries.each do |entry|
