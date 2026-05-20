@@ -1,6 +1,9 @@
 <% content_for(:title, "#{@entry.name} — Learn — Solana Bytes") %>
 
-<div class="max-w-4xl mx-auto">
+<%# Wider than the rest of the site (max-w-5xl vs 4xl): the byte-layout
+    tables have up to 5 columns of wide Press Start 2P text and need the
+    room. The host <main> caps at 1200px, so this still has side margin. %>
+<div class="max-w-5xl mx-auto">
   <%# Breadcrumb: Learn / <Category>. Categories link back to their landing
       page; that page links back to /learn. Keeps the upward navigation
       shallow and explicit. %>
@@ -117,12 +120,12 @@
                 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:mb-5
                 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-5
                 [&_li]:mb-2 [&_li]:leading-relaxed
-                [&_code]:text-purple-300 [&_code]:bg-purple-950/40 [&_code]:px-1.5 [&_code]:py-0.5
+                [&_code]:text-purple-300 [&_code]:bg-purple-950/40 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:break-words
                 [&_a]:text-purple-400 [&_a]:underline hover:[&_a]:text-purple-300
                 [&_strong]:text-white
-                [&_table]:w-full [&_table]:my-6 [&_table]:border-2 [&_table]:border-gray-800 [&_table]:border-collapse
-                [&_th]:bg-purple-950/40 [&_th]:text-purple-300 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:border-b-2 [&_th]:border-gray-800
-                [&_td]:px-3 [&_td]:py-2 [&_td]:border-t [&_td]:border-gray-800 [&_td]:align-top"
+                [&_table]:w-full [&_table]:my-6 [&_table]:border-2 [&_table]:border-gray-800 [&_table]:border-collapse [&_table]:text-[10px] [&_table]:leading-relaxed
+                [&_th]:bg-purple-950/40 [&_th]:text-purple-300 [&_th]:px-2.5 [&_th]:py-1.5 [&_th]:text-left [&_th]:align-bottom [&_th]:border-b-2 [&_th]:border-gray-800
+                [&_td]:px-2.5 [&_td]:py-1.5 [&_td]:border-t [&_td]:border-gray-800 [&_td]:align-top [&_td]:break-words"
          style="padding:24px;font-size:11px;line-height:1.85"
          id="learn-body">
       <%= render_learn_markdown(@entry.body) %>
