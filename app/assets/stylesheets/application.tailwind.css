@@ -98,6 +98,27 @@
     inset 2px 2px 0 #1f2937;
 }
 
+/* Horizontal-scroll wrapper for Learn byte-layout tables. The wide
+   Press Start 2P font makes 5-column tables overflow narrow viewports;
+   this lets the table scroll within the card instead of clipping (and
+   keeps the page from gaining its own horizontal scrollbar). The
+   gradient layers are the classic pure-CSS "scrolling shadows" — the
+   purple edge shadows appear only while there is more table to scroll,
+   and the #0a0a14 cover gradients (matching the card) hide them at the
+   ends. On desktop the table fits, so nothing scrolls and no shadow shows. */
+.learn-table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+  background:
+    linear-gradient(to right, #0a0a14 30%, rgba(10, 10, 20, 0)) 0 0,
+    linear-gradient(to left, #0a0a14 30%, rgba(10, 10, 20, 0)) 100% 0,
+    radial-gradient(farthest-side at 0 50%, rgba(124, 58, 237, 0.5), rgba(124, 58, 237, 0)) 0 0,
+    radial-gradient(farthest-side at 100% 50%, rgba(124, 58, 237, 0.5), rgba(124, 58, 237, 0)) 100% 0;
+  background-repeat: no-repeat;
+  background-size: 40px 100%, 40px 100%, 14px 100%, 14px 100%;
+  background-attachment: local, local, scroll, scroll;
+}
+
 /* 8-bit input */
 .pixel-input {
   font-family: 'Press Start 2P', monospace;
