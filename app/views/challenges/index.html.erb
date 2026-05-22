@@ -1,28 +1,27 @@
-<% content_for(:title, "Byte Challenge — Solana Bytes") %>
+<% content_for(:title, "#{t('challenge.title')} — Solana Bytes") %>
 
 <div class="flex flex-col items-center justify-center min-h-[70vh]">
   <div class="text-center max-w-2xl">
     <div class="mb-6"><%= pixel_icon(:target, size: 56) %></div>
-    <h1 class="text-white mb-4" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95">Byte Challenge</h1>
+    <h1 class="text-white mb-4" style="font-size:24px;text-shadow:4px 4px 0 #4c1d95"><%= t("challenge.title") %></h1>
     <p class="text-gray-400 mb-2" style="font-size:12px;line-height:2">
-      Can you find the right bytes in a Solana account?
+      <%= t("challenge.subtitle") %>
     </p>
     <p class="text-gray-500 mb-10" style="font-size:10px;line-height:2">
-      Click on the hex dump to find a specific field.
-      Build streaks, earn stars, climb the leaderboard.
+      <%= t("challenge.intro") %>
     </p>
 
     <%# Difficulty tier selector. Default is Easy for first-time players; the
         "All" option uses an explicit ?tier=all sentinel so the controller
         can distinguish "first visit" from "user chose every tier". %>
     <div class="mb-5">
-      <p class="text-gray-500 mb-3" style="font-size:10px">Difficulty</p>
+      <p class="text-gray-500 mb-3" style="font-size:10px"><%= t("challenge.difficulty") %></p>
       <div class="flex flex-wrap items-center justify-center gap-2">
-        <% tiers_with_all = [[ChallengesController::ALL_TIER_KEY, "All", "Every account type"]] + ChallengesController::TIERS.map { |k, v| [k, v[:label], v[:description]] } %>
+        <% tiers_with_all = [[ChallengesController::ALL_TIER_KEY, t("challenge.tier_all"), t("challenge.tier_all_desc")]] + ChallengesController::TIERS.map { |k, v| [k, v[:label], v[:description]] } %>
         <% tiers_with_all.each do |key, label, description| %>
           <% active = key == ChallengesController::ALL_TIER_KEY ? @active_tier.nil? : @active_tier == key %>
           <%= link_to(
-                "/challenges?tier=#{key}",
+                loc("/challenges?tier=#{key}"),
                 title: description,
                 class: "pixel-tab #{'pixel-tab-active' if active}"
               ) { label } %>
@@ -37,32 +36,29 @@
 
     <%# Play buttons %>
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-      <%# Always include the tier in the URL so the user's choice survives the
-          jump to /challenge — including the "All" sentinel when no tier is
-          highlighted. Otherwise the show action's default ("easy") kicks in. %>
-      <% play_url = "/challenge?tier=#{@active_tier || ChallengesController::ALL_TIER_KEY}" %>
+      <% play_url = loc("/challenge?tier=#{@active_tier || ChallengesController::ALL_TIER_KEY}") %>
       <% if logged_in? %>
         <%= link_to play_url, class: "pixel-btn", style: "font-size:12px" do %>
-          <%= pixel_icon(:play, size: 18) %> Play Challenge
+          <%= pixel_icon(:play, size: 18) %> <%= t("challenge.play") %>
         <% end %>
       <% else %>
         <%= link_to play_url, class: "pixel-btn", style: "font-size:12px" do %>
-          <%= pixel_icon(:play, size: 18) %> Start Playing
+          <%= pixel_icon(:play, size: 18) %> <%= t("challenge.start_playing") %>
         <% end %>
       <% end %>
     </div>
 
     <% if logged_in? %>
       <p class="text-gray-500 mb-10" style="font-size:10px">
-        Playing as <span class="text-purple-400"><%= current_user.short_address %></span> — results saved
+        <%= t("challenge.playing_as_html", address: current_user.short_address) %>
       </p>
     <% else %>
       <p class="text-gray-300 mb-2" style="font-size:10px">
-        No login needed — start playing now.
+        <%= t("challenge.no_login") %>
       </p>
       <p class="text-gray-500 mb-10" style="font-size:9px;line-height:1.8">
-        Want streaks on the leaderboard?
-        <%= link_to "Connect a wallet →", "/auth/login", class: "text-purple-400 hover:text-purple-300" %>
+        <%= t("challenge.want_streaks") %>
+        <%= link_to t("challenge.connect_wallet"), "/auth/login", class: "text-purple-400 hover:text-purple-300" %>
       </p>
     <% end %>
 
@@ -71,15 +67,15 @@
       <div class="flex items-center justify-center gap-8 mb-10">
         <div class="text-center">
           <div class="text-yellow-400" style="font-size:16px"><%= pixel_icon(:fire, size: 20) %> <%= @user_stats[:best_streak] %></div>
-          <div class="text-gray-500 mt-1" style="font-size:10px">Best Streak</div>
+          <div class="text-gray-500 mt-1" style="font-size:10px"><%= t("challenge.best_streak") %></div>
         </div>
         <div class="text-center">
           <div class="text-white" style="font-size:16px"><%= @user_stats[:total_challenges] %></div>
-          <div class="text-gray-500 mt-1" style="font-size:10px">Games</div>
+          <div class="text-gray-500 mt-1" style="font-size:10px"><%= t("challenge.games") %></div>
         </div>
         <div class="text-center">
           <div class="text-yellow-400" style="font-size:16px"><%= @user_stats[:total_stars] %> <%= pixel_icon(:star, size: 18) %></div>
-          <div class="text-gray-500 mt-1" style="font-size:10px">Stars</div>
+          <div class="text-gray-500 mt-1" style="font-size:10px"><%= t("challenge.stars") %></div>
         </div>
       </div>
     <% end %>
@@ -91,15 +87,15 @@
     <div class="mt-10 grid grid-cols-3 gap-4 text-center max-w-md mx-auto">
       <div>
         <div class="mb-2"><%= pixel_icon(:magnifier, size: 24) %></div>
-        <div class="text-gray-400" style="font-size:10px;line-height:2">Find the field<br>in the hex dump</div>
+        <div class="text-gray-400" style="font-size:10px;line-height:2"><%= t("challenge.how_find").html_safe %></div>
       </div>
       <div>
         <div class="mb-2"><%= pixel_icon(:fire, size: 24) %></div>
-        <div class="text-gray-400" style="font-size:10px;line-height:2">Build streaks<br>3 wrong = game over</div>
+        <div class="text-gray-400" style="font-size:10px;line-height:2"><%= t("challenge.how_streaks").html_safe %></div>
       </div>
       <div>
         <div class="mb-2"><%= pixel_icon(:star, size: 24) %></div>
-        <div class="text-gray-400" style="font-size:10px;line-height:2">Earn stars<br>0 mistakes = 3 stars</div>
+        <div class="text-gray-400" style="font-size:10px;line-height:2"><%= t("challenge.how_stars").html_safe %></div>
       </div>
     </div>
   </div>

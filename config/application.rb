@@ -38,5 +38,11 @@ module SolanaBytes
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # Internationalization (en default, es opt-in). Missing :es keys fall
+    # back to :en so partially-translated UI never shows blank strings.
+    config.i18n.available_locales = [ :en, :es ]
+    config.i18n.default_locale = :en
+    config.i18n.fallbacks = [ :en ]
   end
 end

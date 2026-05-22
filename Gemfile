@@ -34,6 +34,10 @@ gem "solrengine"
 # Base58 encoding for Solana addresses
 gem "base58"
 
+# Markdown rendering for /learn reference pages (GFM input mode, tables enabled)
+gem "kramdown", "~> 2.4"
+gem "kramdown-parser-gfm", "~> 1.1"
+
 # Error tracking (production only)
 gem "sentry-ruby"
 gem "sentry-rails"

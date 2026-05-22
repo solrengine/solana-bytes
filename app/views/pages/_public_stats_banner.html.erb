@@ -15,10 +15,10 @@
 <% if stats && stats[:accounts_analyzed].to_i > 0 %>
   <div class="mb-20">
     <p class="text-center text-purple-300 mb-2" style="font-size:13px;letter-spacing:0.12em">
-      LIVE FROM THE SITE
+      <%= t("home.live_label") %>
     </p>
     <p class="text-center text-gray-500 mb-8" style="font-size:10px">
-      Refreshed every 5 minutes.
+      <%= t("home.live_caption") %>
     </p>
 
     <div class="pixel-card relative overflow-hidden" style="padding:24px 20px">
@@ -32,25 +32,25 @@
           <div class="text-purple-400" style="font-size:18px">
             <%= number_with_delimiter(stats[:accounts_analyzed]) %>
           </div>
-          <div class="text-gray-500 mt-1" style="font-size:9px">accounts decoded</div>
+          <div class="text-gray-500 mt-1" style="font-size:9px"><%= t("home.stat_accounts") %></div>
         </div>
         <div>
           <div class="text-purple-400" style="font-size:18px">
             <%= number_with_delimiter(stats[:total_challenges]) %>
           </div>
-          <div class="text-gray-500 mt-1" style="font-size:9px">challenges played</div>
+          <div class="text-gray-500 mt-1" style="font-size:9px"><%= t("home.stat_challenges") %></div>
         </div>
         <div>
           <div class="text-purple-400" style="font-size:18px">
             <%= number_to_human_size(stats[:bytes_decoded].to_i, precision: 2) %>
           </div>
-          <div class="text-gray-500 mt-1" style="font-size:9px">bytes decoded</div>
+          <div class="text-gray-500 mt-1" style="font-size:9px"><%= t("home.stat_bytes") %></div>
         </div>
         <div>
           <div class="text-purple-400" style="font-size:18px">
             <%= number_with_delimiter(stats[:total_countries]) %>
           </div>
-          <div class="text-gray-500 mt-1" style="font-size:9px">countries</div>
+          <div class="text-gray-500 mt-1" style="font-size:9px"><%= t("home.stat_countries") %></div>
         </div>
       </div>
     </div>

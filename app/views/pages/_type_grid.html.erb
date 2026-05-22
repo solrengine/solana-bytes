@@ -7,14 +7,15 @@
 
     Cards link to /accounts/<example_address> for now; U15 swaps them to
     /learn/<slug> once the Learn pages exist. %>
+<%# U22: card links now go to /learn/<category>/<slug> via entry.learn_path. %>
 <% mockup_type_names = ["Mint", "Token Account", "Stake Account", "Vote Account", "Token Metadata", "Address Lookup Table"]
    mockup_entries = mockup_type_names.map { |name| AccountTaxonomy.flat_entries.find { |e| e.name == name } }.compact %>
 <div class="mb-20">
   <h2 class="text-center text-white mb-3" style="font-size:20px;text-shadow:3px 3px 0 #4c1d95">
-    Explore common account types
+    <%= t("home.type_grid_title") %>
   </h2>
   <p class="text-center text-gray-500 mb-8" style="font-size:10px">
-    Hand-picked Solana account layouts, decoded byte by byte.
+    <%= t("home.type_grid_caption") %>
   </p>
 
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -22,7 +23,7 @@
       <%# U15 swap: link target moves from /accounts/<addr> to /learn/<slug>
           now that the Learn pages exist. Turbo-frame attribute removed —
           /learn pages are standalone, not a Turbo Frame destination. %>
-      <%= link_to "/learn/#{entry.slug}",
+      <%= link_to loc(entry.learn_path),
             class: "pixel-card flex flex-col hover:border-purple-500 transition-colors",
             style: "padding:14px;text-decoration:none" do %>
         <h3 class="text-white mb-1" style="font-size:13px">
@@ -35,7 +36,7 @@
           <%= truncate(entry.description, length: 110) %>
         </p>
         <p class="mt-auto text-purple-400" style="font-size:10px">
-          Explore <span aria-hidden="true">&rarr;</span>
+          <%= t("home.explore") %> <span aria-hidden="true">&rarr;</span>
         </p>
       <% end %>
     <% end %>
@@ -45,11 +46,11 @@
       entries not surfaced in the 6-card grid. Targets /learn (404 until
       U15 ships the route + redirect). %>
   <div class="text-center mt-8">
-    <%= link_to "/learn",
+    <%= link_to loc("/learn"),
           class: "text-gray-400 hover:text-purple-300 inline-flex items-center gap-2",
           style: "font-size:10px",
           data: { turbo: false } do %>
-      <%= pixel_icon(:lock, size: 12) %> Browse all account types &rarr;
+      <%= pixel_icon(:lock, size: 12) %> <%= t("home.browse_all") %> &rarr;
     <% end %>
   </div>
 
@@ -57,15 +58,15 @@
       live play-count social proof and game entry point both stay. %>
   <% challenges_count = local_assigns[:stats] && stats[:total_challenges].to_i %>
   <div class="text-center mt-4">
-    <%= link_to "/challenges",
+    <%= link_to loc("/challenges"),
           class: "pixel-btn pixel-btn-secondary inline-flex items-center gap-2",
           style: "font-size:10px;padding:10px 18px",
           data: { turbo: false } do %>
       <%= pixel_icon(:target, size: 14) %>
       <% if challenges_count.to_i > 0 %>
-        <span><%= number_with_delimiter(challenges_count) %> challenges played &mdash; can you beat them?</span>
+        <span><%= t("home.challenge_cta_count", count: number_with_delimiter(challenges_count)) %></span>
       <% else %>
-        <span>Test your eye &mdash; find the mint authority in 165 bytes</span>
+        <span><%= t("home.challenge_cta_default") %></span>
       <% end %>
       <span>&rarr;</span>
     <% end %>

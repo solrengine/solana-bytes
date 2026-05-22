@@ -1,23 +1,29 @@
 require "test_helper"
 
 class AccountTaxonomyTest < ActiveSupport::TestCase
-  IN_SCOPE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
-  OUT_OF_SCOPE_NAMES = [ "Multisig", "Token-2022 Mint/Account + Extensions", "BPF Upgradeable Program", "ELF Bytecode" ].freeze
+  # The original six live entries shipped with U22. New live entries are
+  # covered by the dynamic invariant tests below instead of being bolted
+  # onto this regression baseline.
+  LIVE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
 
-  test "all six in-scope entries have a slug" do
-    IN_SCOPE_SLUGS.each do |slug|
+  test "all six live entries have a slug, category, example_address" do
+    LIVE_SLUGS.each do |slug|
       entry = AccountTaxonomy.find_by_slug(slug)
       assert_not_nil entry, "expected an AccountTaxonomy entry with slug=#{slug.inspect}"
       assert_equal slug, entry.slug
+      assert entry.live?, "#{slug} should have status: live"
+      assert_not_nil entry.category, "#{slug} should belong to a category"
       assert_not_nil entry.example_address, "#{slug} should carry an example_address for the Learn live sample"
     end
   end
 
-  test "out-of-scope entries have slug: nil so /learn does not list them" do
-    OUT_OF_SCOPE_NAMES.each do |name|
-      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_not_nil entry, "taxonomy should still contain #{name.inspect}"
-      assert_nil entry.slug, "#{name.inspect} should have slug: nil (not surfaced on /learn)"
+  # Drafts may exist transiently while a page is being written. When they
+  # do, they must be flagged and body-less. With the reference fully built
+  # out this is currently vacuous, but it guards future drafts.
+  test "draft entries (if any) are flagged and body-less" do
+    AccountTaxonomy.flat_entries.select(&:draft?).each do |entry|
+      assert entry.draft?, "#{entry.slug} should report draft?"
+      assert_nil entry.body, "#{entry.slug} is draft so body should be nil"
     end
   end
 
@@ -32,32 +38,92 @@ class AccountTaxonomyTest < ActiveSupport::TestCase
     assert_nil AccountTaxonomy.find_by_slug(nil)
   end
 
-  test "all six in-scope entries have substantive explainer_text (U21)" do
-    IN_SCOPE_SLUGS.each do |slug|
+  test "all live entries have a substantive markdown body (U22)" do
+    LIVE_SLUGS.each do |slug|
       entry = AccountTaxonomy.find_by_slug(slug)
-      assert_not_nil entry.explainer_text, "#{slug} should have explainer_text populated by U21"
-      word_count = entry.explainer_text.to_s.split.length
-      assert word_count >= 150, "#{slug} explainer_text should be at least 150 words (was #{word_count})"
-      # Markdown is NOT parsed in U17 (simple_format renders plain prose);
-      # raw markdown syntax in the prose would bleed through as visible
-      # asterisks / hashes / brackets. Guard against that here.
-      assert_no_match %r{\*\*|^#\s|\[[^\]]+\]\([^)]+\)}, entry.explainer_text,
-        "#{slug} explainer_text should not contain markdown syntax (rendered via simple_format)"
+      assert_not_nil entry.body, "#{slug} should have a body populated by U22"
+      word_count = entry.body.to_s.split.length
+      assert word_count >= 150, "#{slug} body should be at least 150 words (was #{word_count})"
+      # Every live page must include a Byte layout section.
+      assert_includes entry.body, "## Byte layout",
+        "#{slug} body should contain a '## Byte layout' section"
     end
   end
 
-  test "out-of-scope entries have nil explainer_text" do
-    OUT_OF_SCOPE_NAMES.each do |name|
-      entry = AccountTaxonomy.flat_entries.find { |e| e.name == name }
-      assert_nil entry.explainer_text, "#{name.inspect} is not Learn-addressable so explainer_text should be nil"
-    end
-  end
 
   test "every slug is a lowercase kebab-case identifier (URL-safe)" do
     AccountTaxonomy.flat_entries.each do |entry|
-      next unless entry.slug
       assert_match %r{\A[a-z][a-z0-9-]*\z}, entry.slug,
         "Entry #{entry.name.inspect} has malformed slug #{entry.slug.inspect}"
+    end
+  end
+
+  test "learn_path returns the canonical /learn/<category>/<slug> URL" do
+    mint = AccountTaxonomy.find_by_slug("mint")
+    assert_equal "/learn/spl-token/mint", mint.learn_path
+
+    alt = AccountTaxonomy.find_by_slug("address-lookup-table")
+    assert_equal "/learn/transactions/address-lookup-table", alt.learn_path
+  end
+
+  test "categories are ordered and indexed" do
+    slugs = AccountTaxonomy.categories.map(&:slug)
+    assert_equal %w[spl-token token-2022 consensus metaplex bubblegum transactions native programs anchor addressing encoding], slugs
+    # order field is strictly ascending and unique
+    orders = AccountTaxonomy.categories.map(&:order)
+    assert_equal orders.sort, orders
+    assert_equal orders.uniq, orders
+    assert_equal "SPL Token", AccountTaxonomy.find_category("spl-token").name
+    assert_nil AccountTaxonomy.find_category("nonexistent")
+  end
+
+  test "every entry's category resolves to a defined category" do
+    AccountTaxonomy.flat_entries.each do |entry|
+      assert_not_nil AccountTaxonomy.find_category(entry.category),
+        "#{entry.slug} references undefined category #{entry.category.inspect}"
+    end
+  end
+
+  test "find_by_category returns entries scoped to that category" do
+    spl = AccountTaxonomy.find_by_category("spl-token").map(&:slug)
+    assert_includes spl, "mint"
+    assert_includes spl, "token-account"
+    assert_includes spl, "multisig"
+    assert_empty AccountTaxonomy.find_by_category("nonexistent")
+  end
+
+  # --- Dynamic invariants over every live entry ---
+  # These walk the live set instead of a hardcoded list, so newly
+  # promoted pages automatically inherit the "must have substantive
+  # body + Byte layout section" rule. The hardcoded LIVE_SLUGS tests
+  # above stay as a regression baseline for the original six.
+
+  test "every live entry has a substantive body with a Byte layout section" do
+    AccountTaxonomy.flat_entries.select(&:live?).each do |entry|
+      assert_not_nil entry.body, "#{entry.slug} is live but has no body"
+      word_count = entry.body.split.length
+      assert word_count >= 150, "#{entry.slug} body should be ≥150 words (was #{word_count})"
+      assert_includes entry.body, "## Byte layout",
+        "#{entry.slug} body should contain a '## Byte layout' section"
+    end
+  end
+
+  test "every live entry of kind: account has an example_address" do
+    AccountTaxonomy.flat_entries.select(&:live?).select { |e| e.kind == "account" }.each do |entry|
+      assert_not_nil entry.example_address,
+        "#{entry.slug} (kind: account) should carry an example_address for the live sample"
+    end
+  end
+
+  test "every entry has required frontmatter fields" do
+    AccountTaxonomy.flat_entries.each do |entry|
+      %i[name slug category kind status program_label].each do |field|
+        assert_not_nil entry.send(field), "#{entry.slug.inspect} is missing #{field}"
+      end
+      assert_includes %w[live draft planned], entry.status,
+        "#{entry.slug} has unknown status #{entry.status.inspect}"
+      assert_includes %w[account instruction concept], entry.kind,
+        "#{entry.slug} has unknown kind #{entry.kind.inspect}"
     end
   end
 end

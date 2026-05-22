@@ -1,65 +1,102 @@
 require "test_helper"
 
 class LearnControllerTest < ActionDispatch::IntegrationTest
-  IN_SCOPE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
+  LIVE_SLUGS = %w[mint token-account stake-account vote-account token-metadata address-lookup-table].freeze
 
-  test "GET /learn returns 200 and lists slugged entries + Other section" do
+  test "GET /learn returns 200 and links to live entries by canonical URL" do
     get "/learn"
     assert_response :success
-    # Top section: each slugged entry rendered as a card pointing at /learn/<slug>
-    IN_SCOPE_SLUGS.each do |slug|
-      assert_match %r{href="/learn/#{slug}"}, response.body,
-        "/learn index should link to /learn/#{slug}"
-    end
-    # Bottom section: "Other account types" with the unslugged entries
-    assert_includes response.body, "Other account types"
-    # The unslugged entries appear in the Other section by name
-    [ "Multisig", "BPF Upgradeable Program" ].each do |name|
-      assert_includes response.body, name,
-        "/learn index 'Other' section should list #{name.inspect}"
+    # Each live entry is rendered as a card linking to its canonical
+    # /learn/<category>/<slug> URL (U22).
+    LIVE_SLUGS.each do |slug|
+      entry = AccountTaxonomy.find_by_slug(slug)
+      assert_match %r{href="#{Regexp.escape(entry.learn_path)}"}, response.body,
+        "/learn index should link to #{entry.learn_path}"
     end
   end
 
-  test "GET /learn/:slug returns 200 for each in-scope slug" do
-    IN_SCOPE_SLUGS.each do |slug|
-      get "/learn/#{slug}"
-      assert_response :success, "/learn/#{slug} should resolve"
+  test "GET /learn/:category/:slug returns 200 for each live entry" do
+    LIVE_SLUGS.each do |slug|
+      entry = AccountTaxonomy.find_by_slug(slug)
+      get entry.learn_path
+      assert_response :success, "#{entry.learn_path} should resolve"
     end
   end
 
-  test "GET /learn/no-such-type returns 404" do
-    get "/learn/no-such-type"
+  # Dynamic coverage: every live entry must render at its canonical URL.
+  # Catches any new page that loads in the model but errors in the view
+  # (bad cross-link slug, kramdown failure, missing partial, etc.).
+  test "every live entry renders 200 at its canonical URL" do
+    AccountTaxonomy.flat_entries.select(&:live?).each do |entry|
+      get entry.learn_path
+      assert_response :success, "#{entry.learn_path} (#{entry.name}) should render"
+      # Names may contain HTML-special chars (e.g. "&"); compare escaped.
+      assert_includes response.body, ERB::Util.html_escape(entry.name)
+    end
+  end
+
+  # Every live entry must appear on its category landing page.
+  test "every live entry is listed on its category page" do
+    AccountTaxonomy.flat_entries.select(&:live?).map(&:category).uniq.each do |cat_slug|
+      get "/learn/#{cat_slug}"
+      assert_response :success
+    end
+  end
+
+  test "GET /learn/:category/:bad-slug returns 404" do
+    get "/learn/spl-token/no-such-entry"
     assert_response :not_found
   end
 
-  # The route constraint rejects uppercase / non-kebab slugs before the
-  # controller runs.
+  test "GET /learn/:wrong-category/:slug returns 404 (category guard)" do
+    # mint lives in spl-token; requesting it under consensus must not resolve.
+    get "/learn/consensus/mint"
+    assert_response :not_found
+  end
+
   test "GET /learn/INVALID returns 404 via route constraint" do
     get "/learn/INVALID"
     assert_response :not_found
   end
 
-  # U17 fetches the sample via RpcAccountFetcher → goes through the test
-  # helper's StubRpcClient. When no stub is registered the fetcher returns
-  # nil and the controller renders the fallback path; no exception.
-  test "GET /learn/:slug renders fallback card when RPC sample is missing" do
-    get "/learn/mint"
+  test "GET /learn/<category> renders the category landing page" do
+    get "/learn/spl-token"
+    assert_response :success
+    assert_includes response.body, "SPL Token"
+    assert_includes response.body, "Mint"
+    assert_includes response.body, "Token Account"
+  end
+
+  test "GET /learn/<legacy-slug> 301-redirects to canonical URL" do
+    LIVE_SLUGS.each do |slug|
+      get "/learn/#{slug}"
+      assert_response :moved_permanently
+      assert_equal AccountTaxonomy.find_by_slug(slug).learn_path, response.location.sub(/\Ahttps?:\/\/[^\/]+/, "")
+    end
+  end
+
+  test "GET /learn/unknown-single-segment returns 404" do
+    # Neither a category nor a legacy entry slug — must 404, not redirect.
+    get "/learn/nonexistent-thing"
+    assert_response :not_found
+  end
+
+  test "GET /learn/<category>/<slug> renders fallback card when RPC sample is missing" do
+    get "/learn/spl-token/mint"
     assert_response :success
     assert_includes response.body, "Sample temporarily unavailable",
       "fallback card should render when the cached RPC fetch returns nil"
-    # The explainer prose still renders even when the sample is missing
+    # Body is rendered via kramdown — the rendered HTML contains the
+    # opening prose from the markdown file.
     assert_includes response.body, "An SPL Mint account defines a fungible token"
   end
 
-  # Covers AE3 — explainer + cached live sample renders end-to-end when
-  # the RPC stub registers a payload. Uses the Stake-Account sample so
-  # the embedded compact hex view exercises a non-trivial decoder.
-  test "GET /learn/:slug with a live sample renders explainer + embedded hex view" do
+  test "GET /learn/:category/:slug with a live sample renders body + embedded hex view" do
     stake_address = "CbrKVVDv6irzm4SYv8YnhJkN6wCTnYw9S7SqdwavCrRt"
     # Minimal initialized stake (state=1) — enough for the decoder to
     # produce regions without erroring.
     bytes = Array.new(200, 0)
-    bytes[0] = 1 # state: Initialized
+    bytes[0] = 1
     RpcStubRegistry.responses[stake_address] = {
       "result" => { "value" => {
         "lamports" => 5_000_000_000, "owner" => "Stake11111111111111111111111111111111111111",
@@ -67,34 +104,25 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
         "data" => [ Base64.strict_encode64(bytes.pack("C*")), "base64" ]
       } }
     }
-    get "/learn/stake-account"
+    get "/learn/consensus/stake-account"
     assert_response :success
-    # Explainer prose
+    # Prose (kramdown-rendered) keeps the opening line of the body.
     assert_includes response.body, "A Stake account delegates SOL"
-    # Sample heading + cached caption
+    # Sample heading + cached caption.
     assert_includes response.body, "Sample: Stake Account"
     assert_includes response.body, "(cached; refreshes hourly"
-    # Embedded compact hex view (data-controller="hex-viewer" comes from
-    # the shared _hex_view.html.erb partial)
+    # Embedded compact hex view comes from the shared partial.
     assert_includes response.body, 'data-controller="hex-viewer"'
-    # "View full hex" CTA points at /accounts/<example_address>
     assert_includes response.body, "/accounts/#{stake_address}"
     assert_includes response.body, "View full hex"
-    # Bottom exit affordances
     assert_includes response.body, "Back to Learn"
     assert_includes response.body, "Try the Byte Challenge"
   end
 
-  # Address Lookup Tables can run up to ~8 KB. The controller passes
-  # max_data: 10_240 (matching AccountsController) so the embedded sample
-  # is NOT truncated for in-scope types. The presenter's `truncated`
-  # marker would be nil; the "showing X of Y bytes" notice should not fire.
-  test "GET /learn/address-lookup-table accepts 8KB samples without truncation" do
+  test "GET /learn/transactions/address-lookup-table accepts 8KB samples without truncation" do
     address = "GbL3KvBBRXJArvft1KQPMUworMDormXNfo97hkbftsT5"
-    # Build an 8000-byte ALT: 56-byte header (discriminator=1, rest zeros)
-    # + ~248 32-byte address slots
     bytes = Array.new(8000, 0)
-    bytes[0] = 1 # discriminator: LookupTable
+    bytes[0] = 1
     RpcStubRegistry.responses[address] = {
       "result" => { "value" => {
         "lamports" => 100_000_000, "owner" => "AddressLookupTab1e1111111111111111111111111",
@@ -102,10 +130,87 @@ class LearnControllerTest < ActionDispatch::IntegrationTest
         "data" => [ Base64.strict_encode64(bytes.pack("C*")), "base64" ]
       } }
     }
-    get "/learn/address-lookup-table"
+    get "/learn/transactions/address-lookup-table"
     assert_response :success
-    # No truncation notice should appear (max_data: 10_240 > 8000)
     refute_match %r{showing\s+\d+\s+of\s+\d+\s+bytes}i, response.body,
       "ALT sample should not be truncated at max_data: 10_240"
+  end
+
+  # The reference is fully built out — no drafts remain. The draft-banner
+  # render path still exists in show.html.erb for future drafts; this test
+  # exercises it only when a draft is actually present.
+  test "draft pages (if any) render the body-pending banner" do
+    draft = AccountTaxonomy.flat_entries.find(&:draft?)
+    skip "no draft entries currently" unless draft
+    get draft.learn_path
+    assert_response :success
+    assert_includes response.body, "still being written"
+    refute_includes response.body, 'id="learn-body"'
+  end
+
+  test "GET /learn/:category/:slug renders kramdown tables (Byte layout)" do
+    get "/learn/spl-token/mint"
+    assert_response :success
+    # Kramdown GFM turns Markdown tables into <table>; the layout header
+    # row from mint.md must show up as a real table cell.
+    assert_match %r{<table[^>]*>.*Offset.*Length.*Field.*Notes.*</table>}m,
+      response.body,
+      "Mint body should render the Byte layout as an HTML <table>"
+  end
+
+  # --- i18n (es) ---
+
+  test "bare path renders English" do
+    get "/learn/spl-token/mint"
+    assert_response :success
+    assert_includes response.body, "An SPL Mint account defines"
+    assert_includes response.body, "Back to Learn"
+  end
+
+  test "GET /es/learn/:category/:slug renders the translated page (chrome + content)" do
+    get "/es/learn/spl-token/mint"
+    assert_response :success
+    # Translated body
+    assert_includes response.body, "Una cuenta Mint de SPL"
+    # Translated chrome
+    assert_includes response.body, "Volver a Aprende"
+    assert_includes response.body, "Fuentes"
+    # Structural facts are locale-invariant and still render in the es page:
+    # the byte size and the (untranslated) field names from the layout table.
+    assert_includes response.body, "82 bytes"
+    assert_includes response.body, "mint_authority"
+  end
+
+  test "untranslated page under /es falls back to English content but localized chrome" do
+    # Pick any live page that has no Spanish overlay yet, so this stays
+    # correct as more pages get translated. entry.summary is loaded under
+    # the test's default :en locale, so it's the English text that should
+    # appear via fallback on the es page.
+    base = Rails.root.join("content/learn")
+    entry = AccountTaxonomy.flat_entries.select(&:live?).find do |e|
+      !File.exist?(base.join(e.category, "#{e.slug}.es.md"))
+    end
+    skip "all pages have Spanish translations" unless entry
+
+    get "/es#{entry.learn_path}"
+    assert_response :success
+    # Chrome is localized…
+    assert_includes response.body, "Volver a Aprende"
+    # …but the body falls back to the English summary (no overlay).
+    assert_includes response.body, ERB::Util.html_escape(entry.summary)
+  end
+
+  test "language switcher links to the same page in the other locale" do
+    get "/learn/spl-token/mint"
+    assert_match %r{href="/es/learn/spl-token/mint"}, response.body
+    get "/es/learn/spl-token/mint"
+    assert_match %r{href="/learn/spl-token/mint"}, response.body
+  end
+
+  test "invalid locale segment is not treated as a locale" do
+    # /fr is not an available locale, so the constraint rejects the /:locale
+    # match and "fr" can't stand in for a category/slug → 404.
+    get "/fr/learn/spl-token/mint"
+    assert_response :not_found
   end
 end

@@ -40,10 +40,21 @@
         user navigates home (so the hero reads cleanly again). %>
     <style>
       body.landing-hero-active nav.pixel-nav { display: none; }
+      /* The nav (and its language switcher) is hidden on the landing
+         hero, so surface a standalone switcher that shows only then. */
+      .landing-lang-switch { display: none; }
+      body.landing-hero-active .landing-lang-switch { display: inline-flex; }
     </style>
   </head>
 
   <body class="min-h-screen bg-gray-950 text-gray-100<%= ' landing-hero-active' if content_for?(:hide_navbar) %>">
+    <%# Landing-only language switcher — visible when the navbar is hidden
+        on the hero. Fixed top-right so it never collides with the hero. %>
+    <%= link_to locale_switch_path(other_locale),
+          class: "landing-lang-switch fixed top-4 right-4 text-gray-400 hover:text-white border-2 border-gray-700 hover:border-purple-500 px-2 py-1",
+          style: "z-index:20;font-size:10px;background:#0a0a14",
+          rel: "alternate", hreflang: other_locale.to_s do %><%= other_locale.to_s.upcase %><% end %>
+
     <%# Loading overlay — shown during challenge navigation %>
     <div id="game-loading" class="hidden fixed inset-0 flex items-center justify-center bg-black/80" style="z-index:200">
       <div class="text-center">
@@ -61,17 +72,20 @@
 
     <nav class="relative pixel-nav" style="z-index:10">
       <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <%# Brand: pixel logo + wordmark. Literal "/" path — engine-isolation safe. %>
-        <%= link_to "/", class: "text-white hover:text-purple-400 shrink-0 flex items-center gap-3" do %>
+        <%# Brand: pixel logo + wordmark. loc() keeps the link within the
+            active locale; bare path for default (engine-isolation safe). %>
+        <%= link_to loc("/"), class: "text-white hover:text-purple-400 shrink-0 flex items-center gap-3" do %>
           <%= pixel_logo(variant: :dark, size: 56) %>
           <span style="font-size:14px;text-shadow:3px 3px 0 #4c1d95" class="hidden sm:inline">Solana Bytes</span>
         <% end %>
         <div class="flex items-center gap-3 sm:gap-4">
-          <%= link_to "/about", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>About<% end %>
-          <%= link_to "/learn", class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %>Learn<% end %>
-          <%= link_to "/challenges", class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:10px" do %>
-            <%= pixel_icon(:target, size: 14) %><span class="hidden sm:inline"> Challenge</span>
+          <%= link_to loc("/about"), class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %><%= t("nav.about") %><% end %>
+          <%= link_to loc("/learn"), class: "text-gray-500 hover:text-gray-300 hidden sm:inline", style: "font-size:10px" do %><%= t("nav.learn") %><% end %>
+          <%= link_to loc("/challenges"), class: "text-purple-400 hover:text-purple-300 flex items-center gap-1", style: "font-size:10px" do %>
+            <%= pixel_icon(:target, size: 14) %><span class="hidden sm:inline"> <%= t("nav.challenge") %></span>
           <% end %>
+          <%# Language switcher: links to the current page in the other locale. %>
+          <%= link_to locale_switch_path(other_locale), class: "text-gray-500 hover:text-gray-300", style: "font-size:10px", rel: "alternate", hreflang: other_locale.to_s do %><%= other_locale.to_s.upcase %><% end %>
           <% if logged_in? %>
             <span class="text-gray-400 bg-gray-900 border-2 border-gray-700 px-2 py-1 hidden sm:inline" style="font-size:10px"><%= current_user.short_address %></span>
             <%= link_to "x", "/auth/logout", data: { turbo_method: :delete }, class: "text-gray-500 hover:text-white", style: "font-size:10px" %>
@@ -116,9 +130,9 @@
           <%# Centre: nav links. Same set as the global nav: About / Learn /
               Challenge. Literal string paths for engine isolation. %>
           <div class="flex flex-col gap-2 text-center md:text-left text-gray-400">
-            <a href="/about" class="hover:text-purple-300" style="font-size:9px">About</a>
-            <a href="/learn" class="hover:text-purple-300" style="font-size:9px">Learn</a>
-            <a href="/challenges" class="hover:text-purple-300" style="font-size:9px">Challenge</a>
+            <a href="<%= loc("/about") %>" class="hover:text-purple-300" style="font-size:9px"><%= t("nav.about") %></a>
+            <a href="<%= loc("/learn") %>" class="hover:text-purple-300" style="font-size:9px"><%= t("nav.learn") %></a>
+            <a href="<%= loc("/challenges") %>" class="hover:text-purple-300" style="font-size:9px"><%= t("nav.challenge") %></a>
           </div>
 
           <%# Right: hackathon credit + SolRengine attribution. %>
