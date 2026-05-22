@@ -2,9 +2,13 @@
 
 ## Project Overview
 
-Solana Bytes is an interactive Solana account hex visualizer + educational game with a full 8-bit pixel art aesthetic. Paste any account address to see decoded metadata and raw bytes with hover tooltips. Play the Byte Challenge to test your knowledge of Solana data structures — find specific fields in hex dumps, build streaks, compete on the leaderboard.
+Solana Bytes is the byte-level field guide to Solana accounts, with a full 8-bit pixel art aesthetic. Three pillars:
 
-Built with Rails 8 and SolRengine for the Colosseum Frontier Hackathon.
+1. **Learn** (`/learn`) — a 52-page reference that decodes every common Solana account, instruction, and concept byte by byte. The flagship; content is file-based Markdown.
+2. **Hex Visualizer** — paste any account address to see decoded metadata and raw bytes with hover tooltips.
+3. **Byte Challenge** — a game: find a specific field in a hex dump, build streaks, compete on the leaderboard.
+
+The entire site is **bilingual (English default + Spanish under `/es`)**. Built with Rails 8 and SolRengine; originally for the Colosseum Frontier Hackathon, now a live product at [bytes.solrengine.org](https://bytes.solrengine.org).
 
 ## Key Commands
 
@@ -13,7 +17,7 @@ Built with Rails 8 and SolRengine for the Colosseum Frontier Hackathon.
 - `yarn build:css` — compile Tailwind CSS
 - `bin/rails db:prepare` — set up all databases
 - `bin/rails db:migrate` — run pending migrations
-- `bin/rails test` — run all tests (102 tests, 529 assertions)
+- `bin/rails test` — run all tests (153 runs; 2 skips are expected — see Tests)
 
 ## Environment Variables
 
@@ -24,6 +28,19 @@ Copy `.env.example` to `.env`:
 - `SENTRY_DSN` — Sentry error tracking DSN (production only)
 
 ## Architecture
+
+### Learn Reference (the flagship)
+- **Content** lives in `content/learn/<category>/<slug>.md` — Markdown body + YAML frontmatter (slug, category, name, kind, status, program_id, size, summary, example_address, fields, see_also, sources, last_verified). 52 base pages across 11 categories.
+- **AccountTaxonomy** (`app/presenters/account_taxonomy.rb`) — loads/parses the Markdown files (memoized per locale), exposes `flat_entries`, `find_by_slug`, `find_by_category`, `categories`. The `Entry`/`Category` structs back the views. `reset!` clears the memo (tests/dev).
+- **LearnController** — `index` (category-grouped directory), `category` (landing page OR 301 redirect for legacy `/learn/<slug>`), `show` (per-entry page with a cached live mainnet sample for `kind: account`).
+- **Rendering** — `LearnHelper#render_learn_markdown` renders the body with **Kramdown** (GFM: tables, fenced code) and localizes in-body `/learn` links to the active locale. `category_name`/`category_description` resolve localized category labels.
+- **Translations** — a sibling `content/learn/<category>/<slug>.<locale>.md` overlays ONLY `name`/`summary`/body. Structural frontmatter (offsets, sizes, program_id, fields, sources) stays canonical in the base file so byte facts can't drift between languages; missing overlay → English fallback.
+
+### Internationalization (i18n)
+- `config.i18n`: `available_locales [:en, :es]`, default `:en`, `fallbacks [:en]`. Strings in `config/locales/{en,es}.yml`.
+- **Routing**: all host-app routes are wrapped in `scope "(:locale)"` (constraint `/en|es/`); the auth engine + health check stay outside. Bare path = English; `/es/...` = Spanish.
+- **ApplicationController**: `around_action :switch_locale` sets `I18n.locale` from the URL; `default_url_options` keeps it sticky; `loc(path)`, `locale_switch_path`, `other_locale` are `helper_method`s.
+- **`loc(path)` is required for in-app links** — because views use literal string paths (engine isolation), `loc()` is how a link stays in the active locale. Use `loc("/learn")`, not a bare `"/learn"`, for any in-app link that should preserve language.
 
 ### Hex Visualizer
 - **AccountsController** — fetches account via `solrengine-rpc`, validates base58, 3 retry attempts with 8s timeout
@@ -48,6 +65,15 @@ The SolRengine Auth Engine uses `isolate_namespace`. All views use **literal str
 
 ## Key Files
 
+### Learn Reference & i18n
+- `content/learn/<category>/<slug>.md` — base reference pages (52); `<slug>.<locale>.md` — translation overlays
+- `app/presenters/account_taxonomy.rb` — file loader, `Entry`/`Category` structs, `CATEGORIES` constant (11 ordered categories)
+- `app/controllers/learn_controller.rb` — index / category / show + legacy-slug redirect
+- `app/helpers/learn_helper.rb` — `render_learn_markdown` (Kramdown + link localization), `category_name`/`category_description`
+- `app/views/learn/{index,category,show}.html.erb` — directory, category landing, per-entry page
+- `config/locales/{en,es}.yml` — UI strings (nav, learn, home, about, challenge, leaderboard, stats, common)
+- `docs/reference-roadmap.md` — page-by-page reference status (gitignored, local-only)
+
 ### Hex Visualizer
 - `app/controllers/accounts_controller.rb` — fetch, validate, retry, lookup redirect
 - `app/presenters/account_presenter.rb` — hex rows, O(1) offset map, color constants, HexRow/HexCell structs
@@ -69,12 +95,15 @@ The SolRengine Auth Engine uses `isolate_namespace`. All views use **literal str
 - `config/initializers/rack_attack.rb` — rate limiting (60 req/min general, 20/min RPC, 10/min save)
 - `config/initializers/sentry.rb` — error tracking (production only, 10% trace sampling)
 
-### Tests
-- `test/presenters/region_decoder_test.rb` — 66 tests for all decoders, base58, edge cases
-- `test/controllers/challenges_controller_test.rb` — 17 tests for token signing, model validations, tier selection
-- `test/controllers/pages_controller_test.rb` — 11 tests for landing page rendering
-- `test/presenters/account_presenter_test.rb` — 4 tests for hex row construction and offset map
-- `test/controllers/types_controller_test.rb` — 4 tests for the taxonomy page
+### Tests (153 runs; 2 expected skips)
+- `test/presenters/region_decoder_test.rb` — decoders, base58, edge cases
+- `test/presenters/account_taxonomy_test.rb` — file loader, frontmatter invariants, category ordering, `learn_path`, dynamic checks over every live entry
+- `test/presenters/account_presenter_test.rb` — hex row construction + offset map
+- `test/controllers/learn_controller_test.rb` — nested URLs, category landing, legacy 301s, kramdown tables, i18n (`/es` renders + English fallback + switcher)
+- `test/controllers/challenges_controller_test.rb` — token signing, model validations, tier selection
+- `test/controllers/pages_controller_test.rb` — landing + About rendering
+- `test/controllers/accounts_controller_test.rb` — fetch/validate/retry
+- The 2 skips: the draft-banner test (no drafts remain) and the es-fallback test (all pages translated). Both skip on purpose.
 
 ### Pixel Art System
 - `app/helpers/pixel_icon_helper.rb` — 10 inline SVG pixel sprites (heart, fire, star, trophy, target, lock, medals, magnifier, play)
@@ -100,16 +129,24 @@ The SolRengine Auth Engine uses `isolate_namespace`. All views use **literal str
 
 ## Routes
 
+All app routes are nested under an optional `scope "(:locale)"` (so each also exists under `/es/...`). The auth engine + health check are outside the scope.
+
 ```
-GET  /                    → pages#home (hex visualizer landing)
-POST /lookup              → accounts#lookup (redirect)
-GET  /accounts/:address   → accounts#show (hex view)
-PATCH /network            → networks#update (session network switch)
-GET  /challenges          → challenges#index (game landing)
-GET  /challenge           → challenges#show (play — accepts ?token=signed_token)
-POST /challenge/result    → challenges#save_result (JSON — requires signed challenge_token)
-GET  /leaderboard         → leaderboard#index
-/auth/*                   → SolRengine Auth Engine (login, nonce, verify, logout)
+GET  /                          → pages#home (landing)
+POST /lookup                    → accounts#lookup (redirect)
+GET  /accounts/:address         → accounts#show (hex view)
+PATCH /network                  → networks#update (session network switch)
+GET  /learn                     → learn#index (reference directory)
+GET  /learn/:category/:slug     → learn#show (canonical reference page)
+GET  /learn/:slug               → learn#category (category landing OR 301 from legacy slug)
+GET  /challenges                → challenges#index (game landing)
+GET  /challenge                 → challenges#show (play — accepts ?token=signed_token)
+POST /challenge/result          → challenges#save_result (JSON — requires signed challenge_token)
+GET  /leaderboard               → leaderboard#index
+GET  /stats                     → stats#show
+GET  /about                     → pages#about
+GET  /types                     → 301 redirect to /learn (legacy)
+/auth/*                         → SolRengine Auth Engine (outside locale scope)
 ```
 
 ## Game Mechanics
@@ -166,6 +203,9 @@ GET  /leaderboard         → leaderboard#index
 - Use `pixel_icon(:name, size:)` helper for icons — never emoji
 - Hex cell `:bg` colors are opaque (pre-blended with dark base). Legend sidebar decoration may use rgba for subtle contrast.
 - Region colors defined in `REGION_COLORS` constant — use hex values, not Tailwind classes
-- All views use literal string paths, NOT route helpers (engine isolation)
+- All views use literal string paths, NOT route helpers (engine isolation) — wrap in-app links in `loc(...)` so they stay in the active locale
+- User-facing strings go through i18n: `t("...")` in views, keys in `config/locales/{en,es}.yml`. New English value must match any existing rendered text so controller tests still pass.
+- Learn content: add pages as `content/learn/<category>/<slug>.md`; translate via a `<slug>.<locale>.md` overlay carrying ONLY `name`/`summary`/body — never duplicate structural frontmatter (offsets/sizes/program_id) into the overlay
+- Byte-level facts (offsets, field names, types) stay verbatim in both languages; field names are on-chain identifiers, not translatable
 - Desktop-first — mobile not optimized
 - NEVER modify: config/credentials, config/deploy.yml, .kamal/secrets, .env files
