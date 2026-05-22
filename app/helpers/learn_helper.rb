@@ -15,6 +15,7 @@ module LearnHelper
       auto_ids: true
     ).to_html
     html = localize_internal_links(html) unless I18n.locale == I18n.default_locale
+    html = wrap_tables(html)
     html.html_safe
   end
 
@@ -38,5 +39,14 @@ module LearnHelper
   INTERNAL_LINK_RE = %r{href="(/(?:learn|accounts|challenges|about)\b)}
   def localize_internal_links(html)
     html.gsub(INTERNAL_LINK_RE, %(href="/#{I18n.locale}\\1))
+  end
+
+  # Wraps each kramdown-emitted <table> in a horizontal-scroll container so
+  # the wide byte-layout tables scroll within the card on narrow viewports
+  # instead of clipping. Paired with .learn-table-scroll + the table's
+  # min-width (see show.html.erb / application.tailwind.css).
+  TABLE_RE = %r{<table>.*?</table>}m
+  def wrap_tables(html)
+    html.gsub(TABLE_RE) { |table| %(<div class="learn-table-scroll">#{table}</div>) }
   end
 end
