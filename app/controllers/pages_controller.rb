@@ -1,10 +1,12 @@
 class PagesController < ApplicationController
+  # USDC mint — 82 bytes, instantly recognizable, fully decoded by the
+  # Mint layout. Shown live on the landing so visitors see the product
+  # before reading about it.
+  FEATURED_ACCOUNT_ADDRESS = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v".freeze
+
   def home
-    # The centered hero (U4) replaced the prior 2-column layout that paired
-    # the copy with a live-decoded USDC mint sample, so @featured_account is
-    # no longer needed. The featured-account fetch was the only place we
-    # consumed FEATURED_ACCOUNT_ADDRESS — both removed together.
     @public_stats = fetch_public_stats
+    @featured_account = fetch_featured_account
   end
 
   # Static About page — U19. Tells the project's story for hackathon
@@ -14,6 +16,20 @@ class PagesController < ApplicationController
   end
 
   private
+
+  # Live decode sample for the landing. Cached for an hour (mint layouts
+  # are effectively static) and fully optional — any RPC or decode failure
+  # hides the section instead of degrading the homepage.
+  def fetch_featured_account
+    result = RpcAccountFetcher.fetch(FEATURED_ACCOUNT_ADDRESS, network: "mainnet-beta", expires_in: 1.hour)
+    value = result&.dig("result", "value")
+    return nil if value.nil?
+
+    AccountPresenter.new(FEATURED_ACCOUNT_ADDRESS, value, max_data: 256)
+  rescue StandardError => e
+    Rails.logger.error("Featured account decode failed: #{e.class} #{e.message}")
+    nil
+  end
 
   # Public, homepage-safe subset of the metrics tracked in /stats.
   # Excludes individual users, IPs, and granular game results.

@@ -64,6 +64,9 @@ es:
   home:
     tagline: Una guía de campo de las cuentas de Solana.
     subtitle: Inspecciona y comprende los bytes en bruto, las estructuras y los datos on-chain de las cuentas de Solana.
+    live_decode_label: DECODIFICACIÓN EN VIVO — UNA CUENTA REAL DE MAINNET
+    live_decode_caption: Esta es la cuenta mint de USDC, obtenida y decodificada ahora mismo. Pasa el cursor por los bytes.
+    live_decode_cta: Explórala tú mismo →
     fetching: Obteniendo la cuenta desde Solana
     fetching_caption: Esto puede tardar unos segundos.
     paste_placeholder: Pega una dirección de cuenta de Solana...

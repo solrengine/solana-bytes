@@ -41,6 +41,36 @@
       </div>
     </div>
 
+    <%# Live decode sample — the product itself, right below the hero. A
+        real mainnet account rendered through the same pipeline as the
+        explorer (compact hex view, hover tooltips work). Hidden entirely
+        if the cached RPC fetch fails. %>
+    <% if @featured_account %>
+      <div class="mb-20">
+        <p class="text-center text-purple-300 mb-2" style="font-size:13px;letter-spacing:0.12em">
+          <%= t("home.live_decode_label") %>
+        </p>
+        <p class="text-center text-gray-500 mb-8" style="font-size:10px">
+          <%= t("home.live_decode_caption") %>
+        </p>
+
+        <div class="pixel-card max-w-3xl mx-auto" style="padding:20px">
+          <div class="flex items-center justify-between gap-3 mb-5 flex-wrap">
+            <span class="text-white" style="font-size:11px">
+              USDC Mint · <%= @featured_account.owner_label %> · <%= @featured_account.data_length %> bytes
+            </span>
+            <%= link_to loc("/accounts/#{PagesController::FEATURED_ACCOUNT_ADDRESS}"),
+                  data: { turbo_frame: "account_result" },
+                  class: "text-purple-400 hover:text-purple-300",
+                  style: "font-size:10px" do %>
+              <%= t("home.live_decode_cta") %>
+            <% end %>
+          </div>
+          <%= render "accounts/hex_view", account: @featured_account, compact: true %>
+        </div>
+      </div>
+    <% end %>
+
     <%= render "pages/intro_cards" %>
 
     <%= render "pages/public_stats_banner", stats: @public_stats %>

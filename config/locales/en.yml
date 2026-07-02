@@ -30,6 +30,9 @@ en:
   home:
     tagline: A field guide to Solana accounts.
     subtitle: Inspect and understand raw Solana account bytes, structures, and on-chain data.
+    live_decode_label: LIVE DECODE — A REAL MAINNET ACCOUNT
+    live_decode_caption: This is USDC's mint account, fetched and decoded right now. Hover the bytes.
+    live_decode_cta: Explore it yourself →
     fetching: Fetching account from Solana
     fetching_caption: This may take a few seconds.
     paste_placeholder: Paste a Solana account address...
